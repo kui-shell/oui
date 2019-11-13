@@ -3,6 +3,7 @@
   "references": [
     { "path": "./plugins/plugin-openwhisk" },
     { "path": "./plugins/plugin-apache-composer" },
+    { "path": "./plugins/plugin-grid" },
     { "path": "./plugins/plugin-openwhisk-editor-extensions" }
   ]
 }

@@ -7,6 +7,7 @@ services:
 install:
   - Xvfb :1 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :1 -ac >& /dev/null &
   - Xvfb :2 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :2 -ac >& /dev/null &
+  - Xvfb :3 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :3 -ac >& /dev/null &
   - ./tools/travis/openwhisk/openwhisk.sh &
   - ow=$!
   - npm ci
@@ -17,7 +18,7 @@ jobs:
   include:
     - stage: test
       script: npm run test
-      env: LAYERS="openwhisk1 openwhisk-editor" MOCHA_RUN_TARGET=electron
+      env: LAYERS="openwhisk1 openwhisk-editor grid" MOCHA_RUN_TARGET=electron
     - stage: test
       script: npm run test
       # re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
