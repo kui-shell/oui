@@ -6,28 +6,42 @@ services:
 
 install:
   - Xvfb :1 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :1 -ac >& /dev/null &
-  - ./tools/travis/microk8s.sh &
-  - k8s=$!
+  - Xvfb :2 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :2 -ac >& /dev/null &
+  - ./tools/travis/openwhisk/openwhisk.sh &
+  - ow=$!
   - npm ci
   - if [ "$MOCHA_RUN_TARGET"] == "webpack" ]; then (npm run proxy &); (npm run webpack &); fi
-  - wait $!
+  - wait $ow
 
 jobs:
   include:
     - stage: test
-      script: npm run test k8s
-      env: STAGE=k8s MOCHA_RUN_TARGET=electron
+      script: npm run test
+      env: LAYERS="openwhisk1 openwhisk-editor" MOCHA_RUN_TARGET=electron
     - stage: test
-      script: npm run test k8s1
-      env: STAGE=k8s1 MOCHA_RUN_TARGET=electron
+      script: npm run test
+      # re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
+      env: LAYERS=openwhisk2 MOCHA_RUN_TARGET=electron NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
     - stage: test
-      script: npm run test k8s2
-      env: STAGE=k8s2 MOCHA_RUN_TARGET=electron
+      script: npm run test
+      env: LAYERS=openwhisk3 MOCHA_RUN_TARGET=electron
+    - stage: test
+      script: npm run test
+      env: LAYERS="openwhisk4 composer1" MOCHA_RUN_TARGET=electron NEEDS_OPENWHISK_NODEJS8=true
+    - stage: test
+      script: npm run test
+      env: LAYERS=composer2 MOCHA_RUN_TARGET=electron
 
 env:
   global:
-    - TRAVIS_KUBE_VERSION=1.12
-    - TRAVIS_HELM_VERSION=2.13.0
     - WINDOW_WIDTH=1400
     - WINDOW_HEIGHT=1050
     - PATH=bin:$PATH
+    - KEY=${TRAVIS_JOB_NUMBER}
+    - PORT_OFFSET=1
+    - LOCAL_OPENWHISK=true # allows e.g. openwhisk/src/test/openwhisk1/headless to avoid trying to host set <not-local>
+    - NO_OPENWHISK_API_MGMT=true # no openwhisk api management support
+    - IGNORE_CERTS=true # apache-composer needs this, because it doesn't obey INSECURE_SSL in wskprops
+    - TEST_ORG=testorg
+    - TEST_SPACE=testspace
+    - NEEDS_OPENWHISK=true

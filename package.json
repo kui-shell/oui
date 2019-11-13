@@ -1,5 +1,5 @@
 {
-  "name": "plugin-kubectl-boilerplate",
+  "name": "oui",
   "version": "0.0.0",
   "description": "",
   "main": "node_modules/@kui-shell/core/main/main.js",
@@ -16,7 +16,7 @@
     "pty:rebuild": "if [ -d node_modules/node-pty-prebuilt-multiarch ]; then cd node_modules/node-pty-prebuilt-multiarch && npm run install; fi",
     "pty:electron": "if [ -d node_modules/node-pty-prebuilt-multiarch ]; then if [ ! -e node_modules/node-pty-prebuilt-multiarch/.npmrc ]; then cp node_modules/@kui-shell/builder/npmrc node_modules/node-pty-prebuilt-multiarch/.npmrc && npm run pty:rebuild; fi; fi",
     "pty:nodejs": "if [ -e node_modules/node-pty-prebuilt-multiarch/.npmrc ]; then rm -f node_modules/node-pty-prebuilt-multiarch/.npmrc; npm run pty:rebuild; fi",
-    "test": "KUI=$(echo \"$(pwd)/bin/kubectl-kui\") kui-test",
+    "test": "KUI=$(echo \"$(pwd)/bin/oui-ascii\") kui-test",
     "test:webpack": "KUI_USE_PROXY=true MOCHA_RUN_TARGET=webpack WEBPACK_CLIENT_URL=http://localhost:9080 kui-test",
     "lint": "eslint '**/*.{js,ts}'",
     "format": "prettier --write '**/*.{css,html,js,json,md,ts}'",
@@ -25,11 +25,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:kui-shell/plugin-kubectl-boilerplate.git"
+    "url": "git@github.com:kui-shell/oui.git"
   },
   "keywords": [
-    "kubernetes",
-    "kubectl",
+    "openwhisk",
     "cli",
     "ui",
     "kui"
@@ -40,18 +39,18 @@
   ],
   "license": "Apache-2.0",
   "devDependencies": {
-    "@kui-shell/builder": "5.2.34",
-    "@kui-shell/core": "5.2.34",
-    "@kui-shell/plugin-bash-like": "5.2.34",
-    "@kui-shell/plugin-core-support": "5.2.34",
-    "@kui-shell/plugin-editor": "5.2.34",
-    "@kui-shell/plugin-kubeui": "0.0.10",
-    "@kui-shell/plugin-proxy-support": "5.2.34",
-    "@kui-shell/proxy": "5.2.34",
-    "@kui-shell/test": "5.2.34",
-    "@kui-shell/webpack": "5.2.34",
+    "@kui-shell/builder": "5.2.35",
+    "@kui-shell/core": "5.2.35",
+    "@kui-shell/plugin-bash-like": "5.2.35",
+    "@kui-shell/plugin-core-support": "5.2.35",
+    "@kui-shell/plugin-editor": "5.2.35",
+    "@kui-shell/plugin-proxy-support": "5.2.35",
+    "@kui-shell/proxy": "5.2.35",
+    "@kui-shell/test": "5.2.35",
+    "@kui-shell/webpack": "5.2.35",
     "@types/mocha": "5.2.7",
     "@types/node": "12.12.7",
+    "@types/swagger-schema-official": "^2.0.20",
     "@types/uuid": "3.4.6",
     "@types/webdriverio": "4.13.3",
     "@typescript-eslint/eslint-plugin": "2.7.0",
@@ -68,11 +67,15 @@
     "lint-staged": "9.4.2",
     "mocha": "6.2.2",
     "prettier": "1.19.1",
+    "request-promise": "^4.2.5",
     "spectron": "8.0.0",
     "typescript": "3.7.2"
   },
   "dependencies": {
-    "@kui-shell/plugin-sample": "file:plugins/plugin-sample"
+    "@kui-shell/plugin-apache-composer": "file:plugins/plugin-apache-composer",
+    "@kui-shell/plugin-grid": "^5.2.35",
+    "@kui-shell/plugin-openwhisk": "file:plugins/plugin-openwhisk",
+    "@kui-shell/plugin-openwhisk-editor-extensions": "file:plugins/plugin-openwhisk-editor-extensions"
   },
   "husky": {
     "hooks": {

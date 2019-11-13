@@ -1,27 +1,25 @@
 {
-  "productName": "Kui",
-  "productTitle": "Kui",
-  "ogSiteName": "Kui",
-  "ogTitle": "Kui: The CLI with a GUI twist",
-  "ogUrl": "http://kui.tools",
+  "productName": "Oui",
+  "productTitle": "Oui",
+  "ogSiteName": "Oui",
+  "ogTitle": "Oui: The CLI with a GUI twist",
+  "ogUrl": "http://github.com/kui-shell/oui",
   "byline": "The CLI with a GUI twist",
-  "ogDescription": "Kui is a platform for enhancing the terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles. It provides tool developers an opportunity to unify these experiences.",
+  "ogDescription": "Oui is a tool that enhances the OpenWhisk terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles.",
   "ogImage": "http://content.kui-shell.org/images/ogImage.jpg",
   "ogLabel1": "Clone on GitHub",
-  "ogData1": "https://github.com/IBM/kui",
-  "ogLabel2": "Download Now",
-  "ogData2": "https://tarball.kui-shell.org",
+  "ogData1": "https://github.com/kui-shell/oui",
   "companyName": "",
-  "productSubName": "Kui",
+  "productSubName": "Oui",
   "shellName": "Shell",
-  "userAgent": "Kui-Shell",
+  "userAgent": "Oui",
   "description": {
-    "en_US": "**Kui** is a platform for enhancing the terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles. It provides tool developers an opportunity to unify these experiences.\n\n---\n\n[Home Page](http://kui.tools)\n\n[GitHub](https://github.com/IBM)\n\n[Bugs](https://github.com/IBM/kui/issues/new)"
+    "en_US": "**Oui** is a tool that enhances the OpenWhisk terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles.\n\n---\n\n[GitHub](https://github.com/kui-shell/oui)\n\n[Bugs](https://github.com/kui-shell/oui/issues/new)"
   },
   "gettingStarted": "tutorial play @tutorials/getting-started",
   "defaultTheme": "Carbon Gray10",
-  "defaultContext": ["kubeui"],
-  "contentSecurityPolicy": "default-src * 'nonce-kuiDefaultNonce'; img-src * data:; style-src * 'unsafe-inline'",
+  "defaultContext": ["wsk"],
+  "contentSecurityPolicy": "default-src * 'nonce-kuiDefaultNonce' 'unsafe-eval'; img-src * data:; style-src * 'unsafe-inline'; connect-src 'self' http://localhost:9953",
   "about": [{ "mode": "contexts", "label": "Contexts", "direct": "about --mode contexts --content contexts" }],
   "themes": [
     {
@@ -71,13 +69,13 @@
   "bodyCss": ["kui"],
   "tabStripe": "top-tab-stripe.css",
   "tableStyle": "Light",
-  "appIcon": "icons/png/kui.png",
-  "largeIcon": "icons/svg/kui.svg",
-  "wideIcon": "icons/svg/kui-wide.svg",
-  "favicon": "icons/ico/kui.ico",
+  "appIcon": "icons/png/oui.png",
+  "largeIcon": "icons/svg/oui.svg",
+  "wideIcon": "icons/svg/oui-wide.svg",
+  "favicon": "icons/ico/oui.ico",
   "filesystemIcons": {
-    "darwin": "icons/icns/kui.icns",
-    "win32": "icons/ico/kui.ico",
-    "linux": "icons/png/kui.png"
+    "darwin": "icons/icns/oui.icns",
+    "win32": "icons/ico/oui.ico",
+    "linux": "icons/png/oui.png"
   }
 }
