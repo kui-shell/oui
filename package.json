@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@kui-shell/plugin-apache-composer": "file:plugins/plugin-apache-composer",
-    "@kui-shell/plugin-grid": "^5.2.35",
+    "@kui-shell/plugin-grid": "file:plugins/plugin-grid",
     "@kui-shell/plugin-openwhisk": "file:plugins/plugin-openwhisk",
     "@kui-shell/plugin-openwhisk-editor-extensions": "file:plugins/plugin-openwhisk-editor-extensions"
   },

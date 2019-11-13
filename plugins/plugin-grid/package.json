@@ -1,7 +1,7 @@
 {
-  "name": "@kui-shell/plugin-apache-composer",
+  "name": "@kui-shell/plugin-grid",
   "version": "5.1.0",
-  "description": "Kui plugin for the Apache OpenWhisk Composer",
+  "description": "Kui plugin that offers a grid visualization of OpenWhisk function invocations",
   "license": "Apache-2.0",
   "author": "Nick Mitchell",
   "homepage": "https://github.com/IBM/kui#readme",
@@ -16,17 +16,14 @@
     "kui",
     "plugin"
   ],
-  "contributors": [
-    "Mengting Yan"
-  ],
   "main": "dist/index.js",
   "dependencies": {
-    "@kui-shell/core": "^5.2.35",
-    "@kui-shell/plugin-wskflow": "^5.2.35",
-    "@kui-shell/test": "^5.2.35",
-    "app-module-path": "2.2.0",
-    "debug": "4.1.1",
-    "openwhisk-composer": "github:starpit/incubator-openwhisk-composer#agent"
+    "pretty-ms": "5.0.0",
+    "uuid": "3.3.3"
+  },
+  "kui": {
+    "headless": false,
+    "proxy": false
   },
   "publishConfig": {
     "access": "public"
