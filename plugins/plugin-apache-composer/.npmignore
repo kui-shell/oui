@@ -1,0 +1,8 @@
+build
+src
+tests/data
+dist/test/*
+dist/test/composer2/*
+!dist/test/composer2/composer-headless.js
+tsconfig*
+/*.tgz

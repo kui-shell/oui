@@ -5,3 +5,4 @@ plugins/*/*.js
 **/*/node_modules/
 **/*.d.ts
 *flycheck*.js
+plugins/plugin-apache-composer/tests/data/composer/composer-source-expect-errors/if-bad.js

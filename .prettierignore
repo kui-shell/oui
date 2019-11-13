@@ -2,3 +2,4 @@ node_modules/
 *.d.ts
 *.min.css
 package-lock.json
+plugins/plugin-apache-composer/tests/data/composer/composer-source-expect-errors/if-bad.js
