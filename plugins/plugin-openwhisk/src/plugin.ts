@@ -40,7 +40,7 @@ import activationList from './lib/cmds/activations/list'
 import registerViews from './views'
 
 export default async (commandTree: Commands.Registrar) => {
-  const wsk = await core(commandTree)
+  await core(commandTree)
 
   // commands
   await cp(commandTree)
@@ -59,7 +59,7 @@ export default async (commandTree: Commands.Registrar) => {
   await webbify(commandTree)
 
   // activation extensions
-  await activationList(commandTree, wsk)
+  await activationList(commandTree)
   await awaitCommand(commandTree)
   await last(commandTree)
 
@@ -70,6 +70,4 @@ export default async (commandTree: Commands.Registrar) => {
   // views
   await modes(commandTree)
   await registerViews()
-
-  return wsk
 }

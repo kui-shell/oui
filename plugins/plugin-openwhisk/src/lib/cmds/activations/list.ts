@@ -19,6 +19,8 @@ import Debug from 'debug'
 import { Capabilities, Commands } from '@kui-shell/core'
 import { registerListView } from '@kui-shell/core/webapp/cli'
 
+import { synonyms } from '../../models/synonyms'
+import { addPrettyType, getClient, owOpts } from '../openwhisk-core'
 import { activations as usage } from '../openwhisk-usage'
 import { ActivationListTable, renderActivationListView } from '../../views/cli/activations/list'
 
@@ -48,7 +50,7 @@ const baseOptions: Options = {
  * The activation list impl.
  *
  */
-const doList = wsk => async ({ command, argvNoOptions, parsedOptions, execOptions }): Promise<ActivationListTable> => {
+const doList = async ({ command, argvNoOptions, parsedOptions, execOptions }): Promise<ActivationListTable> => {
   debug('command', command)
   debug('skip', parsedOptions.skip)
   debug('limit', parsedOptions.limit)
@@ -67,15 +69,13 @@ const doList = wsk => async ({ command, argvNoOptions, parsedOptions, execOption
     debug('adding positional parameter name', parsedOptions)
   }
 
-  const opts = Object.assign({}, baseOptions, wsk.owOpts(parsedOptions, execOptions))
-  delete opts._
+  const opts = Object.assign({}, baseOptions, owOpts(parsedOptions /*, execOptions */))
 
   // eslint-disable-next-line no-useless-catch
   try {
-    const list = await wsk
-      .client(execOptions)
+    const list = await getClient(execOptions)
       .activations.list(opts)
-      .then(L => Promise.all(L.map(wsk.addPrettyType('activations', 'list'))))
+      .then(L => Promise.all(L.map(addPrettyType('activations', 'list'))))
 
     return { body: list, type: 'activations' }
   } catch (err) {
@@ -83,7 +83,7 @@ const doList = wsk => async ({ command, argvNoOptions, parsedOptions, execOption
   }
 }
 
-export default (commandTree: Commands.Registrar, wsk) => {
+export default (commandTree: Commands.Registrar) => {
   if (!Capabilities.isHeadless()) {
     registerListView('activations', renderActivationListView)
 
@@ -91,8 +91,8 @@ export default (commandTree: Commands.Registrar, wsk) => {
     registerListView('session', renderActivationListView)
   }
 
-  wsk.synonyms('activations').forEach(syn => {
-    commandTree.listen(`/wsk/${syn}/list`, doList(wsk), {
+  synonyms('activations').forEach(syn => {
+    commandTree.listen(`/wsk/${syn}/list`, doList, {
       usage: usage(syn).available.find(({ command }) => command === 'list')
     })
   })
