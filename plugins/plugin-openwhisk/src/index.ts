@@ -20,10 +20,11 @@ export { default as agent } from './lib/models/agent'
 export { synonyms } from './lib/models/synonyms'
 export { addActionMode } from './lib/models/modes'
 export { default as withHeader } from './lib/models/withHeader'
-export { Action, Package, Rule, currentSelection } from './lib/models/openwhisk-entity'
-export { Activation } from './lib/models/activation'
+export { Package, Rule, currentSelection } from './lib/models/openwhisk-entity'
+export { Action, isAction, Activation, isActivation, OpenWhiskResource, hasAnnotation } from './lib/models/resource'
 export { current as currentNamespace } from './lib/models/namespace'
 export { ActivationListTable } from './lib/views/cli/activations/list'
+export { fqn } from './controller/fqn'
 
 import * as Usage from './lib/cmds/openwhisk-usage'
 export { Usage }

@@ -49,15 +49,16 @@ localDescribe('Test synchronous action invocation', function(this: Common.ISuite
       .then(SidecarExpect.showing(actionName))
       .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_ID))
       .then(openwhisk.expectValidActivationId)
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ name: 'Step1 openwhisk' }))
+      .then(() => this.app)
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ name: 'Step1 openwhisk' }))
       .catch(Common.oops(this)))
 
   it('should create a packaged action', () =>
     CLI.command(`let ${packageName}/${actionName2} = ${ROOT}/data/openwhisk/foo.js`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName))
+      .then(SidecarExpect.showing(actionName2, packageName))
       .catch(Common.oops(this)))
 
   it('should invoke that action with implicit entity', () =>
@@ -67,8 +68,9 @@ localDescribe('Test synchronous action invocation', function(this: Common.ISuite
       .then(SidecarExpect.showing(actionName2))
       .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_ID))
       .then(openwhisk.expectValidActivationId)
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ name: 'Step1 openwhisker' }))
+      .then(() => this.app)
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ name: 'Step1 openwhisker' }))
       .catch(Common.oops(this)))
 
   it('should invoke the first action with explicit entity', () =>
@@ -78,7 +80,8 @@ localDescribe('Test synchronous action invocation', function(this: Common.ISuite
       .then(SidecarExpect.showing(actionName))
       .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_ID))
       .then(openwhisk.expectValidActivationId)
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ name: 'Step1 openwhiskers' }))
+      .then(() => this.app)
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ name: 'Step1 openwhiskers' }))
       .catch(Common.oops(this)))
 })

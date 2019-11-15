@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -54,7 +54,7 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
       CLI.command(`${cmd} ${aFull} ${bFull}`, this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(b, undefined, undefined, bPackage))
+        .then(SidecarExpect.showing(b, bPackage))
         .catch(Common.oops(this)))
 
     // verify that annotations survived the copy
@@ -62,9 +62,9 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
       CLI.command('wsk action annotations', this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(b, undefined, undefined, bPackage))
-        .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-        .then(Util.expectSubset(expectAnnotations))
+        .then(SidecarExpect.showing(b, bPackage))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAMLSubset(expectAnnotations))
         .catch(Common.oops(this)))
 
     // invoke the copy
@@ -73,8 +73,8 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(b))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expect))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expect))
         .catch(Common.oops(this)))
 
     // verify that the original still exists
@@ -82,7 +82,7 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
       CLI.command(`wsk action get ${aFull}`, this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(a, undefined, undefined, aPackage))
+        .then(SidecarExpect.showing(a, aPackage))
         .catch(Common.oops(this)))
 
     // verify that original annotations survived the copy
@@ -90,9 +90,9 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
       CLI.command('wsk action annotations', this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(a, undefined, undefined, aPackage))
-        .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-        .then(Util.expectSubset(expectAnnotations))
+        .then(SidecarExpect.showing(a, aPackage))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAMLSubset(expectAnnotations))
         .catch(Common.oops(this)))
   }
 
@@ -111,7 +111,7 @@ describe('Use copy to copy openwhisk entities', function(this: Common.ISuite) {
     CLI.command(`let ${packageName1}/${actionName2}.js = x=>x -p ${key1} ${value1} -a ${key1} ${value1}`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName1))
+      .then(SidecarExpect.showing(actionName2, packageName1))
       .catch(Common.oops(this)))
   cp(actionName2, actionName2b, packageName1)
   cp(actionName2, actionName2c, packageName1)

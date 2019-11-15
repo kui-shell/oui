@@ -41,7 +41,7 @@ describe('Use the app list command to list the invokeable compositions', functio
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // list it
   it(`should list ${seqName1} via app list`, () =>
@@ -49,7 +49,7 @@ describe('Use the app list command to list the invokeable compositions', functio
       .then(ReplExpect.okWithOnly(seqName1))
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // make a second app
   it('should create a second composer sequence', () =>
@@ -57,7 +57,7 @@ describe('Use the app list command to list the invokeable compositions', functio
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName2))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // list it
   it(`should list ${seqName1} via app list`, () =>
@@ -65,27 +65,27 @@ describe('Use the app list command to list the invokeable compositions', functio
       .then(ReplExpect.okWith(seqName1)) // seqName1 had better still be in the list
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName2)) // but the sidecar should be showing seqName2
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it(`should list ${seqName1} via wsk app list`, () =>
     CLI.command(`wsk app list`, this.app)
       .then(ReplExpect.okWith(seqName2)) // seqName2 had better also be in the list
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName2))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it(`should create package ppp`, () =>
     CLI.command(`wsk package create ppp`, this.app)
       .then(ReplExpect.ok)
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // make a packaged app
   it('should create a second composer sequence', () =>
     CLI.command(`wsk app create ppp/${seqName2} ${ROOT}/data/composer/fsm.json`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(seqName2, undefined, undefined, 'ppp'))
-      .catch(Common.oops(this)))
+      .then(SidecarExpect.showing(seqName2, 'ppp'))
+      .catch(Common.oops(this, true)))
 
   // get the first app, so that the sidecar shows it (so we can test switching back to the packaged app)
   it(`should get ${seqName1}`, () =>
@@ -93,19 +93,5 @@ describe('Use the app list command to list the invokeable compositions', functio
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .catch(Common.oops(this)))
-
-  it(`should list ppp/${seqName2} via wsk app list`, () =>
-    CLI.command(`wsk app list`, this.app)
-      .then(
-        ReplExpect.okWithCustom({
-          selector: `.entity[data-name="${seqName2}"][data-package-name="ppp"]`,
-          expect: `ppp/${seqName2}`
-        })
-      )
-      .then(selector => this.app.client.click(`${selector} .entity-name.clickable`))
-      .then(() => this.app)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(seqName2, undefined, undefined, 'ppp'))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 })

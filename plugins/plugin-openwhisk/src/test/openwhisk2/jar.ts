@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert'
-
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -35,9 +33,6 @@ describe('Create jar actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName1))
-      .then(SidecarExpect.badge('jar'))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .hook-for-third-party-content`))
-      .then(code => assert.strictEqual(code, 'This is machine-generated code, wrapping around your original code.'))
       .catch(Common.oops(this)))
 
   it('should invoke the jar action', () =>
@@ -45,6 +40,7 @@ describe('Create jar actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName1))
-      .then(SidecarExpect.result({ x: 3 }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ x: 3 }))
       .catch(Common.oops(this)))
 })

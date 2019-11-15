@@ -307,7 +307,7 @@ describe('wskflow test test if pressing a node, dragging and releasing triggers 
       .then(() => this.app.client.moveToObject('#wskflowSVG'))
       .then(() => this.app.client.buttonUp())
       .then(() => this.app.client.getText('.sidecar-header-icon'))
-      .then(text => assert.strictEqual(text, 'SESSION'))
+      .then(text => assert.strictEqual(text, 'ACTIVATION'))
       .catch(Common.oops(this)))
 
   xit(`should click on the exit node and go to the activation`, () =>

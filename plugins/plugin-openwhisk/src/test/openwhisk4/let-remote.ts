@@ -68,7 +68,7 @@ xdescribe('Create an action via let from a remote resource', function(this: Comm
       )
       .then(() => this.app)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName, undefined, undefined, packageName))
+      .then(SidecarExpect.showing(actionName, packageName))
   }
 
   const doCreate1 = doCreate(REMOTE1)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 /**
@@ -30,14 +30,14 @@ describe('app create error handling', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('if'))
-      .then(app =>
+      /* .then(app =>
         app.client.waitUntil(async () => {
           const ok: boolean = await app.client
             .getText('.wskflow-undeployed-action-warning-text')
             .then(expectedText => /3 undeployed components/.test(expectedText))
           return ok
-        }, 2000)
-      )
+        }, 20000)
+      ) */
       .catch(Common.oops(this)))
 
   it('should fail to invoke composition with undeployed actions', () =>
@@ -47,9 +47,9 @@ describe('app create error handling', function(this: Common.ISuite) {
       .then(SidecarExpect.showing('if'))
       .then(app =>
         app.client.waitUntil(async () => {
-          const ok: boolean = await app.client
-            .getText(`${Selectors.SIDECAR_CONTENT} .activation-result`)
-            .then(activationResult => activationResult.includes('Failed to resolve action'))
+          const ok: boolean = await Util.getValueFromMonaco(app).then(activationResult =>
+            activationResult.includes('Failed to resolve action')
+          )
           return ok
         }, 2000)
       )
@@ -77,8 +77,8 @@ describe('app create error handling', function(this: Common.ISuite) {
       .then(SidecarExpect.showing('if'))
       .then(app =>
         app.client.waitUntil(async () => {
-          const ok: boolean = await await app.client.getText(`${Selectors.SIDECAR_CONTENT} .activation-result`).then(
-            Util.expectStruct({
+          const ok: boolean = await Util.getValueFromMonaco(app).then(
+            Util.expectYAML({
               html: '<html><body>please say the magic word.</body></html>'
             })
           )

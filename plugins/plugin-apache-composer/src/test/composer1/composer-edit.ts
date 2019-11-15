@@ -17,7 +17,7 @@
 //
 // test the edit actionName command for compositions
 //
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 import {
@@ -46,7 +46,7 @@ describe('edit compositions', function(this: Common.ISuite) {
   const deploy = (app, action) => () => {
     return app.client
       .click(Selectors.SIDECAR_MODE_BUTTON('Deploy'))
-      .then(() => app.client.waitForExist(`${Selectors.SIDECAR}:not(.is-modified):not(.is-new)`))
+      .then(() => app.client.waitForExist(Selectors.CURRENT_PROMPT_BLOCK))
       .then(() => app)
       .catch(err => {
         console.error('Ouch, something bad happened, let us clean up the action before retrying')
@@ -172,7 +172,11 @@ describe('edit compositions', function(this: Common.ISuite) {
             .then(ReplExpect.ok)
             .then(SidecarExpect.open)
             .then(SidecarExpect.showing('compFromTpl'))
-            .then(SidecarExpect.result({ msg: 'hello compose!' }, false))
+            .then(app =>
+              app.client.waitUntil(() =>
+                Util.getValueFromMonaco(app).then(Util.expectYAML({ msg: 'hello compose!' }, true))
+              )
+            )
             .then(() => true)
             .catch(() => false)
         )

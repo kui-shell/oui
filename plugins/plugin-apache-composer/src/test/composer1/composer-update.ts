@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 import { dirname } from 'path'
@@ -42,11 +42,10 @@ describe('confirm that app update preserves annotations and parameters', functio
 
   it('should webbify the app', () =>
     CLI.command(`wsk action webbify ${appName1}`, this.app)
-      .then(ReplExpect.okWithCustom({ selector: '.entity-web-export-url' }))
       .then(() => this.app)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(appName1))
-      .then(() => this.app.client.getText(`${Selectors.SIDECAR} .entity-web-export-url.has-url`))
+      .then(SidecarExpect.badge('web'))
       .catch(Common.oops(this)))
 
   it('should update an app', () =>
@@ -54,6 +53,5 @@ describe('confirm that app update preserves annotations and parameters', functio
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(appName1))
-      // .then(() => this.app.client.getText(`${Selectors.SIDECAR} .entity-web-export-url.has-url`)) // TODO
       .catch(Common.oops(this)))
 })

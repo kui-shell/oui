@@ -63,11 +63,11 @@ describe('app create and sessions', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName1))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expect(key, value, extraExpect, expectIsIt)))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expect(key, value, extraExpect, expectIsIt)))
         .then(() => this.app.client.click(Selectors.SIDECAR_TITLE)) // click on the name part in the sidecar header
         .then(() => this.app)
-        .then(SidecarExpect.showing(seqName1, undefined, undefined, packageName))
+        .then(SidecarExpect.showing(seqName1, packageName))
         .catch(Common.oops(this)))
   }
 
@@ -85,8 +85,8 @@ describe('app create and sessions', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(name))
-        .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-        .then(Util.expectStruct(expect(key, value, undefined, undefined)))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expect(key, value, undefined, undefined)))
         .catch(Common.oops(this)))
   }
 
@@ -142,36 +142,36 @@ describe('app create and sessions', function(this: Common.ISuite) {
   it('should throw a usage message for incomplete app create', () =>
     CLI.command(`wsk app create ${seqName1}`, this.app)
       .then(ReplExpect.error(497)) // 497 insufficient required parameters
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should throw a usage message for incomplete app create v2', () =>
     CLI.command(`wsk app create`, this.app)
       .then(ReplExpect.error(497)) // 497 insufficient required parameters
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should throw a usage message for incomplete app create v3', () =>
     CLI.command(`wsk app create ${ROOT}/data/composer/fsm.json`, this.app)
       .then(ReplExpect.error(497)) // 497 insufficient required parameters
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should create a composer sequence', () =>
     CLI.command(`wsk app create ${seqName1} ${ROOT}/data/composer/fsm.json`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should create a package', () =>
     CLI.command(`wsk package create ${packageName1}`, this.app)
       .then(ReplExpect.ok)
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should create a packaged composer sequence', () =>
     CLI.command(`wsk app create ${packageName1}/${seqName1} ${ROOT}/data/composer/fsm.json`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(seqName1, undefined, undefined, packageName1))
-      .catch(Common.oops(this)))
+      .then(SidecarExpect.showing(seqName1, packageName1))
+      .catch(Common.oops(this, true)))
   invoke({ package: packageName1, action: seqName1 }, 'x', 3, {
     aa: 11,
     bb: 22,
@@ -183,7 +183,7 @@ describe('app create and sessions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it(`should create wookiechat and dependent actions with implicit entity`, () =>
     CLI.command('wsk app update wookie @demos/wookie/app.js', this.app)
@@ -195,7 +195,7 @@ describe('app create and sessions', function(this: Common.ISuite) {
       .then(verifyNodeExists('report-swapi', false)) // expect not to be deployed
       .then(verifyNodeExists('report-stapi', false)) // expect not to be deployed
       .then(verifyNodeExists('report-empty', false)) // expect not to be deployed
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   getSessions('wsk sessions list', 0, 0) // no sessions, yet
   // diable pagination tests
@@ -231,7 +231,7 @@ describe('app create and sessions', function(this: Common.ISuite) {
               return M
             }, {})
       )
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should get the composer sequence via "action get"', () =>
     CLI.command(`wsk action get ${seqName1}`, this.app)
@@ -239,7 +239,7 @@ describe('app create and sessions', function(this: Common.ISuite) {
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
       .then(() => this.app.client.waitForVisible(`${Selectors.SIDECAR_MODE_BUTTON('visualization')}`))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // get some regular action, so we can test switching back to the composer action
   getAction(actionName1)
@@ -247,7 +247,7 @@ describe('app create and sessions', function(this: Common.ISuite) {
   it('should throw a usage message for incomplete app get', () =>
     CLI.command(`wsk app get`, this.app)
       .then(ReplExpect.error(497)) // 497 insufficient required parameters
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   invoke(seqName1, 'x', 3, { aa: 11, bb: 22, cc: 22 })
   getSessions('wsk session list', 0, 1) // 1 "done" session

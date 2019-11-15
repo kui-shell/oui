@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -43,8 +43,8 @@ describe('wsk action invoke with implicit entity', function(this: Common.ISuite)
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(actionName))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ x: 3, name: 'grumble' }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ x: 3, name: 'grumble' }))
         .catch(Common.oops(this)))
   }
 
@@ -53,8 +53,8 @@ describe('wsk action invoke with implicit entity', function(this: Common.ISuite)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct(Object.assign({ x: 3 }, paramsJson)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML(Object.assign({ x: 3 }, paramsJson)))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with implicit entity and -P`, () =>
@@ -62,8 +62,8 @@ describe('wsk action invoke with implicit entity', function(this: Common.ISuite)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct(Object.assign({ x: 3 }, paramsJson)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML(Object.assign({ x: 3 }, paramsJson)))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with explicit entity and -P`, () =>
@@ -71,12 +71,12 @@ describe('wsk action invoke with implicit entity', function(this: Common.ISuite)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct(Object.assign({ x: 3 }, paramsJson)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML(Object.assign({ x: 3 }, paramsJson)))
       .catch(Common.oops(this)))
 
   it(`should fail when requesting parameters of an activation`, () =>
     CLI.command('wsk action params', this.app)
-      .then(ReplExpect.error(0, 'The current entity does not support viewing parameters'))
+      .then(ReplExpect.error(0, 'The current entity is not of the expected kind'))
       .catch(Common.oops(this)))
 })

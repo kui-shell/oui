@@ -109,7 +109,7 @@ const testPagination = (ctx: Common.ISuite, actionName?: string) => {
         })
       )
 
-      .catch(Common.oops(ctx))
+      .catch(Common.oops(ctx, true))
   )
 }
 
@@ -121,18 +121,20 @@ describe('Activation list paginator', function(this: Common.ISuite) {
     CLI.command(`wsk action create ${actionName} ${ROOT}/data/openwhisk/foo.js`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName)))
+      .then(SidecarExpect.showing(actionName))
+      .catch(Common.oops(this, true)))
 
   it(`should create an action ${actionName2}`, () =>
     CLI.command(`wsk action create ${actionName2} ${ROOT}/data/openwhisk/foo.js`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2)))
+      .then(SidecarExpect.showing(actionName2))
+      .catch(Common.oops(this, true)))
 
   invokeABunch(this, actionName)
   it('paginate activations without filter', () => testPagination(this))
 
-  invokeABunch(this, actionName2)
-  it(`paginate activations with filter ${actionName}`, () => testPagination(this, actionName))
-  it(`paginate activations with filter ${actionName2}`, () => testPagination(this, actionName2))
+  // invokeABunch(this, actionName2)
+  xit(`paginate activations with filter ${actionName}`, () => testPagination(this, actionName))
+  xit(`paginate activations with filter ${actionName2}`, () => testPagination(this, actionName2))
 })

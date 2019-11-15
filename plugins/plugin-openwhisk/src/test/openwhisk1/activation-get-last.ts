@@ -19,7 +19,7 @@
  *    this test also covers toggling the sidecar
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -66,8 +66,8 @@ localDescribe('wsk activation get --last', function(this: Common.ISuite) {
           .then(ReplExpect.ok)
           .then(SidecarExpect.open)
           .then(SidecarExpect.showing(actionName1, undefined, undefined, undefined, undefined, 500))
-          .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-          .then(Util.expectStruct({ name: 'Step1 lastTestIPromise' }))
+          .then(Util.getValueFromMonaco)
+          .then(Util.expectYAML({ name: 'Step1 lastTestIPromise' }))
           .then(() => true)
           .catch(() => false)
       })

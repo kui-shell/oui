@@ -47,7 +47,7 @@ describe('app create where app name is also a package name', function(this: Comm
     CLI.command('wsk app list', this.app)
       .then(
         ReplExpect.okWithCustom({
-          selector: '.entity[data-name="foo"][data-package-name="foo"] .entity-name.clickable',
+          selector: '.entity[data-name="foo/foo"] .entity-name.clickable',
           passthrough: true
         })
       )
@@ -55,6 +55,6 @@ describe('app create where app name is also a package name', function(this: Comm
       .then(selector => this.app.client.click(selector))
       .then(() => this.app)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('foo', undefined, undefined, 'foo'))
+      .then(SidecarExpect.showing('foo', 'foo'))
       .catch(Common.oops(this)))
 })

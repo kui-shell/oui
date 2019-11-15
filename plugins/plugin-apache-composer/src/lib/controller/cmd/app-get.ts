@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import Debug from 'debug'
-
 import { Commands } from '@kui-shell/core'
-import { Action, synonyms } from '@kui-shell/plugin-openwhisk'
+import { Action } from '@kui-shell/plugin-openwhisk'
 
 import { appGet } from '../../utility/usage'
-import * as view from '../../view/entity-view'
 import * as parseUtil from '../../utility/parse'
-
-const debug = Debug('plugins/apache-composer/cmd/app-get')
 
 export default async (commandTree: Commands.Registrar) => {
   /* command handler for app get */
@@ -41,23 +36,4 @@ export default async (commandTree: Commands.Registrar) => {
       ),
     { usage: appGet('get') }
   )
-
-  // override wsk action get
-  const actionGet = (await commandTree.find('/wsk/action/get')).$
-
-  synonyms('actions').forEach(syn => {
-    commandTree.listen(
-      `/wsk/${syn}/get`,
-      opts => {
-        if (!actionGet) {
-          return Promise.reject(new Error())
-        }
-        debug('rendering action get')
-        return Promise.resolve(actionGet(opts)).then(response =>
-          view.visualizeComposition(opts.tab, response, opts.execOptions)
-        )
-      },
-      {}
-    )
-  })
 }

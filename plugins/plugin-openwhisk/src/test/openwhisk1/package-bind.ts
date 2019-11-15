@@ -19,7 +19,7 @@
  *
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -31,7 +31,7 @@ describe('wsk package bind tests', function(this: Common.ISuite) {
     CLI.command(`let package/action = x=>x`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('action', undefined, undefined, 'package'))
+      .then(SidecarExpect.showing('action', 'package'))
       .catch(Common.oops(this)))
 
   it('should bind that package', () =>
@@ -46,8 +46,8 @@ describe('wsk package bind tests', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('action'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ name: 'hassle' }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ name: 'hassle' }))
       .catch(Common.oops(this)))
 
   it('should bind that package with namespace', () =>
@@ -62,7 +62,7 @@ describe('wsk package bind tests', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('action'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ name: 'hoffer' }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ name: 'hoffer' }))
       .catch(Common.oops(this)))
 })

@@ -26,49 +26,49 @@ describe('wsk action invoke -r', function(this: Common.ISuite) {
   after(Common.after(this))
 
   it('should create an action', () =>
-    CLI.command(`let ${actionName} = x=>x -p x 3`, this.app)
+    CLI.command(`let ${actionName} = x=>x`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
       .catch(Common.oops(this)))
 
   it('should create another action', () =>
-    CLI.command(`let ${actionName2} = x=>x -p x 3`, this.app)
+    CLI.command(`let ${actionName2} = x=>x`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName2))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with -r`, () =>
-    CLI.command(`wsk action invoke ${actionName} -r`, this.app)
+    CLI.command(`wsk action invoke ${actionName} -r -p x 3`, this.app)
       .then(ReplExpect.okWithCustom({ selector: '.json' }))
       .then(selector => this.app.client.getText(selector))
       .then(Util.expectStruct({ x: 3 }))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with --result`, () =>
-    CLI.command(`wsk action invoke ${actionName} --result`, this.app)
+    CLI.command(`wsk action invoke ${actionName} --result --param x 3`, this.app)
       .then(ReplExpect.okWithCustom({ selector: '.json' }))
       .then(selector => this.app.client.getText(selector))
       .then(Util.expectStruct({ x: 3 }))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with -br`, () =>
-    CLI.command(`wsk action invoke ${actionName} -br`, this.app)
+    CLI.command(`wsk action invoke ${actionName} -p x 3 -br`, this.app)
       .then(ReplExpect.okWithCustom({ selector: '.json' }))
       .then(selector => this.app.client.getText(selector))
       .then(Util.expectStruct({ x: 3 }))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with -rb`, () =>
-    CLI.command(`wsk action invoke ${actionName} -rb`, this.app)
+    CLI.command(`wsk action invoke ${actionName} -rb --param x 3`, this.app)
       .then(ReplExpect.okWithCustom({ selector: '.json' }))
       .then(selector => this.app.client.getText(selector))
       .then(Util.expectStruct({ x: 3 }))
       .catch(Common.oops(this)))
 
   it(`should invoke ${actionName} with --blocking --result`, () =>
-    CLI.command(`wsk action invoke ${actionName} --blocking --result`, this.app)
+    CLI.command(`wsk action invoke ${actionName} --blocking --result -p x 3`, this.app)
       .then(ReplExpect.okWithCustom({ selector: '.json' }))
       .then(selector => this.app.client.getText(selector))
       .then(Util.expectStruct({ x: 3 }))

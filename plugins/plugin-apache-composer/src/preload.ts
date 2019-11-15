@@ -20,13 +20,18 @@ debug('loading')
 
 import { dirname } from 'path'
 import Util from '@kui-shell/core/api/util'
+import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
 import initRequirePath from './initRequirePath'
+
+import flow from './modes/flow'
+import json from './modes/json'
+import visualize from './modes/visualize'
 
 /**
  * This is the module
  *
  */
-export default async () => {
+export default async (registrar: PreloadRegistrar) => {
   // help compositions find our openwhisk-composer module
   await initRequirePath()
 
@@ -34,6 +39,8 @@ export default async () => {
   Util.augmentModuleLoadPath(dirname(require.resolve('@kui-shell/plugin-apache-composer/samples/@demos/hello.js')), {
     command: 'preview'
   })
+
+  registrar.registerModes(flow, visualize, json)
 }
 
 debug('finished loading')

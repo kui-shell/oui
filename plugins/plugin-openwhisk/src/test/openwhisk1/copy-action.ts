@@ -19,7 +19,7 @@
  *    this test also covers toggling the sidecar
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -49,8 +49,8 @@ localDescribe('Copy actions using the wsk syntax', function(this: Common.ISuite)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct({ x: 5, y: 10 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ x: 5, y: 10 })))
 
   it('should copy an action', () =>
     CLI.command(`wsk action create --copy ${actionName2} ${actionName} -p x 8`, this.app)
@@ -64,8 +64,8 @@ localDescribe('Copy actions using the wsk syntax', function(this: Common.ISuite)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName2))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct({ x: 8, y: 10 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ x: 8, y: 10 })))
 
   it('should copy an action with --copy in an alternate spot', () =>
     CLI.command(`wsk action create ${actionName3} --copy  ${actionName} -p x 8 -p y 1`, this.app)
@@ -79,6 +79,6 @@ localDescribe('Copy actions using the wsk syntax', function(this: Common.ISuite)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName3))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct({ x: 8, y: 1 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ x: 8, y: 1 })))
 })

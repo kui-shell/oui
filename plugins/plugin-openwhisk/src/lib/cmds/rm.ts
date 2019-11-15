@@ -26,10 +26,12 @@
 
 import * as minimist from 'yargs-parser'
 
-import { Commands, Models, Tables } from '@kui-shell/core'
+import { Table } from '@kui-shell/core/api/table-models'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import { synonyms } from '../models/synonyms'
-import { Action, Package } from '../models/openwhisk-entity'
+import { currentSelection } from '../models/selection'
+import { OpenWhiskResource, Package, Action } from '../models/resource'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { isAnonymousLet } = require('./actions/let-core')
@@ -48,7 +50,7 @@ const errorThen = val => err => {
 }
 
 /** here is the module */
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   /**
    * Given a package name and an entity within that package, return the fully qualified name of the entity
    *
@@ -56,12 +58,12 @@ export default async (commandTree: Commands.Registrar) => {
   const reify = (pckage: Package, field: 'actions' | 'feeds') => {
     const entities = pckage[field]
     if (entities) {
-      return entities.map(entity => `${pckage.name}/${entity.name}`)
+      return entities.map(entity => `${pckage.metadata.name}/${entity.name}`)
     }
   }
 
   /** Recursive removal helpers */
-  const rmHelper = (type: string) => ({ REPL }: Commands.Arguments, entities: string[]) => {
+  const rmHelper = (type: string) => ({ REPL }: Arguments, entities: string[]) => {
     if (!entities || entities.length === 0) {
       return Promise.resolve([])
     } else {
@@ -79,7 +81,7 @@ export default async (commandTree: Commands.Registrar) => {
    * Recursively remove a package and its contents
    *
    */
-  const deletePackageAndContents = (command: Commands.Arguments, pckage: string) =>
+  const deletePackageAndContents = (command: Arguments, pckage: string) =>
     new Promise((resolve, reject) => {
       command.REPL.qexec<Package>(`wsk package get "${pckage}"`)
         .then(pckage =>
@@ -119,15 +121,17 @@ export default async (commandTree: Commands.Registrar) => {
    * Return the fully qualified name of the given entity
    *
    */
-  const fqn = (entity: { namespace: string; name: string }) => `/${entity.namespace}/${entity.name}`
+  const fqn = (entity: OpenWhiskResource) => {
+    return `/${entity.metadata.namespace}/${entity.metadata.name}`
+  }
 
   /**
    * Fetch entities of the given type
    *
    */
   const BATCH = 200 // keep this at 200, but you can temporarily set it to lower values for debugging
-  const fetch = (command: Commands.Arguments, type: string, skip = 0, soFar = []) => {
-    return command.REPL.qexec<Tables.Table>(`wsk ${type} list --limit ${BATCH} --skip ${skip}`)
+  const fetch = async (command: Arguments, type: string, skip = 0, soFar = []) => {
+    return command.REPL.qexec<Table>(`wsk ${type} list --limit ${BATCH} --skip ${skip}`)
       .then(response => response.body)
       .then(items => {
         if (items.length === BATCH) {
@@ -145,11 +149,7 @@ export default async (commandTree: Commands.Registrar) => {
    * Do a glob-style match, using the given list of patterns
    *
    */
-  const glob = (
-    command: Commands.Arguments,
-    type: string,
-    list: string[]
-  ): Promise<{ isExact: boolean; item: string }[]> => {
+  const glob = (command: Arguments, type: string, list: string[]): Promise<{ isExact: boolean; item: string }[]> => {
     const wildcards = list
       .filter(pattern => pattern.indexOf('*') >= 0)
       .map(pattern => new RegExp(pattern.replace(/\*/g, '.*')))
@@ -168,7 +168,7 @@ export default async (commandTree: Commands.Registrar) => {
    * This is the core logic
    *
    */
-  const rm = (type: string) => (command: Commands.Arguments) => {
+  const rm = (type: string) => (command: Arguments) => {
     const { tab, block, nextBlock, argv: fullArgv, execOptions, REPL } = command
 
     const options = minimist(fullArgv, {
@@ -184,10 +184,10 @@ export default async (commandTree: Commands.Registrar) => {
       // if no entity specified on the command line, check to
       // see if there is a selection; if so, use that entity
       //
-      const selection = Models.Selection.current(tab)
-      if (selection && selection.type !== 'activations') {
-        toBeDeletedList.push(`/${selection.namespace}/${selection.name}`)
-        type = selection.type
+      const selection = currentSelection(tab)
+      if (selection && selection.kind !== 'Activation') {
+        toBeDeletedList.push(`/${selection.metadata.namespace}/${selection.metadata.name}`)
+        type = selection.kind.toLowerCase()
         console.log('rm using implicit entity name', toBeDeletedList[0])
       }
     }
@@ -217,8 +217,8 @@ export default async (commandTree: Commands.Registrar) => {
                         .then(component => {
                           if (isAnonymousLet(component, arg)) {
                             // arg is the parent sequence
-                            return REPL.qexec<Action>(`wsk action delete "${component.name}"`, block)
-                              .then(() => [component.name]) // deleted one
+                            return REPL.qexec<Action>(`wsk action delete "${component.metadata.name}"`, block)
+                              .then(() => [component.metadata.name]) // deleted one
                               .catch(errorThen([])) // deleted zero
                           } else {
                             return [] // deleted zero

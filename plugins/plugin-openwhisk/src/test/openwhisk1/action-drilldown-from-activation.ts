@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 const actionName = `foo-${new Date().getTime()}`
@@ -48,7 +48,7 @@ describe('activation list, activation get, click on header', function(this: Comm
       .then(SidecarExpect.showing(actionName))
       .then(() =>
         this.app.client.waitUntil(async () => {
-          const actionSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actionSrc = await Util.getValueFromMonaco(this.app)
           return actionSrc.trim() === expectedSrc
         })
       )

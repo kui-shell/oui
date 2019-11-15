@@ -55,22 +55,21 @@ describe('edit actions', function(this: Common.ISuite) {
       .then(ReplExpect.error(499)) // unsupported optional parameter
       .catch(Common.oops(this)))
 
-  it('should edit with implicit entity and shows correct sidecar mode buttons', () =>
-    CLI.command('edit', this.app)
+  it('should edit that entity and show correct sidecar mode buttons', () =>
+    CLI.command('edit foo', this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('foo'))
-      // now we click on the lock/unlock buttons a few times to make
+      // now we click on the edit/done buttons a few times to make
       // sure we can toggle back and forth between read-only and edit
       // mode
       .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('lock')))
-      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('unlock')))
+      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('edit')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('code')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('limits')))
-      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('parameters')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('annotations')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('raw')))
-      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('unlock')))
+      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('edit')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('lock')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('Deploy')))
       .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('Revert')))

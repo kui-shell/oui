@@ -38,7 +38,7 @@ export const deploy = ({ composition, overwrite }) => {
   debug('deploying composition', composition)
   const httpOptons = { agent: agent() }
   return Client(options)
-    .compositions.deploy(composition, overwrite, undefined, undefined, undefined, httpOptons)
+    .compositions.deploy(composition, overwrite, undefined, undefined, undefined, undefined, undefined, httpOptons)
     .then(entity => {
       // delploy returns [{...}]
       return Object.assign({}, { name: entity[0].id, verb: 'update', type: 'composition' }, entity[0])

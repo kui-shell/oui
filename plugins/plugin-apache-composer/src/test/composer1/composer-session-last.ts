@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 import { dirname } from 'path'
@@ -46,8 +46,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ xxx: 333 }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ xxx: 333 }))
       .catch(Common.oops(this)))
 
   it('create sequence that invokes WITH ERROR', () =>
@@ -64,8 +64,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName1, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ xxx: 333 }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ xxx: 333 }))
         .catch(Common.oops(this))
     }))
 
@@ -82,8 +82,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName3))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ zzz: 555 }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ zzz: 555 }))
       .catch(Common.oops(this)))
 
   it(`should show ${seqName1} with session get --last ${seqName1}`, () =>
@@ -92,8 +92,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName1, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ xxx: 333 }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ xxx: 333 }))
         .catch(Common.oops(this))
     }))
 
@@ -103,19 +103,18 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName3, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ zzz: 555 }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ zzz: 555 }))
         .catch(Common.oops(this))
     }))
 
   it(`should invoke ${seqName2}`, () =>
     CLI.command(`wsk app invoke ${seqName2} -p yyy 444`, this.app)
       .then(ReplExpect.ok)
-      .then(SidecarExpect.openWithFailure)
       .then(SidecarExpect.showing(seqName2))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ error: { yyy: 444 } }))
-      .catch(Common.oops(this)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ error: { yyy: 444 } }))
+      .catch(Common.oops(this, false)))
 
   it(`should show ${seqName1} with session get --last ${seqName1}`, () =>
     this.app.client.waitUntil(() => {
@@ -123,8 +122,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName1, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ xxx: 333 }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ xxx: 333 }))
         .catch(Common.oops(this))
     }))
 
@@ -134,8 +133,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName2, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ error: { yyy: 444 } }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ error: { yyy: 444 } }))
         .catch(Common.oops(this))
     }))
 
@@ -144,8 +143,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName3))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ zzz: 555 }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ zzz: 555 }))
       .catch(Common.oops(this)))
 
   it(`should show ${seqName2} with session get --last-failed`, () =>
@@ -154,8 +153,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName2, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ error: { yyy: 444 } }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ error: { yyy: 444 } }))
         .catch(Common.oops(this))
     }))
 
@@ -167,8 +166,8 @@ describe('session get --last and --last-failed', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName2, undefined, undefined, undefined, undefined, 500))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ error: { yyy: 444 } }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ error: { yyy: 444 } }))
         .catch(Common.oops(this))
     }))
 })

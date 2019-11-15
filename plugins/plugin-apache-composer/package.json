@@ -21,9 +21,9 @@
   ],
   "main": "dist/index.js",
   "dependencies": {
-    "@kui-shell/core": "^5.2.35",
-    "@kui-shell/plugin-wskflow": "^5.2.35",
-    "@kui-shell/test": "^5.2.35",
+    "@kui-shell/core": "^5.3.12",
+    "@kui-shell/plugin-wskflow": "^5.3.12",
+    "@kui-shell/test": "^5.3.12",
     "app-module-path": "2.2.0",
     "debug": "4.1.1",
     "openwhisk-composer": "github:starpit/incubator-openwhisk-composer#agent"

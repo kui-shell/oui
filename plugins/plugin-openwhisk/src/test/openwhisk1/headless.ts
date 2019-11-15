@@ -121,7 +121,7 @@ odescribe('openwhisk headless mode', function(this: Common.ISuite) {
       cli
         .command(ls)
         .then(
-          cli.expectOK('foo private nodejs', {
+          cli.expectOK('foo Action 0.0.1', {
             skipLines: 1,
             squish: true
           })
@@ -144,7 +144,7 @@ odescribe('openwhisk headless mode', function(this: Common.ISuite) {
   it('should invoke spacey', () =>
     cli
       .command('wsk action invoke spacey')
-      .then(cli.expectOK('"fun": "space cadet"'))
+      .then(cli.expectOK('"fun":"space cadet"'))
       .catch(Common.oops(this)))
 
   it('should async spacey', () =>
@@ -191,24 +191,4 @@ odescribe('openwhisk headless mode', function(this: Common.ISuite) {
         assert.strictEqual(lines.length, 5) // 3 activationIds plus 'ok' plus trailing newline
       })
       .catch(Common.oops(this)))
-
-  if (!process.env.LOCAL_OPENWHISK) {
-    it('should set host to us-south', () =>
-      cli
-        .command('wsk host set us-south')
-        .then(cli.expectOK())
-        .then(() => cli.command('wsk host get'))
-        .then(cli.expectOK('https://us-south.functions.cloud.ibm.com'))
-        .catch(Common.oops(this)))
-
-    const { apihostIsLocal } = openwhisk
-    const apihost = apihostIsLocal ? 'local' : openwhisk.apihost
-    it(`should restore host to original setting: ${apihost}`, () =>
-      cli
-        .command(`wsk host set ${apihost}`)
-        .then(cli.expectOK())
-        .then(() => cli.command('wsk host get'))
-        .then(cli.expectOK(openwhisk.apihost))
-        .catch(Common.oops(this)))
-  }
 })

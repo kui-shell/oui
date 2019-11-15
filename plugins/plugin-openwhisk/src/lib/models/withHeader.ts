@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import Tables from '@kui-shell/core/api/tables'
+import { Row, Table } from '@kui-shell/core/api/table-models'
 import Commands from '@kui-shell/core/api/commands'
 
 /**
@@ -24,10 +24,7 @@ import Commands from '@kui-shell/core/api/commands'
  * actually wants us to add the header (showHeader).
  *
  */
-export default (
-  rows: Tables.Row[],
-  execOptions: Commands.ExecOptions = new Commands.DefaultExecOptions()
-): Tables.Table => {
+export default (rows: Row[], execOptions: Commands.ExecOptions = new Commands.DefaultExecOptions()): Table => {
   if (rows.length === 0 || (!execOptions.showHeader && (execOptions.nested || rows[0].type === 'activations'))) {
     return { body: rows }
   } else {
@@ -35,12 +32,12 @@ export default (
     const maybeCell = (field: string, value: string, outerCSS?: string) => (rows[0][field] ? cell(value, outerCSS) : [])
 
     const type = rows[0].prettyType || rows[0].type
-    const kind = type === 'actions' ? maybeCell('type', 'kind', 'entity-kind') : []
+    const kind = rows[0].kind ? cell('kind', 'entity-kind') : []
     const active = type === 'rules' ? cell('status') : []
     const version =
       type === 'rules' ? cell('rule', 'hide-with-sidecar') : maybeCell('version', 'version', 'hide-with-sidecar')
 
-    const header: Tables.Row = {
+    const header: Row = {
       type,
       name: 'name',
       onclick: false,

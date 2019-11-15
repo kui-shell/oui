@@ -16,7 +16,7 @@
 
 import { readFileSync } from 'fs'
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -48,7 +48,7 @@ describe('Invoke an action with a binary-formatted parameter', function(this: Co
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName1))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .activation-content`))
-      .then(Util.expectStruct({ text: content }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ text: content }))
       .catch(Common.oops(this)))
 })
