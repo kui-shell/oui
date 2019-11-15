@@ -23,10 +23,10 @@ import { Capabilities, Commands, Errors, eventBus, Models, Settings, REPL, UI, U
 
 import agent from '../models/agent'
 import withHeader from '../models/withHeader'
-import { isCRUDable, crudableTypes } from '../models/crudable'
+import { isCRUDable } from '../models/crudable'
 import { synonymsTable, synonyms } from '../models/synonyms'
-import { actionSpecificModes, addActionMode, activationModes, addActivationModes } from '../models/modes'
-import { ow as globalOW, apiHost, apihost, auth as authModel, initOWFromConfig, initOW } from '../models/auth'
+import { actionSpecificModes, activationModes } from '../models/modes'
+import { ow as globalOW, apihost, initOWFromConfig, initOW } from '../models/auth'
 import { Action, Rule, Annotations, Parameters, Package, currentSelection } from '../models/openwhisk-entity'
 
 import * as namespace from '../models/namespace'
@@ -377,7 +377,7 @@ const specials = {
   activations: BlankSpecial
 }
 
-export const addPrettyType = (entityType: string, verb: string, entityName: string) => async entity => {
+export const addPrettyType = (entityType: string, verb: string, entityName?: string) => async entity => {
   if (typeof entity === 'string') {
     return {
       type: entityType,
@@ -1299,10 +1299,6 @@ const executor = (commandTree: Commands.Registrar, _entity, _verb: string, verbS
   })
 }
 
-/** these are the module's exported functions */
-let self = {}
-let initSelf: (isReinit: boolean) => Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
-
 /**
  * Update an entity
  *
@@ -1323,7 +1319,7 @@ export const update = execOptions => (entity, retryCount = 0) => {
         console.error(`error in wsk::update ${err}`)
         console.error(err)
         if ((retryCount || 0) < 10) {
-          return self['update'](entity, (retryCount || 0) + 1)
+          return update(execOptions)(entity, (retryCount || 0) + 1)
         } else {
           throw err
         }
@@ -1351,72 +1347,6 @@ export const fillInActionDetails = (pkage: Package, type = 'actions') => actionS
 
 const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) => {
   debug('init')
-
-  // exported API
-  self = {
-    /** given /a/b/c, return /a/b */
-    parseNamespace,
-    parseName,
-
-    /** export the activation bottom stripe modes */
-    activationModes: addActivationModes,
-
-    /** deprecated; modules should import synonyms directly */
-    synonyms,
-
-    /** main terms (not including synonyms) for all crudable types */
-    // [].concat(...crudableTypes.map(synonymsFn)), // Util.flatten the result
-    crudable: crudableTypes,
-
-    /** export the raw interface */
-    client: getClient,
-    ow: globalOW,
-    addPrettyType: addPrettyType,
-    parseOptions: parseOptions,
-
-    apiHost,
-    auth: Object.assign({}, authModel, {
-      set: (newAuthKey: string): Promise<boolean> => {
-        if (authModel.set(newAuthKey)) {
-          initSelf(true)
-        }
-        self['ow'] = globalOW
-        return Promise.resolve(true)
-      }
-    }),
-
-    fillInActionDetails,
-
-    /** actions => action */
-    toOpenWhiskKind: toOpenWhiskKind,
-
-    /** is this activation that of a sequence? */
-    isSequenceActivation: entity =>
-      entity.logs && entity.annotations && entity.annotations.find(kv => kv.key === 'kind' && kv.value === 'sequence'),
-
-    /** update the given openwhisk entity */
-    update,
-
-    /** add action modes; where=push|unshift */
-    addActionMode,
-
-    owOpts: owOpts,
-
-    /** execute a wsk command without saving to the command history */
-    qexec: (command, execOptions) =>
-      executor(commandTree, history, command, Object.assign({}, { noHistory: true }, execOptions)),
-
-    /** execute a wsk command with the given options */
-    exec: (command, execOptions) => {
-      try {
-        return executor(commandTree, history, command, execOptions)
-      } catch (err) {
-        console.error('Error in wsk::exec')
-        console.error(err)
-        throw err
-      }
-    }
-  }
 
   if (isReinit) return
 
@@ -1666,10 +1596,9 @@ const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) =
   }
 
   debug('init done')
-  return self
 }
 
 export default function(commandTree: Commands.Registrar) {
-  initSelf = makeInit(commandTree)
+  const initSelf = makeInit(commandTree)
   return initSelf(false)
 }
