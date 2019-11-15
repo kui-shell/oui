@@ -40,7 +40,7 @@ import { existsSync, lstat, readFile, readFileSync, unlink, writeFile } from 'fs
 
 import { Capabilities, Commands, Util } from '@kui-shell/core'
 
-import { OpenWhiskEntity, Action, Package } from '../../models/openwhisk-entity'
+import { OpenWhiskEntity, Action } from '../../models/openwhisk-entity'
 import { synonyms } from '../../models/synonyms'
 import { deployHTMLViaOpenWhisk } from './_html'
 import { current as currentNamespace } from '../../models/namespace'
@@ -402,21 +402,6 @@ export default async (commandTree: Commands.Registrar) => {
       //
       // const annotationArgs = (options.annotations || []).map(kv => `-a ${kv.key} ${kv.value}`).join(' ')
       return command.REPL.qexec<Action>(`wsk action update "${name}" "${location}" --kind "${kind}"`)
-        .then(action => {
-          ;(annotators[letType] || []).forEach(annotator => annotator(action))
-          if (mimeType) (annotators[mimeType] || []).forEach(annotator => annotator(action))
-          if (options.action) {
-            action.annotations = action.annotations.concat(options.action.annotations || [])
-            action.parameters = options.action.parameters
-            action.limits = options.action.limits
-          }
-          const owOpts = wskOpts({
-            name: name,
-            action: action
-          })
-          return getClient(execOptions).actions.update(owOpts)
-        })
-        .then(addPrettyType('actions', 'update', name))
     } else {
       //
       // otherwise, assume this is a web action for now
@@ -474,28 +459,31 @@ export default async (commandTree: Commands.Registrar) => {
         }
       })
 
-  const doCreate = (args: Commands.Arguments) => {
-    const { block: retryOK, argv: fullArgv, command: fullCommand, execOptions, REPL } = args
-    const update = execOptions.createOnly ? 'create' : 'update'
+  const doCreate = (args: Commands.Arguments): Promise<Commands.Response> => {
+    const { argv: fullArgv, command: fullCommand, execOptions, REPL } = args
+    // const update = execOptions.createOnly ? 'create' : 'update'
 
     /**
      * If the create failed, maybe this is because the package does not exist?
      *
      */
-    const packageAutoCreate = (name: string) => (err: StatusCodeError) => {
-      if (err.statusCode === 404 && retryOK) {
+    const packageAutoCreate = (name: string) => (err1: StatusCodeError) => {
+      if (err1.statusCode === 404 && !execOptions.noRetry) {
         // create failure with 404, maybe package not found?
         const path = name.split('/')
         const packageName = path.length === 2 ? path[0] : path.length === 3 ? path[1] : undefined
         if (packageName) {
-          return REPL.qexec<Package>(`wsk package update "${packageName}"`).then(() =>
-            doCreate(Object.assign({}, args, { block: false }))
-          )
+          return REPL.qexec(`wsk package update "${packageName}"`)
+            .then(() => doCreate(Object.assign({}, args, { noRetry: true })))
+            .catch(() => {
+              // package auto-create failed, rethrow the first error
+              throw err1
+            })
         }
       }
 
       // otherwise, it wasn't a package existence issue
-      throw err
+      throw err1
     }
 
     const maybeComponentIsFile = (
@@ -626,7 +614,7 @@ export default async (commandTree: Commands.Registrar) => {
       if (annotators[extension]) annotators[extension].forEach(annotator => annotator(action))
 
       debug('inline-function::create', name)
-      return REPL.qexec<Action>(`wsk action update "${name}"`, undefined, undefined, {
+      return REPL.qexec<Commands.Response>(`wsk action update "${name}"`, undefined, undefined, {
         entity: { action }
       }).catch(packageAutoCreate(name))
     } else {
@@ -634,7 +622,7 @@ export default async (commandTree: Commands.Registrar) => {
       debug('sequenceMatch', sequenceMatch, components)
       if (sequenceMatch) {
         // maybe it is a sequence!
-        const letType = sequenceMatch[1]
+        // const letType = sequenceMatch[1]
         const mimeType = cutTrailingWhitespace(sequenceMatch[3])
         const name = figureName(sequenceMatch[2].trim(), mimeType)
 
@@ -676,46 +664,9 @@ export default async (commandTree: Commands.Registrar) => {
               }
 
               debug('creating sequence', extraArgs, name, components)
-              return REPL.qexec<Action>(
+              return REPL.qexec<Commands.Response>(
                 `wsk action update --sequence ${extraArgs} "${name}" ${components.join(',')}`
-              ).then(action => {
-                ;(annotators[letType] || []).forEach(annotator => annotator(action))
-                if (mimeType) {
-                  ;(annotators[mimeType] || []).forEach(annotator => annotator(action))
-
-                  // make sure this appears as a sequence
-                  //    for the case where the entity was first created e.g. with let s=|request|
-                  //    then later the user added a second element, turning the action into a sequence
-                  action.annotations = action.annotations.filter(kv => kv.key !== 'wskng.combinators')
-                }
-                if (options.action) {
-                  action.annotations = action.annotations.concat(options.action.annotations || [])
-                  action.parameters = options.action.parameters
-                  action.limits = options.action.limits
-                }
-
-                if (annoMatch) {
-                  // e.g. let seq = a->b (-a foo bar)   <-- the parenthesized last part
-                  const { kvOptions: commandLineOptions } = parseOptions(annoMatch[2].split(/\s+/), 'action')
-                  if (commandLineOptions && commandLineOptions.action) {
-                    if (commandLineOptions.action.annotations) {
-                      action.annotations = action.annotations.concat(commandLineOptions.action.annotations)
-                    }
-                    if (commandLineOptions.action.parameters) {
-                      action.parameters = action.parameters.concat(commandLineOptions.action.parameters)
-                    }
-                  }
-                }
-
-                const owOpts = wskOpts({
-                  name: action.name,
-                  namespace: action.namespace,
-                  action: action
-                })
-                return getClient(execOptions)
-                  .actions[update](owOpts)
-                  .then(addPrettyType('actions', 'update', action.name))
-              })
+              )
             })
             .catch(packageAutoCreate(name))
         } else {

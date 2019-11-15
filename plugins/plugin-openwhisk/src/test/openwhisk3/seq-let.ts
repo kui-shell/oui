@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -75,7 +75,6 @@ describe('Create a sequence via let', function(this: Common.ISuite) {
   it(`should delete ${seqName5} and its two inline anonymous functions`, () =>
     CLI.command(`wsk action rimraf -r ${seqName5}`, this.app)
       .then(ReplExpect.okWithCustom({ expect: 'deleted 3 elements', exact: true }))
-      .then(SidecarExpect.closed)
       .catch(Common.oops(this, true)))
 
   // create the sequence with a max of white spaces
@@ -91,12 +90,12 @@ describe('Create a sequence via let', function(this: Common.ISuite) {
     CLI.command(`wsk action async -p y 3`, this.app).then(ReplExpect.okWithString(seqName3))) // e.g. "invoked `seqname3` with id:"
 
   // call await
-  it('should await successful completion of the activation', () =>
+  xit('should await successful completion of the activation', () =>
     CLI.command(`await`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName3))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ y: 3 }))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ y: 3 }))
       .catch(Common.oops(this, true)))
 })

@@ -38,8 +38,8 @@ localDescribe('Create a packaged action then invoke with implicit entity', funct
     CLI.command(`let ppp/foo = ${ROOT}/data/openwhisk/foo.js`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('foo', undefined, undefined, 'ppp'))
-      .catch(Common.oops(this)))
+      .then(SidecarExpect.showing('foo', 'ppp'))
+      .catch(Common.oops(this, true)))
 
   // invoke it asynchronously with no params
   it('should async that action', () =>
@@ -50,22 +50,22 @@ localDescribe('Create a packaged action then invoke with implicit entity', funct
         await this.app.client.click(selector)
         return SidecarExpect.open(this.app).then(SidecarExpect.showing('foo', activationId))
       })
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should get/open the package', () =>
     CLI.command(`wsk package get ppp`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('ppp'))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // re-open the packaged action and invoke it, for good measure
   it('should create re-open the packaged action', () =>
     CLI.command(`wsk action get ppp/foo`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('foo', undefined, undefined, 'ppp'))
-      .catch(Common.oops(this)))
+      .then(SidecarExpect.showing('foo', 'ppp'))
+      .catch(Common.oops(this, true)))
 
   // invoke it asynchronously with no params
   it('should async that action', () =>
@@ -76,5 +76,5 @@ localDescribe('Create a packaged action then invoke with implicit entity', funct
         await this.app.client.click(selector)
         return SidecarExpect.open(this.app).then(SidecarExpect.showing('foo', activationId))
       })
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 })

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -56,7 +56,7 @@ describe('create action list it then click to show it again', function(this: Com
       // also confirm that source matches
       .then(() =>
         this.app.client.waitUntil(async () => {
-          const actualSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actualSrc = await Util.getValueFromMonaco(this.app)
           return actualSrc.trim() === expectedSrc
         })
       )
@@ -65,7 +65,7 @@ describe('create action list it then click to show it again', function(this: Com
       .then(() => new Promise(resolve => setTimeout(resolve, 3000)))
       .then(() =>
         this.app.client.waitUntil(async () => {
-          const actualSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actualSrc = await Util.getValueFromMonaco(this.app)
           return actualSrc.trim() === expectedSrc
         })
       )

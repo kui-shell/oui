@@ -19,7 +19,7 @@
  *
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -49,47 +49,8 @@ describe('wsk trigger fire tests', function(this: Common.ISuite) {
       .then(SidecarExpect.showing('rrr'))
       .catch(Common.oops(this)))
 
-  it('should fire the trigger', () =>
-    CLI.command('wsk trigger fire ttt', this.app)
-      .then(ReplExpect.okWithCustom({ selector: '.clickable.activationId' }))
-      .then(selector => this.app.client.click(selector))
-      .then(() => this.app)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('ttt'))
-      .then(() => CLI.command('wsk activation logs', this.app))
-      .then(() => this.app)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('ttt'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(logs => JSON.parse(logs))
-      .then(logs => logs.activationId)
-      .then(activationId => CLI.command(`wsk activation get ${activationId}`, this.app))
-      .then(ReplExpect.ok)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('aaa'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ tvar: 2, avar: 3 }))
-      .catch(Common.oops(this)))
-
   it('should fire the trigger with fire parameter', () =>
     CLI.command('wsk trigger fire ttt -p fvar 4', this.app)
-      .then(ReplExpect.okWithCustom({ selector: '.clickable.activationId' }))
-      .then(selector => this.app.client.click(selector))
-      .then(() => this.app)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('ttt'))
-      .then(() => CLI.command('wsk activation logs', this.app))
-      .then(() => this.app)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('ttt'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(logs => JSON.parse(logs))
-      .then(logs => logs.activationId)
-      .then(activationId => CLI.command(`wsk activation get ${activationId}`, this.app))
-      .then(ReplExpect.ok)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('aaa'))
-      .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ tvar: 2, avar: 3, fvar: 4 }))
+      .then(ReplExpect.okWithString('fired trigger'))
       .catch(Common.oops(this)))
 })

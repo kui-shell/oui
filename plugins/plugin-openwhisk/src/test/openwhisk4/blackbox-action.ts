@@ -24,7 +24,7 @@ import { dirname } from 'path'
 
 const ROOT = dirname(require.resolve('@kui-shell/plugin-openwhisk/tests/package.json'))
 
-describe('blackbox actions', function(this: Common.ISuite) {
+describe('blackbox actions docker', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
 
@@ -33,7 +33,7 @@ describe('blackbox actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('bb1'))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE))
+      .then(() => this.app.client.getText(Selectors.SIDECAR_CUSTOM_CONTENT))
       .then(txt => assert.strictEqual(txt, 'dockerhub image: openwhisk/example'))
       .catch(Common.oops(this)))
 
@@ -56,7 +56,8 @@ describe('blackbox actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('bb4'))
-      .then(SidecarExpect.source('// eslint-disable-next-line @typescript-eslint/no-unused-vars\nconst main = x => x'))
+      .then(Util.getValueFromMonaco)
+      .then(txt => txt.includes('// eslint-disable-next-line @typescript-eslint/no-unused-vars\nconst main = x => x'))
       .catch(Common.oops(this)))
 
   it('should create a package', () =>
@@ -70,8 +71,9 @@ describe('blackbox actions', function(this: Common.ISuite) {
     CLI.command(`wsk action create ppp/bb4 ${ROOT}/data/openwhisk/echo.js --docker openwhisk/example`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('bb4', undefined, undefined, 'ppp'))
-      .then(SidecarExpect.source('// eslint-disable-next-line @typescript-eslint/no-unused-vars\nconst main = x => x'))
+      .then(SidecarExpect.showing('bb4', 'ppp'))
+      .then(Util.getValueFromMonaco)
+      .then(txt => txt.includes('// eslint-disable-next-line @typescript-eslint/no-unused-vars\nconst main = x => x'))
       .catch(Common.oops(this)))
 
   it(`should invoke bb2`, () =>
@@ -79,9 +81,9 @@ describe('blackbox actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('bb2'))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
+      .then(Util.getValueFromMonaco)
       .then(
-        Util.expectStruct({
+        Util.expectYAML({
           args: {},
           msg: 'Hello from arbitrary C program!'
         })

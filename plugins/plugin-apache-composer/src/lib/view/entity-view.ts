@@ -23,31 +23,12 @@ import { decorateAsApp } from '../utility/decorate'
 
 const debug = Debug('plugins/apache-composer/entity-view')
 
-const defaultMode = 'visualization'
-
 /**
  * Format the given activation record for display as a session
  *
  */
-export const formatSessionResponse = ({ REPL }: Commands.Arguments, activation) => {
+export const formatSessionResponse = (_, activation) => {
   activation.prettyType = 'sessions'
-
-  const path = activation.annotations.find(({ key }) => key === 'path').value
-
-  // entity onclick handler
-  activation.onclick = () => REPL.pexec(`wsk app get "/${path}"`)
-
-  // add our visualization view mode
-  if (!activation.modes) activation.modes = []
-  activation.modes.find(({ mode }) => mode === 'logs').label = 'trace'
-
-  activation.modes.push({
-    mode: defaultMode,
-    label: 'Session Flow',
-    direct: `wsk session flow ${activation.activationId}`
-  })
-
-  debug('session response', activation)
   return activation
 }
 
@@ -102,13 +83,17 @@ export const visualizeComposition = async (tab: UI.Tab, response, execOptions) =
     if (doVisualize) {
       debug('visualze composition')
 
+      const toolbarText = subtext && {
+        type: 'warning',
+        text: subtext
+      }
       return Object.assign(action, {
         type: 'custom',
         viewName: action.type,
         content,
         input,
         isEntity: true,
-        subtext,
+        toolbarText,
         controlHeaders: ['sidecar-header-secondary-content']
       })
     } else {

@@ -104,8 +104,8 @@ describe('summary visualization', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(actionName))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expectedStruct))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expectedStruct))
         .catch(Common.oops(this)))
   }
   const notbomb = () => invoke(+1)

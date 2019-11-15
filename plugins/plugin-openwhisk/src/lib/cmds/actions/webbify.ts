@@ -23,8 +23,9 @@
 
 import { Commands, Models, UI } from '@kui-shell/core'
 
-import { addPrettyType, getClient, owOpts } from '../openwhisk-core'
+import { getClient, owOpts } from '../openwhisk-core'
 import { synonyms } from '../../models/synonyms'
+import { fqnOfDesc } from '../../../controller/fqn'
 
 // some helpers for the pattern matcher, helping to find the components of a match
 const matchOf = idx => match => match[idx] // the match is idx'th element of the result of string.match
@@ -101,7 +102,7 @@ const addAnnotations = (annotations, mimeType) => {
  * required annotations, then updates the backend.
  *
  */
-const doWebbify = ({ command, execOptions, tab }: Commands.Arguments) => {
+const doWebbify = ({ command, execOptions, tab, REPL }: Commands.Arguments) => {
   return Promise.all(
     matchers.map(matcher => ({
       matcher: matcher,
@@ -139,7 +140,7 @@ const doWebbify = ({ command, execOptions, tab }: Commands.Arguments) => {
             })
           )
         )
-        .then(addPrettyType('actions', 'update', action.name))
+        .then(_ => REPL.qexec(`wsk action get "${fqnOfDesc(_)}"`))
     })
 }
 

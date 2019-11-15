@@ -19,6 +19,8 @@ import Debug from 'debug'
 import { Capabilities, Commands, Tables, UI } from '@kui-shell/core'
 import { hide as hideSidecar } from '@kui-shell/core/webapp/views/sidecar'
 
+import { OpenWhiskResource } from '../models/resource'
+
 const debug = Debug('plugins/openwhisk/cmds/wipe')
 
 /**
@@ -41,14 +43,13 @@ const logThen = (f: () => Promise<void>) => (msg: string) => {
  * Delete all of the entities in the given `entities` array
  *
  */
-const deleteAllOnce = async (
-  { REPL }: Commands.Arguments,
-  entities: { type: string; namespace: string; name: string }[]
-): Promise<void> => {
+const deleteAllOnce = async ({ REPL }: Commands.Arguments, entities: OpenWhiskResource[]): Promise<void> => {
   await Promise.all(
     entities.map(entity => {
       const tryDelete = async () => {
-        await REPL.qexec(`wsk ${entity.type} delete "/${entity.namespace}/${entity.name}"`)
+        await REPL.qexec(
+          `wsk ${entity.kind.toLowerCase()} delete "/${entity.metadata.namespace}/${entity.metadata.name}"`
+        )
       }
 
       // with retries...
@@ -77,16 +78,16 @@ const deleteAllOnce = async (
  * List the entities of a given entity type (e.g. actions)
  *
  */
-const list = ({ REPL }: Commands.Arguments, type: string) =>
-  REPL.qexec<Tables.Table>(`wsk ${type} list --limit 200`).then(response => response.body)
+async function list({ REPL }: Commands.Arguments, type: string): Promise<OpenWhiskResource[]> {
+  const L = await REPL.qexec<Tables.Table>(`wsk ${type} list --limit 200`)
+  return ((L.body || []) as any) as OpenWhiskResource[]
+}
 
 /**
  * Because we can only list at most 200 entities at a time, we'll need to loop...
  *
  */
-const deleteAllUntilDone = (command: Commands.Arguments, type: string) => (
-  entities: { type: string; namespace: string; name: string }[]
-) => {
+const deleteAllUntilDone = (command: Commands.Arguments, type: string) => (entities: OpenWhiskResource[]) => {
   debug(`deleteAllUntilDone ${type} ${entities.length}`)
 
   if (entities.length === 0) {

@@ -26,12 +26,13 @@ const ROOT = dirname(require.resolve('@kui-shell/plugin-apache-composer/tests/pa
 
 const seqName1 = 'seq1'
 
-describe('kill composer invocation', function(this: Common.ISuite) {
+describe('app invoke plain', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
 
   /** expected return value */
-  const expect = (key, value, extraExpect, expectIsIt) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const expect = (key: string, value: string | number, extraExpect: Record<string, any>, expectIsIt: boolean) => {
     if (expectIsIt) {
       return extraExpect
     } else {
@@ -42,7 +43,13 @@ describe('kill composer invocation', function(this: Common.ISuite) {
   }
 
   // note that we do an implicit-action use of the async command
-  const invokeThenResult = (name, key, value, extraExpect = {}, expectIsIt = false) => {
+  const invokeThenResult = (
+    name: string,
+    key: string,
+    value: string | number,
+    extraExpect = {},
+    expectIsIt = false
+  ) => {
     const expectedOutput = expect(key, value, extraExpect, expectIsIt)
 
     it(`should invoke the composition ${name} with ${key}=${value}, then get its result`, () =>
@@ -58,8 +65,9 @@ describe('kill composer invocation', function(this: Common.ISuite) {
             .then(SidecarExpect.showing(name))
             .then(app => app.client.getText(Selectors.SIDECAR_ACTIVATION_ID))
             .then(sessionId2 => assert.strictEqual(sessionId2, sessionId))
-            .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-            .then(Util.expectStruct(expectedOutput))
+            .then(() => this.app)
+            .then(Util.getValueFromMonaco)
+            .then(Util.expectYAML(expectedOutput))
             .then(() => {
               console.log('Now issuing app result')
             })

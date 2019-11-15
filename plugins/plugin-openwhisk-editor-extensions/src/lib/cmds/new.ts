@@ -20,7 +20,7 @@ import { Tab } from '@kui-shell/core/api/ui-lite'
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 import Commands from '@kui-shell/core/api/commands'
 
-import { Action } from '@kui-shell/plugin-openwhisk'
+import { Action, fqn } from '@kui-shell/plugin-openwhisk'
 
 import {
   EditorEntity as Entity,
@@ -148,10 +148,8 @@ const failIfNot404 = err => {
  *
  */
 export const gotoReadonlyView = ({ getEntity }) => async (tab: Tab) => {
-  const { name, namespace } = await getEntity()
-  const fqn = `/${namespace}/${name}`
   debug('readonly', fqn)
-  return tab.REPL.pexec<Action>(`wsk action get ${encodeComponent(fqn)}`)
+  return tab.REPL.pexec<Action>(`wsk action get ${encodeComponent(fqn(getEntity()))}`)
 }
 
 export const persisters = {
@@ -160,10 +158,10 @@ export const persisters = {
     getCode: entity => entity,
     revert: async (entity: Entity, { editor }) => {
       debug('revert', entity)
-      const namespacePart = entity.namespace ? `/${entity.namespace}/` : ''
+      const namespacePart = entity.metadata.namespace ? `/${entity.metadata.namespace}/` : ''
 
       const { REPL } = await import('@kui-shell/core/api/repl')
-      return REPL.qexec(`wsk action get "${namespacePart}${entity.name}"`)
+      return REPL.qexec<Action>(`wsk action get "${namespacePart}${entity.metadata.name}"`)
         .then(persisters.actions.getCode)
         .then(entity => {
           entity.persister = persisters.actions
@@ -173,14 +171,14 @@ export const persisters = {
     },
     save: async action => {
       debug('save', action)
-      const namespacePart = action.namespace ? `/${action.namespace}/` : ''
+      const namespacePart = action.metadata.namespace ? `/${action.metadata.namespace}/` : ''
 
       // odd: if we don't delete this, the backend will not perform its default version tagging behavior
       // https://github.com/apache/incubator-openwhisk/issues/3237
       delete action.version
 
       const { REPL } = await import('@kui-shell/core/api/repl')
-      return REPL.qexec(`wsk action update "${namespacePart}${action.name}"`, undefined, undefined, {
+      return REPL.qexec<Action>(`wsk action update "${namespacePart}${action.metadata.name}"`, undefined, undefined, {
         entity: { action }
       })
     }
@@ -209,6 +207,9 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
       return Promise.resolve({
         type: 'source',
         name: execOptions.parameters.name,
+        metadata: {
+          name
+        },
         exec: {
           kind: parsedOptions.language || 'source',
           code: source.toString()
@@ -220,7 +221,7 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
     }
   }
   const { REPL } = await import('@kui-shell/core/api/repl')
-  return REPL.qexec(`wsk action get "${name}"`)
+  return REPL.qexec<Action>(`wsk action get "${name}"`)
     .then(check)
     .then(entity =>
       Object.assign({}, entity, {
@@ -303,6 +304,9 @@ export const newAction = ({
         name,
         kind,
         type,
+        metadata: {
+          name
+        },
         exec: { kind, prettyKind, code },
         isNew: true,
         ast,

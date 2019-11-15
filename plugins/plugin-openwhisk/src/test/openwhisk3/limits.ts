@@ -19,7 +19,9 @@
  *    this test also covers toggling the sidecar
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect } from '@kui-shell/test'
+import { Application } from 'spectron'
+
+import { Common, CLI, ReplExpect, Selectors, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -38,6 +40,19 @@ const actionName7 = 'foo7'
 const actionName8 = 'foo8'
 const actionName9 = 'foo9'
 
+export const expectLimit = (type: string, expectedValue: number | string) => async (app: Application) => {
+  const expect: Record<string, number | string> = {}
+  expect[type] = expectedValue
+
+  await app.client.waitForVisible(Selectors.SIDECAR_MODE_BUTTON('limits'))
+  await app.client.click(Selectors.SIDECAR_MODE_BUTTON('limits'))
+
+  await app.client.waitUntil(async () => {
+    const txt = await Util.getValueFromMonaco(app)
+    return Util.expectYAMLSubset(expect, true)(txt)
+  })
+}
+
 // TODO: webpack test
 localDescribe('Create an action with limits', function(this: Common.ISuite) {
   before(openwhisk.before(this))
@@ -48,7 +63,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName1))
-      .then(SidecarExpect.limit('memory', 129))
+      .then(expectLimit('memory', 129))
       .catch(Common.oops(this)))
 
   it('should create an action with --memory 131', () =>
@@ -56,7 +71,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName2))
-      .then(SidecarExpect.limit('memory', 131))
+      .then(expectLimit('memory', 131))
       .catch(Common.oops(this)))
 
   it('should create an action with -t 1000', () =>
@@ -64,7 +79,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName3))
-      .then(SidecarExpect.limit('timeout', 1000))
+      .then(expectLimit('timeout', 1000))
       .catch(Common.oops(this)))
 
   it('should create an action with --timeout 2000', () =>
@@ -72,7 +87,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName4))
-      .then(SidecarExpect.limit('timeout', 2000))
+      .then(expectLimit('timeout', 2000))
       .catch(Common.oops(this)))
 
   it('should create an action with --timeout 3s', () =>
@@ -80,7 +95,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName5))
-      .then(SidecarExpect.limit('timeout', 3000))
+      .then(expectLimit('timeout', 3000))
       .catch(Common.oops(this)))
 
   it('should create an action with --timeout 5m', () =>
@@ -88,7 +103,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName6))
-      .then(SidecarExpect.limit('timeout', 300000))
+      .then(expectLimit('timeout', 300000))
       .catch(Common.oops(this)))
 
   it('should create an action with -l 1', () =>
@@ -96,7 +111,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName7))
-      .then(SidecarExpect.limit('logs', 1))
+      .then(expectLimit('logs', 1))
       .catch(Common.oops(this)))
 
   it('should fail to create an action with --logs 2', () =>
@@ -109,7 +124,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName8))
-      .then(SidecarExpect.limit('logs', 2))
+      .then(expectLimit('logs', 2))
       .catch(Common.oops(this)))
 
   // updating the action8 this time
@@ -118,7 +133,7 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName8))
-      .then(SidecarExpect.limit('logs', 3))
+      .then(expectLimit('logs', 3))
       .catch(Common.oops(this)))
 
   it('should create an action with --logsize 3', () =>
@@ -126,6 +141,6 @@ localDescribe('Create an action with limits', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName9))
-      .then(SidecarExpect.limit('logs', 3))
+      .then(expectLimit('logs', 3))
       .catch(Common.oops(this)))
 })

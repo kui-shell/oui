@@ -20,8 +20,6 @@
  *
  */
 
-import * as assert from 'assert'
-
 import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
@@ -33,22 +31,7 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
   after(Common.after(this))
 
   /** verify the mode buttons work */
-  const verify = (name, expectedResult, expectedLogs) => {
-    // click on parameters mode button
-    it(`should show logs for ${name} by clicking on bottom stripe`, async () => {
-      await this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('logs'))
-      return SidecarExpect.open(this.app)
-        .then(SidecarExpect.showing(name))
-        .then(() => this.app.client.getText(`${Selectors.SIDECAR_CONTENT} .activation-result`))
-        .then(actualLogs => {
-          if (actualLogs.replace(/\s+/g, '').indexOf(expectedLogs.replace(/\s+/g, '')) < 0) {
-            console.error(actualLogs.replace(/\s+/g, '') + ' != ' + expectedLogs.replace(/\s+/g, ''))
-            assert.ok(false)
-          }
-        })
-        .catch(Common.oops(this))
-    })
-
+  const verify = (name, expectedResult) => {
     // this will form a part of the annotations record
     const subsetOfAnnotations = { path: `${openwhisk.expectedNamespace()}/${name}` }
 
@@ -56,8 +39,8 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
       await this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('annotations'))
       return SidecarExpect.open(this.app)
         .then(SidecarExpect.showing(name))
-        .then(() => this.app.client.getText(`${Selectors.SIDECAR_CONTENT} .activation-result`))
-        .then(Util.expectSubset(subsetOfAnnotations))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAMLSubset(subsetOfAnnotations))
         .catch(Common.oops(this))
     })
 
@@ -68,9 +51,7 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
         .then(SidecarExpect.showing(name))
         .then(() =>
           this.app.client.waitUntil(async () => {
-            const ok = await this.app.client
-              .getText(`${Selectors.SIDECAR_CONTENT} .activation-result`)
-              .then(Util.expectStruct(expectedResult, false, true))
+            const ok = await Util.getValueFromMonaco(this.app).then(Util.expectYAML(expectedResult, true))
             return ok
           })
         )
@@ -84,9 +65,9 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
         .then(SidecarExpect.showing(name))
         .then(() =>
           this.app.client.waitUntil(async () => {
-            const ok = await this.app.client
-              .getText(`${Selectors.SIDECAR_CONTENT} .activation-result`)
-              .then(Util.expectSubset({ name, namespace: openwhisk.expectedNamespace() }, false)) // parts of the raw annotation record
+            const ok = await Util.getValueFromMonaco(this.app).then(
+              Util.expectYAMLSubset({ name, namespace: openwhisk.expectedNamespace() }, false)
+            ) // parts of the raw annotation record
             return ok
           })
         )
@@ -96,7 +77,14 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
 
   // create an action, using the implicit entity type
   it(`should create an action ${actionName}`, () =>
-    CLI.command(`let ${actionName} = x => { console.log(JSON.stringify(x)); return x } -p x 5 -p y 10`, this.app)
+    CLI.command(`let ${actionName} = x => { console.log(JSON.stringify(x)); return x }`, this.app)
+      .then(ReplExpect.ok)
+      .then(SidecarExpect.open)
+      .then(SidecarExpect.showing(actionName))
+      .catch(Common.oops(this)))
+
+  it(`should update the params of ${actionName}`, () =>
+    CLI.command(`wsk action update ${actionName} -p x 5 -p y 10`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
@@ -108,7 +96,7 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
       .catch(Common.oops(this)))
-  verify(actionName, { x: 5, y: 10, z: 3 }, '{ "x": 5, "y": 10, "z": 3 }')
+  verify(actionName, { x: 5, y: 10, z: 3 })
 
   it(`should invoke ${actionName}`, () =>
     CLI.command(`wsk action invoke ${actionName} -p z 99`, this.app)
@@ -116,13 +104,5 @@ describe('Sidecar bottom stripe interactions for activations', function(this: Co
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
       .catch(Common.oops(this)))
-  verify(actionName, { x: 5, y: 10, z: 99 }, '{ "x": 5, "y": 10, "z": 99 }')
-
-  // this one is buggy:
-  /* it(`should show activation with last`, () => CLI.command(`last --name ${actionName}`, this.app)
-      .then(ReplExpect.ok)
-      .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName))
-      .catch(Common.oops(this)))
-      verify(actionName, {x:5,y:10,z:99}, '{ x: 5, y: 10, z: 99 }') */
+  verify(actionName, { x: 5, y: 10, z: 99 })
 })

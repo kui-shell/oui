@@ -49,7 +49,7 @@ export const create = command => ({
     {
       name: 'name',
       docs: 'the name of your new app',
-      implicitOK: ['actions', 'preview']
+      implicitOK: ['Action', 'Preview', 'actions', 'preview']
     },
     {
       name: 'sourceFile',
@@ -79,7 +79,7 @@ export const invoke = {
       name: 'name',
       docs: 'a deployed composition',
       entity: 'action',
-      implicitOK: ['actions', 'activations']
+      implicitOK: ['Action', 'Activation', 'actions', 'activations']
     }
   ],
   optional: actionsUsage.invoke.optional,

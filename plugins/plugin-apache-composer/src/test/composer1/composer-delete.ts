@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 import { dirname } from 'path'
@@ -44,8 +44,8 @@ describe('Use the app delete command to delete an invokeable composition', funct
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(name))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expect(key, value, extraExpect, expectIsIt)))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expect(key, value, extraExpect, expectIsIt)))
         .catch(Common.oops(this)))
   }
 

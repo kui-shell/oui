@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -52,7 +52,7 @@ describe('Rename actions', function(this: Common.ISuite) {
       CLI.command(`wsk action rename ${aFull} ${bFull}`, this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(b, undefined, undefined, bPackage))
+        .then(SidecarExpect.showing(b, bPackage))
         .catch(Common.oops(this)))
 
     // verify that annotations survived the rename
@@ -60,9 +60,9 @@ describe('Rename actions', function(this: Common.ISuite) {
       CLI.command('wsk action annotations', this.app)
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
-        .then(SidecarExpect.showing(b, undefined, undefined, bPackage))
-        .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-        .then(Util.expectSubset(expectAnnotations)))
+        .then(SidecarExpect.showing(b, bPackage))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAMLSubset(expectAnnotations)))
 
     // invoke the renamed action
     it(`should invoke the copied action ${bFull}`, () =>
@@ -70,8 +70,8 @@ describe('Rename actions', function(this: Common.ISuite) {
         .then(ReplExpect.justOK)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(b))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expect)))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expect)))
 
     // verify that the original does not exist
     it(`${aFull} should NOT exist`, () =>
@@ -96,7 +96,7 @@ describe('Rename actions', function(this: Common.ISuite) {
     CLI.command(`let ${packageName1}/${actionName2}.js = x=>x -p ${key1} ${value1} -a ${key1} ${value1}`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName1))
+      .then(SidecarExpect.showing(actionName2, packageName1))
       .catch(Common.oops(this)))
   mv('package to non-package', actionName2, actionName2b, packageName1)
 

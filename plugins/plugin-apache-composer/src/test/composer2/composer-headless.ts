@@ -142,13 +142,13 @@ class Validation {
     it(`validate async ${name}`, () =>
       cli
         .command(`wsk app async ${name}`)
-        .then(cli.expectOK(`ok: invoked ${name} with id`, { exact: false }))
+        .then(cli.expectOK(`ok: invoked`, { exact: false }))
         .catch(Common.oops(this.ctx)))
 
     it(`validate async ${name} ; session get ; session list`, () =>
       cli
         .command(`wsk app async ${name}`)
-        .then(cli.expectOK(`ok: invoked ${name} with id`, { exact: false }))
+        .then(cli.expectOK(`ok: invoked`, { exact: false }))
         .then(line => {
           // session get
           const match = line.match(/with id (.*)[\s]*$/)
@@ -157,14 +157,14 @@ class Validation {
           const sessionId = match[1]
 
           return new Promise((resolve, reject) => {
-            const fetch = retry =>
+            const fetch = (retry: number) =>
               cli
                 .command(`wsk session get ${sessionId}`)
                 .then(response => {
                   if (response.code === 404 - 256) {
                     // retry on 404, because the session might not yet be available
                     if (retry < 5) {
-                      console.error(`${retry} retry session get ${name} when 404`)
+                      console.error(`${retry} retry session get ${sessionId} for ${name} when 404`)
                       setTimeout(function() {
                         fetch(retry + 1)
                       }, 2000)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -33,12 +33,12 @@ describe('parameter parsing with quotes', function(this: Common.ISuite) {
 
   const expectParams = params => {
     return it('should show parameters', () =>
-      CLI.command('wsk action params', this.app)
+      CLI.command('wsk package params', this.app)
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing('ppp'))
-        .then(app => app.client.getText(`${Selectors.SIDECAR_PACKAGE_PARAMETERS}`))
-        .then(Util.expectStruct(params))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(params))
         .catch(Common.oops(this)))
   }
 

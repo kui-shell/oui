@@ -40,8 +40,8 @@ describe('grid visualization', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(name))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct(expectedStruct))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML(expectedStruct))
         .catch(Common.oops(this)))
   }
   const notbomb = (name?, packageName?) => invoke(+1, name, packageName)
@@ -316,7 +316,7 @@ describe('grid visualization', function(this: Common.ISuite) {
   it(`should create a packaged action ${packageName}/${actionName2} that bombs if the input value is negative`, () => CLI.command(`let ${packageName}/${actionName2} = ({x}) => x<0 ? {error:'bomb!'} : {x: x}`, this.app)
     .then(ReplExpect.ok)
     .then(SidecarExpect.open)
-    .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName))
+    .then(SidecarExpect.showing(actionName2, packageName))
     .catch(Common.oops(this)))
 
   // invoke not-packed actionName2 again, and packaged

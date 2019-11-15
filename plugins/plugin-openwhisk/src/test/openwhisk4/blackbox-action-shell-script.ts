@@ -17,7 +17,7 @@
 import * as fs from 'fs'
 import * as assert from 'assert'
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -41,7 +41,7 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE))
+      .then(Util.getValueFromMonaco)
       .then(removeWhitespace)
       .then(txt => assert.strictEqual(txt, expectedFlipSource))
       .catch(Common.oops(this)))
@@ -52,8 +52,9 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
+      .then(Util.getValueFromMonaco)
       .then(
-        SidecarExpect.resultSubset({
+        Util.expectYAMLSubset({
           trials: N1
         })
       )
@@ -65,8 +66,9 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
+      .then(Util.getValueFromMonaco)
       .then(
-        SidecarExpect.resultSubset({
+        Util.expectYAMLSubset({
           trials: N2
         })
       )
@@ -77,7 +79,7 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE))
+      .then(Util.getValueFromMonaco)
       .then(removeWhitespace)
       .then(txt => assert.strictEqual(txt, expectedFlipSource))
       .catch(Common.oops(this)))
@@ -87,7 +89,7 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE))
+      .then(Util.getValueFromMonaco)
       .then(removeWhitespace)
       .then(txt => assert.strictEqual(txt, expectedFlipSource))
       .catch(Common.oops(this)))
@@ -97,7 +99,7 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE))
+      .then(Util.getValueFromMonaco)
       .then(removeWhitespace)
       .then(txt => assert.strictEqual(txt, expectedFlipSource))
       .catch(Common.oops(this)))
@@ -108,8 +110,9 @@ describe('blackbox actions from a shell script', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(flip))
+      .then(Util.getValueFromMonaco)
       .then(
-        SidecarExpect.resultSubset({
+        Util.expectYAMLSubset({
           trials: N3
         })
       )

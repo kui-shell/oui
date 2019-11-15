@@ -21,7 +21,7 @@
 
 import { SpectronClient } from 'spectron'
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -97,12 +97,12 @@ describe('create new actions in editor', function(this: Common.ISuite) {
       .then(() =>
         this.app.client.waitUntil(async () => {
           console.log('get: Expected action content: "let main = x => x"')
-          const actionSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actionSrc = await Util.getValueFromMonaco(this.app)
           return actionSrc.trim() === 'let main = x => x'
         })
       )
-      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('unlock')))
-      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('unlock'))) // go to the edit mode
+      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('edit')))
+      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('edit'))) // go to the edit mode
       .then(() =>
         this.app.client.waitForVisible(
           `${Selectors.SIDECAR} .sidecar-toolbar-text-content .editor-status.is-up-to-date .is-up-to-date`
@@ -120,7 +120,8 @@ describe('create new actions in editor', function(this: Common.ISuite) {
         this.app.client.waitUntil(async () => {
           // expect the action content not to be changed
           console.log('lock: Expected action content: "let main = x => x"')
-          const actionSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actionSrc = await Util.getValueFromMonaco(this.app)
+          console.error('!!!!2', actionSrc, actionSrc.trim() === 'let main = x => x')
           return actionSrc.trim() === 'let main = x => x'
         })
       )
@@ -134,12 +135,12 @@ describe('create new actions in editor', function(this: Common.ISuite) {
       .then(() =>
         this.app.client.waitUntil(async () => {
           console.log('get: Expected action content: "let main = x => x"')
-          const actionSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actionSrc = await Util.getValueFromMonaco(this.app)
           return actionSrc.trim() === 'let main = x => x'
         })
       )
-      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('unlock')))
-      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('unlock'))) // go to the edit mode
+      .then(() => this.app.client.waitForExist(Selectors.SIDECAR_MODE_BUTTON('edit')))
+      .then(() => this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('edit'))) // go to the edit mode
       .then(() =>
         this.app.client.waitForVisible(
           `${Selectors.SIDECAR} .sidecar-toolbar-text-content .editor-status.is-up-to-date .is-up-to-date`
@@ -159,7 +160,7 @@ describe('create new actions in editor', function(this: Common.ISuite) {
         this.app.client.waitUntil(async () => {
           // expect the action content to be changed
           console.log('lock: Expected action content "let main = y => y"')
-          const actionSrc = await this.app.client.getText(Selectors.SIDECAR_ACTION_SOURCE)
+          const actionSrc = await Util.getValueFromMonaco(this.app)
           return actionSrc.trim() === 'let main = y => y'
         })
       )

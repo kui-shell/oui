@@ -37,27 +37,27 @@ const deployed = entity => [Object.assign({}, entity[0], { entity: `wsk ${entity
 
 /** required action parameter */
 const action = [{ name: 'action', docs: 'an action name' }]
-const deployedAction = deployed(action)
-const actionImplicitOK = [
+export const deployedAction = deployed(action)
+export const actionImplicitOK = [
   Object.assign({}, deployedAction[0], {
-    implicitOK: ['actions', 'activations']
+    implicitOK: ['Action', 'Activation', 'actions', 'activations']
   })
 ]
 
 /** required package parameter */
 const Package = [{ name: 'package', docs: 'a package name' }]
-const deployedPackage = deployed(Package)
-const maybeDeployedPackage = deployedPackage // nothing special for now; this is for update, which takes either a name or an entity
+export const deployedPackage = deployed(Package)
+export const maybeDeployedPackage = deployedPackage // nothing special for now; this is for update, which takes either a name or an entity
 
 /** required trigger parameter */
 const trigger = [{ name: 'trigger', docs: 'a trigger name' }]
-const deployedTrigger = deployed(trigger)
-const maybeDeployedTrigger = deployedTrigger // nothing special for now; this is for update, which takes either a name or an entity
+export const deployedTrigger = deployed(trigger)
+export const maybeDeployedTrigger = deployedTrigger // nothing special for now; this is for update, which takes either a name or an entity
 
 /** required rule parameter */
 const rule = [{ name: 'rule', docs: 'a rule name' }]
-const deployedRule = deployed(rule)
-const maybeDeployedRule = deployedRule // nothing special for now; this is for update, which takes either a name or an entity
+export const deployedRule = deployed(rule)
+export const maybeDeployedRule = deployedRule // nothing special for now; this is for update, which takes either a name or an entity
 
 /** required source file parameter */
 interface Option {
@@ -67,7 +67,7 @@ interface Option {
   file?: boolean
   docs: string
 }
-const sourceFile: Option[] = [
+export const sourceFile: Option[] = [
   {
     name: 'sourceFile',
     positional: true,
@@ -136,7 +136,7 @@ const feed = [
 
 /** timeout parameter */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const timeout: any[] = [
+export const timeout: any[] = [
   {
     name: '--timeout',
     alias: '-t',
@@ -164,7 +164,7 @@ const limits = timeout.concat([
 ])
 
 /** common action parameters */
-const actionMix = params
+export const actionMix = params
   .concat(annotations)
   .concat(limits)
   .concat([

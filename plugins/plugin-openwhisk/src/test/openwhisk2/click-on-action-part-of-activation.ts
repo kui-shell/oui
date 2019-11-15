@@ -50,7 +50,7 @@ describe('Click on action part of activation sidecar', function(this: Common.ISu
     CLI.command(`wsk action create ppp/foo ${ROOT}/data/openwhisk/foo.js`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing('foo', undefined, false, 'ppp'))
+      .then(SidecarExpect.showing('foo', 'ppp'))
       .catch(Common.oops(this)))
 
   // invoke it asynchronously with no params
@@ -88,6 +88,6 @@ describe('Click on action part of activation sidecar', function(this: Common.ISu
     this.app.client
       .click(Selectors.SIDECAR_TITLE)
       .then(() => this.app)
-      .then(SidecarExpect.showing('foo', undefined, false, 'ppp'))
+      .then(SidecarExpect.showing('foo', 'ppp'))
       .catch(Common.oops(this)))
 })

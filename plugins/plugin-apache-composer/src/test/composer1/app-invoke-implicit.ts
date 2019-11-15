@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 import { dirname } from 'path'
@@ -49,8 +49,8 @@ describe('app invoke with implicit entity', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing(seqName1))
-        .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-        .then(Util.expectStruct({ name: `grumble${idx}` }))
+        .then(Util.getValueFromMonaco)
+        .then(Util.expectYAML({ name: `grumble${idx}` }))
         .catch(Common.oops(this)))
   }
 })

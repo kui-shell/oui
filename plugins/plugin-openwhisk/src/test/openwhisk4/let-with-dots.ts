@@ -76,34 +76,34 @@ describe('Create an action via let with dots', function(this: Common.ISuite) {
     CLI.command(`let ${packageName1}/${actionName1} = "${fileWithSpaces}"`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName1, undefined, undefined, packageName1))
+      .then(SidecarExpect.showing(actionName1, packageName1))
       .catch(Common.oops(this)))
 
   it('should create a packaged action with dots, variant 2', () =>
     CLI.command(`let "${packageName1}/${actionName2}" = "${fileWithSpaces}"`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName1))
+      .then(SidecarExpect.showing(actionName2, packageName1))
       .catch(Common.oops(this)))
 
   it('should create a packaged action with dots, variant 3', () =>
     CLI.command(`let "${packageName1}/${actionName3}" = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName3, undefined, undefined, packageName1))
+      .then(SidecarExpect.showing(actionName3, packageName1))
       .catch(Common.oops(this)))
 
   it('should create a packaged action with dots, variant 4', () =>
     CLI.command(`let "${packageName2}/${actionName1}" = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName1, undefined, undefined, packageName2))
+      .then(SidecarExpect.showing(actionName1, packageName2))
       .catch(Common.oops(this)))
 
   it('should create a packaged action with dots, variant 5', () =>
     CLI.command(`let "${packageName2}/${actionName2}" = "${fileWithSpaces}"`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName2))
+      .then(SidecarExpect.showing(actionName2, packageName2))
       .catch(Common.oops(this)))
 })

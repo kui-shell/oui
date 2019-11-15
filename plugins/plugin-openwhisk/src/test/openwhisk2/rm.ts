@@ -79,13 +79,13 @@ describe('Delete multiple actions using rimraf', function(this: Common.ISuite) {
     CLI.command(`let ${packageName}/${actionName} = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName, undefined, undefined, packageName))
+      .then(SidecarExpect.showing(actionName, packageName))
       .catch(Common.oops(this)))
   it('should create another packaged action', () =>
     CLI.command(`let ${packageName}/${actionName2} = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2, undefined, undefined, packageName))
+      .then(SidecarExpect.showing(actionName2, packageName))
       .catch(Common.oops(this)))
   it('should delete the package recursively', () =>
     CLI.command(`wsk package rimraf -r ${packageName}`, this.app)
@@ -112,7 +112,7 @@ describe('Delete multiple actions using rimraf', function(this: Common.ISuite) {
     CLI.command(`let "${packageNameWithSpaces}/${actionNameWithSpaces}" = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionNameWithSpaces, undefined, undefined, packageNameWithSpaces))
+      .then(SidecarExpect.showing(actionNameWithSpaces, packageNameWithSpaces))
       .catch(Common.oops(this)))
   it('should delete the package recursively', () =>
     CLI.command(`wsk package rimraf -r "${packageNameWithSpaces}"`, this.app)

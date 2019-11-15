@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -37,8 +37,8 @@ describe('Create anonymous actions via let', function(this: Common.ISuite) {
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName1))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ x: 3 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ x: 3 })))
 
   it('should create an anonymous function with _ param', () =>
     CLI.command(`let ${actionName2} = _ => ({xx:33})`, this.app)
@@ -50,8 +50,8 @@ describe('Create anonymous actions via let', function(this: Common.ISuite) {
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName2))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ xx: 33 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ xx: 33 })))
 
   it('should create an anonymous packaged function with () param', () =>
     CLI.command(`let ${seqName1} = ()=>({z:4}) -> x=>x`, this.app)
@@ -63,8 +63,8 @@ describe('Create anonymous actions via let', function(this: Common.ISuite) {
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName1))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ z: 4 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ z: 4 })))
 
   it('should create an anonymous packaged function with _ param', () =>
     CLI.command(`let ${seqName2} = _=>({zz:44}) -> x=>x`, this.app)
@@ -76,6 +76,6 @@ describe('Create anonymous actions via let', function(this: Common.ISuite) {
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName2))
-      .then(() => this.app.client.getText(Selectors.SIDECAR_ACTIVATION_RESULT))
-      .then(Util.expectStruct({ zz: 44 })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ zz: 44 })))
 })

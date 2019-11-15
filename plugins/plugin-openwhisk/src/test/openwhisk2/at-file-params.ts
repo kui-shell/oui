@@ -19,7 +19,7 @@
  *    this test also covers toggling the sidecar
  */
 
-import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
+import { Common, CLI, ReplExpect, SidecarExpect, Util } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
@@ -46,14 +46,16 @@ describe('@file params and annotations', function(this: Common.ISuite) {
     )
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName2)))
+      .then(SidecarExpect.showing(actionName2))
+      .catch(Common.oops(this, true)))
   it('should switch to parameters mode via "params" and show the @file params', () =>
     CLI.command('wsk action params', this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName2))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct(paramsFileContent)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML(paramsFileContent))
+      .catch(Common.oops(this, true)))
 
   // action via wsk action create -P
   it('should create an action with -P', () =>
@@ -63,40 +65,49 @@ describe('@file params and annotations', function(this: Common.ISuite) {
     )
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName3)))
+      .then(SidecarExpect.showing(actionName3))
+      .catch(Common.oops(this, true)))
   it('should switch to parameters mode via "params" and show the @file params', () =>
     CLI.command('wsk action params', this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName3))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct(paramsFileContent)))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML(paramsFileContent))
+      .catch(Common.oops(this, true)))
 
   // action via let
-  it('should create an action via let with @file parameters', () =>
-    CLI.command(`let ${actionName} = x=>x -p xxx @${ROOT}/data/openwhisk/params.json`, this.app)
+  it('should create an action with @file parameters', () =>
+    CLI.command(
+      `wsk action update ${actionName} ${ROOT}/data/openwhisk/foo.js -p xxx @${ROOT}/data/openwhisk/params.json`,
+      this.app
+    )
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(actionName)))
+      .then(SidecarExpect.showing(actionName))
+      .catch(Common.oops(this, true)))
   it('should switch to parameters mode via "params" and show the @file params', () =>
     CLI.command('wsk action params', this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectStruct({ xxx: paramsFileContent })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ xxx: paramsFileContent }))
+      .catch(Common.oops(this, true)))
 
   // sequence
-  it('should create a sequence via let with @file annotations', () =>
+  xit('should create a sequence via let with @file annotations', () =>
     CLI.command(`let ${seqName} = x=>x -> x=>x -a xxx @${ROOT}/data/openwhisk/params.json`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(seqName)))
-  it('should switch to annotations mode via "annotations" and show the @file annotations', () =>
+      .then(SidecarExpect.showing(seqName))
+      .catch(Common.oops(this, true)))
+  xit('should switch to annotations mode via "annotations" and show the @file annotations', () =>
     CLI.command('wsk action annotations', this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(seqName))
-      .then(app => app.client.getText(`${Selectors.SIDECAR_CONTENT} .action-source`))
-      .then(Util.expectSubset({ xxx: paramsFileContent })))
+      .then(Util.getValueFromMonaco)
+      .then(Util.expectYAML({ xxx: paramsFileContent }))
+      .catch(Common.oops(this, true)))
 })

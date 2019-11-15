@@ -33,7 +33,7 @@ import { formatWebActionURL, addWebBadge } from './web-action'
 import { isAnonymousLet } from '../../cmds/actions/let-core'
 import { fillInActionDetails } from '../../cmds/openwhisk-core'
 import withHeader from '../../models/withHeader'
-import { Action as OpenWhiskAction } from '../../models/openwhisk-entity'
+import { Action as OpenWhiskAction } from '../../models/resource'
 
 declare let hljs
 const debug = Debug('plugins/openwhisk/views/sidecar/entity')
@@ -256,7 +256,7 @@ export const showEntity = async (
                   if (anonymousCode) {
                     return anonymousCode.replace(/\s/g, '')
                   } else {
-                    return action.name
+                    return action.metadata.name
                   }
                   // on 404:
                 })

@@ -17,6 +17,7 @@
 import UI from '@kui-shell/core/api/ui'
 import Models from '@kui-shell/core/api/models'
 import { EntitySpec } from '@kui-shell/core/models/entity'
+import { Limits } from 'openwhisk'
 
 export type Annotation = { key: string; value: string | number | boolean }
 export type Annotations = Annotation[]
@@ -39,7 +40,7 @@ export type Parameters = Parameter[]
 
 export interface Action extends OpenWhiskEntity {
   parameters: Parameters
-  limits: { key: 'concurrency' | 'logs' | 'memory' | 'timeout'; value: number }
+  limits: Limits
   exec: {
     kind: string
     code?: string

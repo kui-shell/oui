@@ -35,7 +35,7 @@ describe('wsk package list tests', function(this: Common.ISuite) {
     CLI.command(`let ${pckage}/${action} = x=>x`, this.app)
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
-      .then(SidecarExpect.showing(action, undefined, undefined, pckage))
+      .then(SidecarExpect.showing(action, pckage))
       .catch(Common.oops(this)))
 
   it(`should list ${pckage} with wsk package list`, () =>
@@ -58,12 +58,8 @@ describe('wsk package list tests', function(this: Common.ISuite) {
 
       await this.app.client.click(`${selector} .clickable`)
       await SidecarExpect.open(this.app).then(SidecarExpect.showing(pckage))
-
-      await this.app.client.click(`${Selectors.SIDECAR} .package-action-list .entity[data-name="${action}"] .clickable`)
-
-      await SidecarExpect.open(this.app).then(SidecarExpect.showing(action, undefined, undefined, pckage))
     } catch (err) {
-      return Common.oops(this)(err)
+      return Common.oops(this, true)(err)
     }
   })
 

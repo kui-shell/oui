@@ -16,7 +16,8 @@
 
 import Debug from 'debug'
 
-import { Commands } from '@kui-shell/core'
+import Commands from '@kui-shell/core/api/commands'
+import { Row } from '@kui-shell/core/api/table-models'
 import { Action, withHeader } from '@kui-shell/plugin-openwhisk'
 
 import { appList } from '../../utility/usage'
@@ -50,7 +51,7 @@ export default async (commandTree: Commands.Registrar) => {
         return { body: [] }
       }
 
-      return REPL.qexec<{ body?: Action[] }>(argvNoOptions.join(' ').replace('app', 'action')).then(actions => {
+      return REPL.qexec<{ body?: (Row & Action)[] }>(argvNoOptions.join(' ').replace('app', 'action')).then(actions => {
         debug('filtering action list to find compositions', actions)
         if (actions.body) {
           const apps = actions.body.filter(astUtil.isAnApp).map(app =>
@@ -58,7 +59,7 @@ export default async (commandTree: Commands.Registrar) => {
               type,
               prettyType,
               prettyKind,
-              onclick: `wsk app get "/${app.namespace}/${app.name}"`
+              onclick: `wsk app get "/${app.metadata.namespace}/${app.metadata.name}"`
             })
           )
 

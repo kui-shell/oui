@@ -28,6 +28,7 @@ import { synonymsTable, synonyms } from '../models/synonyms'
 import { actionSpecificModes, activationModes } from '../models/modes'
 import { ow as globalOW, apihost, initOWFromConfig, initOW } from '../models/auth'
 import { Action, Rule, Annotations, Parameters, Package, currentSelection } from '../models/openwhisk-entity'
+import { isOpenWhiskResource } from '../models/resource'
 
 import * as namespace from '../models/namespace'
 
@@ -1112,10 +1113,12 @@ const executor = (commandTree: Commands.Registrar, _entity, _verb: string, verbS
     //
     // OPERATION WITH IMPLICIT ENTITY: try to get the name from the current selection
     //
-    debug('seeing if we can use an implicit entity')
     const selection = currentSelection(tab)
+    debug('seeing if we can use an implicit entity', selection)
     if (selection) {
-      options.name = `/${selection.namespace || '_'}/${selection.name}`
+      const namespace = isOpenWhiskResource(selection) ? selection.metadata.namespace : selection.namespace
+      const name = isOpenWhiskResource(selection) ? selection.metadata.name : selection.name
+      options.name = `/${namespace || '_'}/${name}`
 
       if (selection.type === 'activations') {
         //
@@ -1303,7 +1306,7 @@ const executor = (commandTree: Commands.Registrar, _entity, _verb: string, verbS
  * Update an entity
  *
  */
-export const update = execOptions => (entity, retryCount = 0) => {
+export const update = (execOptions: Commands.ExecOptions) => (entity, retryCount = 0) => {
   const ow = getClient(execOptions)
   const options = owOpts({
     name: entity.name,

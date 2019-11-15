@@ -16,7 +16,7 @@
 
 import Debug from 'debug'
 
-import { Commands, Errors } from '@kui-shell/core'
+import { UI, Commands, Errors } from '@kui-shell/core'
 import { Action, Activation } from '@kui-shell/plugin-openwhisk'
 
 import { astAnnotation } from '../../utility/ast'
@@ -46,10 +46,10 @@ function isWskflowError(maybe: MaybeAction): maybe is WskflowError {
  * Get an activation
  *
  */
-const get = ({ REPL }: Commands.Arguments, activationId: string): Promise<Activation> =>
+const get = (tab: UI.Tab, activationId: string): Promise<Activation> =>
   new Promise((resolve, reject) => {
     const once = (retryCount: number) =>
-      REPL.qexec<Activation>(`wsk activation get ${activationId}`)
+      tab.REPL.qexec<Activation>(`wsk activation get ${activationId}`)
         .then(resolve)
         .catch((err: Errors.CodedError) => {
           if (err && err.statusCode === 404 && retryCount < 10) {
@@ -65,10 +65,10 @@ const get = ({ REPL }: Commands.Arguments, activationId: string): Promise<Activa
  * Fetch the action itself, so we have the AST
  *
  */
-const fetchTheAction = ({ REPL }: Commands.Arguments, session: Activation): Promise<MaybeAction> => {
+const fetchTheAction = (tab: UI.Tab, session: Activation): Promise<MaybeAction> => {
   const path = session.annotations.find(({ key }) => key === 'path').value
 
-  return REPL.qexec<Action>(`wsk action get "/${path}"`).catch(err => {
+  return tab.REPL.qexec<Action>(`wsk action get "/${path}"`).catch(err => {
     console.error('action get call incomplete due to error', path, err.message)
     return { wskflowErr: err }
   })
@@ -78,29 +78,58 @@ const fetchTheAction = ({ REPL }: Commands.Arguments, session: Activation): Prom
  * Fetch the rest of the activations in the trace; fetch at most 2 at a time
  *
  */
-const generatePromises = (command: Commands.Arguments, activation: Activation) =>
+const generatePromises = (tab: UI.Tab, activation: Activation) =>
   function*() {
     // generator function
     for (let idx = 0; idx < activation.logs.length; idx++) {
-      yield get(command, activation.logs[idx]) // yield generates one value
+      yield get(tab, activation.logs[idx]) // yield generates one value
     }
   }
 // by default, PromisePool does not return any arguments in then, causing activations to always be undefined
 // use event listeners here to access return data as described in the docs
-const fetchTrace = (command: Commands.Arguments, activation: Activation): Promise<Activation[]> =>
+const fetchTrace = (tab: UI.Tab, activation: Activation): Promise<Activation[]> =>
   new Promise(resolve => {
     // the type declaration for this module don't seem right. sigh.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PromisePool = require('es6-promise-pool')
 
     const data = []
-    const pool = new PromisePool(generatePromises(command, activation), 2) // at most 2 at a time, here
+    const pool = new PromisePool(generatePromises(tab, activation), 2) // at most 2 at a time, here
 
     pool.addEventListener('fulfilled', event => data.push(event.data.result))
     pool.addEventListener('rejected', event => data.push(event.data.error))
 
     pool.start().then(() => resolve(data))
   })
+
+export function doFlow(tab: UI.Tab, sessionId: string): Promise<HTMLElement> {
+  // fetch the session, then fetch the trace (so we can show the flow) and action (to get the AST)
+  return tab.REPL.qexec<Activation>(`wsk session get ${sessionId}`)
+    .then(session => Promise.all([fetchTrace(tab, session), fetchTheAction(tab, session)]))
+    .then(async ([activations, action]) => {
+      let ast
+      if (isWskflowError(action)) {
+        // 1) if an app was deleted, the last promise item returns an error
+        const error = new Error(`Sorry, this view is not available, as the composition was deleted`)
+        error['code'] = 404
+        throw error
+      } else {
+        // extract the AST
+        const astAnno = astAnnotation(action)
+        if (!astAnno) {
+          const error = new Error(`Sorry, this view is not available, as the composition was improperly created`)
+          error['code'] = 404
+          throw error
+        }
+        ast = astAnno && astAnno.value
+      }
+
+      const { visualize } = await import('@kui-shell/plugin-wskflow')
+      const { view } = await visualize(tab, ast, undefined, undefined, undefined, activations)
+
+      return view
+    })
+}
 
 export default (commandTree: Commands.Registrar) => {
   // register the "session flow" command
@@ -114,7 +143,7 @@ export default (commandTree: Commands.Registrar) => {
 
       // fetch the session, then fetch the trace (so we can show the flow) and action (to get the AST)
       return REPL.qexec<Activation>(`wsk session get ${sessionId}`)
-        .then(session => Promise.all([session, fetchTrace(command, session), fetchTheAction(command, session)]))
+        .then(session => Promise.all([session, fetchTrace(tab, session), fetchTheAction(tab, session)]))
         .then(async ([session, activations, action]) => {
           let ast
           if (isWskflowError(action)) {
@@ -133,19 +162,19 @@ export default (commandTree: Commands.Registrar) => {
             ast = astAnno && astAnno.value
           }
 
-          const { visualize, zoomToFitButtons } = await import('@kui-shell/plugin-wskflow')
-          const { view, controller } = await visualize(tab, ast, undefined, undefined, undefined, activations)
+          const { visualize /*, zoomToFitButtons */ } = await import('@kui-shell/plugin-wskflow')
+          const { view /*, controller */ } = await visualize(tab, ast, undefined, undefined, undefined, activations)
 
           // set the default mode to session flow
-          session.modes.find(({ defaultMode }) => defaultMode).defaultMode = false
-          session.modes.find(({ label }) => label === 'Session Flow').defaultMode = true
+          // session.modes.find(({ defaultMode }) => defaultMode).defaultMode = false
+          // session.modes.find(({ label }) => label === 'Session Flow').defaultMode = true
 
-          if (!session.modes.find(({ label }) => label === '1:1')) {
+          /* if (!session.modes.find(({ label }) => label === '1:1')) {
             zoomToFitButtons(controller).forEach(_ => session.modes.push(_))
-          }
+          } */
 
           return Object.assign(session, {
-            viewName: session.type,
+            // viewName: session.type,
             type: 'custom',
             content: view,
             isEntity: true
