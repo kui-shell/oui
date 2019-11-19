@@ -17,12 +17,18 @@
 import { Registrar } from '@kui-shell/core/api/commands'
 import { isHeadless } from '@kui-shell/core/api/capabilities'
 
-import standardOptions from '../aliases'
 import respondWith from './as-activation'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 import { isActivation } from '../../lib/models/resource'
 import { currentSelection } from '../../lib/models/selection'
+
+const usage = {
+  command: 'logs',
+  docs: 'get the logs of an activation',
+  partial: '<activationId>'
+}
 
 export default (registrar: Registrar) => {
   synonyms('activations').forEach(syn => {
@@ -48,7 +54,7 @@ export default (registrar: Registrar) => {
           return respondWith(raw, 'logs')
         }
       },
-      standardOptions
+      withStandardOptions(usage)
     )
   })
 }

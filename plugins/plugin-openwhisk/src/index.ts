@@ -23,8 +23,24 @@ export { default as withHeader } from './lib/models/withHeader'
 export { Package, Rule, currentSelection } from './lib/models/openwhisk-entity'
 export { Action, isAction, Activation, isActivation, OpenWhiskResource, hasAnnotation } from './lib/models/resource'
 export { current as currentNamespace } from './lib/models/namespace'
-export { ActivationListTable } from './lib/views/cli/activations/list'
+export { renderActivationListView, ActivationListTable } from './lib/views/cli/activations/list'
 export { fqn } from './controller/fqn'
+export { ListOptions } from './controller/options'
+export { asActivationTable } from './controller/activation/as-activation'
 
-import * as Usage from './lib/cmds/openwhisk-usage'
-export { Usage }
+import { createUsage as actionCreateUsage, updateUsage as actionUpdateUsage } from './controller/action/create'
+import { usage as actionInvokeUsage } from './controller/action/invoke'
+import { usage as activationGetUsage } from './controller/activation/get'
+import { skipAndLimit } from './lib/cmds/openwhisk-usage'
+
+export const Usage = {
+  action: {
+    create: actionCreateUsage,
+    update: actionUpdateUsage,
+    invoke: actionInvokeUsage
+  },
+  activation: {
+    get: activationGetUsage
+  },
+  skipAndLimit
+}

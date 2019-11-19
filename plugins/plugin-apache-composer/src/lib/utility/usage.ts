@@ -19,15 +19,6 @@
 import { Usage } from '@kui-shell/plugin-openwhisk'
 import { sampleInputs } from './sample-inputs'
 
-const activationsUsage = {
-  get: Usage.activations('').available.find(({ command }) => command === 'get')
-}
-const actionsUsage = {
-  create: Usage.actions.available.find(({ command }) => command === 'create'),
-  update: Usage.actions.available.find(({ command }) => command === 'update'),
-  invoke: Usage.actions.available.find(({ command }) => command === 'invoke')
-}
-
 const strings = {
   create: 'Use this command to create a new composition from a given source file.',
   update: 'Use this command to update an existing composition.',
@@ -39,7 +30,7 @@ const strings = {
  * Usage message for app create
  *
  */
-export const create = command => ({
+export const create = (command: 'create' | 'update') => ({
   strict: command,
   command,
   title: 'Deploy composition',
@@ -58,7 +49,7 @@ export const create = command => ({
       notNeededIfImplicit: true
     }
   ],
-  optional: actionsUsage[command].optional,
+  optional: command === 'create' ? Usage.action.create.usage.optional : Usage.action.update.usage.optional,
   sampleInputs: sampleInputs(sampleName => `app ${command} ${sampleName}`),
   parents: ['composer', { command: 'composer app' }],
   related: ['app get', 'app invoke', 'app list']
@@ -82,7 +73,7 @@ export const invoke = {
       implicitOK: ['Action', 'Activation', 'actions', 'activations']
     }
   ],
-  optional: actionsUsage.invoke.optional,
+  optional: Usage.action.invoke.usage.optional,
   parents: ['composer', { command: 'composer app' }],
   related: ['app async', 'app create', 'app get', 'app list']
 }
@@ -97,7 +88,7 @@ export const async = {
   header: 'Invoke a given app asynchronously, and return a session id',
   example: 'app async <name> [-p key value]*',
   required: [{ name: 'name', docs: 'the name of your new app' }],
-  optional: actionsUsage.invoke.optional,
+  optional: Usage.action.invoke.usage.optional,
   related: ['app create', 'app get', 'app invoke', 'app list']
 }
 
@@ -185,7 +176,7 @@ export const sessionGet = command => ({
       docs: 'ibid, except show the last failed session'
     }
   ],
-  optional: activationsUsage.get.optional,
+  optional: Usage.activation.get('activation').usage.optional,
   parents: ['composer', { command: 'composer session' }],
   related: related[command]
 })

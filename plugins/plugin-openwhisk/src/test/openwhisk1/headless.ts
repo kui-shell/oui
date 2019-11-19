@@ -59,37 +59,37 @@ odescribe('openwhisk headless mode', function(this: Common.ISuite) {
       .then(cli.expectOK(openwhisk.expectedNamespace(), { exact: true, squish: true }))
       .catch(Common.oops(this)))
 
-  it('should show top-level help with -v', () =>
+  xit('should show top-level help with -v', () =>
     cli
       .command('-v', {}, { errOk: 1 })
       .then(cli.expectError(500 - 256, 'Getting Started'))
       .catch(Common.oops(this)))
 
-  it('should show top-level help with no arguments', () =>
+  xit('should show top-level help with no arguments', () =>
     cli
       .command('', {}, { errOk: 1 })
       .then(cli.expectError(500 - 256, 'Getting Started'))
       .catch(Common.oops(this)))
 
-  it('should show top-level help with help', () =>
+  xit('should show top-level help with help', () =>
     cli
       .command('help', {}, { errOk: 1 })
       .then(cli.expectError(500 - 256, 'Getting Started'))
       .catch(Common.oops(this)))
 
-  it('should show wsk help with wsk', () =>
+  xit('should show wsk help with wsk', () =>
     cli
       .command('wsk', {}, { errOk: 1 })
       .then(cli.expectError(500 - 256, 'OpenWhisk'))
       .catch(Common.oops(this)))
 
-  it('should show wsk help with wsk help', () =>
+  xit('should show wsk help with wsk help', () =>
     cli
       .command('wsk help', {}, { errOk: 1 })
       .then(cli.expectError(500 - 256, 'OpenWhisk'))
       .catch(Common.oops(this)))
 
-  it('should show wsk action get help with action get', () =>
+  xit('should show wsk action get help with action get', () =>
     cli
       .command('wsk action get', {}, { errOk: 1 })
       .then(cli.expectError(497 - 256, 'OpenWhisk / Action Operations / get'))

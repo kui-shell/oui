@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
+import { isHeadless } from '@kui-shell/core/api/capabilities'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import ok from '../ok'
 import respondWith from './as-rule'
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { rule, deployedTrigger, deployedAction, maybeDeployedRule } from '../../lib/cmds/openwhisk-usage'
+
+const createUsage = {
+  command: 'create',
+  strict: 'create',
+  docs: 'create a new rule',
+  example: 'wsk rule create <rule> <trigger> <action>',
+  required: rule.concat(deployedTrigger).concat(deployedAction)
+}
+
+const updateUsage = {
+  command: 'update',
+  strict: 'update',
+  docs: 'update an existing rule, or create one if it does not exist',
+  example: 'wsk rule update <rule> <trigger> <action>',
+  required: maybeDeployedRule.concat(deployedTrigger).concat(deployedAction)
+}
 
 const doCreate = (verb: string, overwrite: boolean) => async ({ argvNoOptions, execOptions }: Arguments) => {
   const idx = argvNoOptions.indexOf(verb) + 1
@@ -50,7 +67,7 @@ const doCreate = (verb: string, overwrite: boolean) => async ({ argvNoOptions, e
 
 export default (registrar: Registrar) => {
   synonyms('rules').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/create`, doCreate('create', false), standardOptions)
-    registrar.listen(`/wsk/${syn}/update`, doCreate('update', true), standardOptions)
+    registrar.listen(`/wsk/${syn}/create`, doCreate('create', false), withStandardOptions(createUsage))
+    registrar.listen(`/wsk/${syn}/update`, doCreate('update', true), withStandardOptions(updateUsage))
   })
 }

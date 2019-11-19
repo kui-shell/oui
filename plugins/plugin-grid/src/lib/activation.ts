@@ -32,10 +32,19 @@ export interface Activation {
 
   annotations: Annotation[]
 
+  metadata?: {
+    name: string
+    namespace: string
+  }
+
   response: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    success: boolean
+    statusCode: number
     result: {
-      error: string | { error?: string; message?: string }
+      message?: string
+      error: string | { error?: string; message?: string; code?: number; statusCode?: number }
+      statusCode?: number
+      code?: number
     }
   }
 }

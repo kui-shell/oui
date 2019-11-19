@@ -19,9 +19,19 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import { fqn } from '../fqn'
 import respondWith from './as-trigger'
 import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 import { currentSelection } from '../../lib/models/selection'
+import { deployedTrigger } from '../../lib/cmds/openwhisk-usage'
+
+const usage = {
+  command: 'get',
+  strict: 'get',
+  docs: 'get the details of a trigger',
+  example: 'wsk trigger get <trigger>',
+  required: deployedTrigger
+}
 
 const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNoOptions, execOptions }: Arguments) => {
   const name = argvNoOptions[argvNoOptions.indexOf(verb || 'get') + 1] || fqn(currentSelection(tab, 'Trigger'))
@@ -41,7 +51,7 @@ const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNo
 
 export default (registrar: Registrar) => {
   synonyms('triggers').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/get`, doGet(), standardOptions)
+    registrar.listen(`/wsk/${syn}/get`, doGet(), withStandardOptions(usage))
     registrar.listen(`/wsk/${syn}/params`, doGet('parameters', 'params'), standardOptions)
     registrar.listen(`/wsk/${syn}/parameters`, doGet('parameters'), standardOptions)
     registrar.listen(`/wsk/${syn}/raw`, doGet('raw'), standardOptions)

@@ -17,11 +17,22 @@
 import { Registrar } from '@kui-shell/core/api/commands'
 
 import { synonyms } from '../../lib/models/synonyms'
-import standardOptions from '../aliases'
 import { kvOptions } from '../key-value'
 import asPackage from './as-package'
 import { asMetadata } from '../fqn'
+import { withStandardOptions } from '../usage'
 import { clientOptions, getClient } from '../../client/get'
+
+import { paramsAndAnnotations, deployedPackage, aPackage } from '../../lib/cmds/openwhisk-usage'
+
+const usage = withStandardOptions({
+  command: 'bind',
+  strict: 'bind',
+  docs: 'bind parameters to a package',
+  example: 'wsk package bind <package> <bindName>',
+  required: deployedPackage.concat(aPackage),
+  optional: paramsAndAnnotations
+})
 
 export default (registrar: Registrar) => {
   synonyms('packages').forEach(syn => {
@@ -54,7 +65,7 @@ export default (registrar: Registrar) => {
         // consistent view of the combined annotations and parameters
         return asPackage(await client.packages.get(Object.assign({ name }, clientOptions)))
       },
-      standardOptions
+      usage
     )
   })
 }

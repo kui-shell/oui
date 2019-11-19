@@ -43,6 +43,10 @@ import showTrigger from './modes/show-trigger'
 import deleteResource from './modes/delete'
 import showPackageFeeds from './modes/package-feeds'
 import showPackageActions from './modes/package-actions'
+import showNamespaceActions from './modes/namespace/actions'
+import showNamespacePackages from './modes/namespace/packages'
+import showNamespaceRules from './modes/namespace/rules'
+import showNamespaceTriggers from './modes/namespace/triggers'
 
 /**
  * Notes: buttons and modes and badges will be presented in the order
@@ -66,6 +70,10 @@ export default async (registrar: PreloadRegistrar) => {
     showTrigger,
     showPackageActions,
     showPackageFeeds,
+    showNamespaceActions,
+    showNamespacePackages,
+    showNamespaceRules,
+    showNamespaceTriggers,
     showBinding,
     invoke,
     edit,

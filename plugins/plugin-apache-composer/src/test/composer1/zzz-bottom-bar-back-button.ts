@@ -140,7 +140,7 @@ describe('Bottom bar back button functionality', function(this: Common.ISuite) {
         .then(() => this.app.client.getAttribute(cell1, 'data-action-name'))
         .then(async actionName => {
           await this.app.client.click(cell1)
-          return Promise.resolve(this.app).then(SidecarExpect.showing(actionName))
+          await Promise.resolve(this.app).then(SidecarExpect.showing(actionName))
         })
         .then(() => this.app.client.click(Selectors.SIDECAR_BACK_BUTTON))
         .then(() => this.app)

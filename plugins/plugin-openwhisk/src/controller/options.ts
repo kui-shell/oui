@@ -19,6 +19,7 @@ import { ParsedOptions } from '@kui-shell/core/api/commands'
 import { clientOptions } from '../client/get'
 
 export interface ListOptions extends ParsedOptions {
+  name?: string
   namespace?: string
   skip?: number
   limit?: number
@@ -32,6 +33,14 @@ export interface ListOptions extends ParsedOptions {
  * @return dest, after insertion of non-null options
  */
 export function copy(src: ListOptions, dest: ListOptions): ListOptions {
+  if (src.name) {
+    dest.name = src.name
+  }
+
+  if (src.namespace) {
+    dest.namespace = src.namespace
+  }
+
   if (src.skip) {
     dest.skip = src.skip
   }

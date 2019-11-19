@@ -30,6 +30,6 @@ describe('Namespaces list', function(this: Common.ISuite) {
   // implicit entity type
   openwhisk.aliases.list.forEach(cmd => {
     it(`should list namespaces with "namespaces ${cmd}"`, () =>
-      CLI.command(`wsk namespaces ${cmd}`, this.app).then(ReplExpect.okWithOnly(openwhisk.expectedNamespace())))
+      CLI.command(`wsk namespaces ${cmd}`, this.app).then(ReplExpect.okWithString(openwhisk.expectedNamespace())))
   })
 })

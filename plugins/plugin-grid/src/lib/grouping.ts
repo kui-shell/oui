@@ -333,7 +333,7 @@ const addToGroup = (options, totals, splitRequested = false, splitter?: Splitter
   let group = groups[groupKey]
   if (!group) {
     group = groups[groupKey] = {
-      name: activation.name,
+      name: activation.name || (activation.metadata && activation.metadata.name),
       nSuccesses: 0,
       nFailures: 0,
       path,

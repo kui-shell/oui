@@ -16,33 +16,27 @@
 
 import Debug from 'debug'
 
-import { Commands, Errors } from '@kui-shell/core'
-import { ActivationListTable } from '@kui-shell/plugin-openwhisk'
+import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import Errors from '@kui-shell/core/api/errors'
+import { asActivationTable, renderActivationListView, Activation, ListOptions } from '@kui-shell/plugin-openwhisk'
 
 import { sessionList } from '../../utility/usage'
 
 const debug = Debug('plugins/apache-composer/cmd/session-list')
 
-interface ListOptions extends Commands.ParsedOptions {
-  name?: string
-  count?: number
-  limit?: number
-  skip?: number
+interface SessionListOptions extends ListOptions {
   'scan-limit'?: number
 }
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   const sessionSyns = ['sessions', 'sess', 'ses', 'session']
 
   /* command handler for session list */
   sessionSyns.forEach(noun => {
     commandTree.listen(
       `/wsk/${noun}/list`,
-      async ({
-        argvNoOptions,
-        parsedOptions,
-        REPL
-      }: Commands.Arguments<ListOptions>): Promise<ActivationListTable | number> => {
+      async ({ tab, argvNoOptions, parsedOptions, REPL }: Arguments<SessionListOptions>) => {
         const limit = parsedOptions.limit === undefined ? 10 : parsedOptions.limit // limit 10 sessions in session list if users didn't specify --limit
         const skip = parsedOptions.skip || 0 // skip 0 sessions in session list by default if users didn't specify --skip
         const scanLimit = parsedOptions['scan-limit']
@@ -63,18 +57,17 @@ export default async (commandTree: Commands.Registrar) => {
 
         // find sessions in activation list
         const findSessions = async (skip = 0, name = '', limit = 20) => {
-          return REPL.qexec<ActivationListTable>(`wsk activation list "${name}" --skip ${skip} --limit ${limit}`)
+          return REPL.rexec<{ content: Activation[] }>(`wsk activation list "${name}" --skip ${skip} --limit ${limit}`)
             .then(activations => {
               // filter activations to find session
               debug('finding sessions in activation list', activations)
-              return activations.body.filter(activation => {
+              return activations.content.filter(activation => {
                 if (
                   activation &&
                   activation.annotations &&
                   activation.annotations.find(({ key, value }) => key === 'conductor' && value)
                 ) {
                   debug('found a session', activation)
-                  activation.sessionId = activation.activationId // indicate the entity is session
                   return activation
                 }
               })
@@ -90,16 +83,33 @@ export default async (commandTree: Commands.Registrar) => {
             foundSessions = foundSessions.concat(sessions)
           }
 
-          return parsedOptions.count
-            ? foundSessions.slice(skip, scanLimit + skip).length
-            : { body: foundSessions.slice(skip, scanLimit + skip), type: 'session' }
+          const list = foundSessions.slice(skip, scanLimit + skip)
+          if (parsedOptions.count) {
+            return list.length
+          } else if (isHeadless()) {
+            const L = await asActivationTable(list)
+            if (L.body.length > 0) {
+              L.header.type = 'session' // hack: needed to make core's headless pretty printer work
+            }
+          } else {
+            return renderActivationListView(tab, list, parsedOptions)
+          }
         } else {
           return findSessions(0, name, 200) // always trying to find sessions in the latest 20 activations
-            .then(foundSessions =>
-              parsedOptions.count
-                ? foundSessions.slice(skip, limit + skip).length
-                : { body: foundSessions.slice(skip, limit + skip), type: 'session' }
-            )
+            .then(async foundSessions => {
+              const list = foundSessions.slice(skip, limit + skip)
+              if (parsedOptions.count) {
+                return list.length
+              } else if (isHeadless()) {
+                const L = await asActivationTable(list)
+                if (L.body.length > 0) {
+                  L.header.type = 'session' // hack: needed to make core's headless pretty printer work
+                }
+                return L
+              } else {
+                return renderActivationListView(tab, list, parsedOptions)
+              }
+            })
             .catch(err => err)
         }
       },

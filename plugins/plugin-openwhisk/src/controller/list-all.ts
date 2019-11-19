@@ -21,33 +21,31 @@
 
 import Debug from 'debug'
 
-import { Commands, Tables } from '@kui-shell/core'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import Tables from '@kui-shell/core/api/tables'
 
-import { wsk } from './openwhisk-usage'
+import { withStandardOptions } from './usage'
 
 const debug = Debug('plugins/openwhisk/cmds/list-all')
 
 /** usage model */
-const usage = (cmd: string) => ({
-  strict: cmd, // enforce no positional or optional arguments
+const usage = withStandardOptions({
+  command: 'list',
+  strict: 'list', // enforce no positional or optional arguments
   title: 'List all',
-  header: `${wsk.available.find(({ command }) => command === 'list').docs}.`,
-  example: `wsk ${cmd}`,
-  parents: [{ command: 'wsk' }]
+  header: 'List all deployed entities',
+  example: `wsk list`
 })
-
-/** construct a struct that informs the command tree of our usage model */
-const docs = (cmd: string) => ({ usage: usage(cmd) })
 
 /** list all of these entity types: */
 const types = ['actions', 'packages', 'triggers', 'rules']
 
 /** list the entities of a given type */
-const list = ({ REPL }: Commands.Arguments) => (type: string) =>
-  REPL.qexec(`wsk ${type} list`, undefined, undefined, { showHeader: true })
+const list = ({ REPL }: Arguments) => (type: string) =>
+  REPL.qexec<Tables.Table>(`wsk ${type} list`, undefined, undefined, { showHeader: true })
 
 /** the command handler */
-const doList = () => async (command: Commands.Arguments) => {
+const doList = async (command: Arguments) => {
   const response = await Promise.all(types.map(list(command))).then(result => {
     return result.filter(
       res =>
@@ -69,6 +67,6 @@ const doList = () => async (command: Commands.Arguments) => {
  * Here is the module, where we register command handlers
  *
  */
-export default commandTree => {
-  commandTree.listen(`/wsk/list`, doList(), docs('list'))
+export default (registrar: Registrar) => {
+  registrar.listen(`/wsk/list`, doList, usage)
 }

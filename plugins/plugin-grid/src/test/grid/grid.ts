@@ -16,6 +16,7 @@
 
 import * as assert from 'assert'
 import { v4 as uuid } from 'uuid'
+import { Application } from 'spectron'
 
 import { Common, CLI, ReplExpect, SidecarExpect, Selectors, Util } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
@@ -47,7 +48,7 @@ describe('grid visualization', function(this: Common.ISuite) {
   const notbomb = (name?, packageName?) => invoke(+1, name, packageName)
   // const bomb = (name, packageName) => invoke(-1, name, packageName)
 
-  const verifyGrid = (expectedCount, expectedErrorCount, name = actionName, expectedTotalCount) => app =>
+  const verifyGrid = (expectedCount, expectedErrorCount, name = actionName, expectedTotalCount) => (app: Application) =>
     Promise.resolve()
       .then(() => {
         // expected number of success cells?
@@ -63,7 +64,7 @@ describe('grid visualization', function(this: Common.ISuite) {
           `${Selectors.SIDECAR_CUSTOM_CONTENT} .grid[data-action-name="${name}"] .grid-cell.is-failure-false`
         )
       )
-      .then(elements => assert.strictEqual(elements.value.length, expectedCount)) // .elements() returns a WebElements structure, with a .value[] field
+      .then(elements => assert.strictEqual(elements.value.length, expectedCount, 'expected count does not match')) // .elements() returns a WebElements structure, with a .value[] field
 
       // expected number of failure cells?
       .then(() =>
@@ -71,12 +72,14 @@ describe('grid visualization', function(this: Common.ISuite) {
           `${Selectors.SIDECAR_CUSTOM_CONTENT} .grid[data-action-name="${name}"] .grid-cell.is-failure-true`
         )
       )
-      .then(elements => assert.strictEqual(elements.value.length, expectedErrorCount))
+      .then(elements =>
+        assert.strictEqual(elements.value.length, expectedErrorCount, 'expected error count does not match')
+      )
 
       // expected total number of cells for the entire view?
-      .then(() => {
+      .then(async () => {
         if (expectedTotalCount) {
-          return app.client
+          await app.client
             .elements(`${Selectors.SIDECAR_CUSTOM_CONTENT} .grid .grid-cell.grid-cell-occupied`)
             .then(elements => assert.strictEqual(elements.value.length, expectedTotalCount))
         }
@@ -84,11 +87,11 @@ describe('grid visualization', function(this: Common.ISuite) {
 
   const openGridExpectCountOf = (expectedCount, expectedErrorCount, cmd, name = actionName, expectedTotalCount?) => {
     const once = (iter, resolve, reject) =>
-      CLI.command(cmd, this.app).then(_ => {
+      CLI.command(cmd, this.app).then(async _ => {
         if (expectedCount === 0 && expectedErrorCount === 0) {
-          return ReplExpect.error(404)(_).then(resolve, reject)
+          await ReplExpect.error(404)(_).then(resolve, reject)
         } else {
-          return ReplExpect.ok(_)
+          await ReplExpect.ok(_)
             .then(SidecarExpect.open)
             .then(verifyGrid(expectedCount, expectedErrorCount, name, expectedTotalCount))
             .then(resolve)

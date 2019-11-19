@@ -15,7 +15,7 @@
  */
 
 import { Commands } from '@kui-shell/core'
-import { Activation, ActivationListTable, synonyms } from '@kui-shell/plugin-openwhisk'
+import { Activation, synonyms } from '@kui-shell/plugin-openwhisk'
 
 import { sessionGet } from '../../utility/usage'
 import * as view from '../../view/entity-view'
@@ -38,8 +38,8 @@ export default async (commandTree: Commands.Registrar) => {
       const { command, parsedOptions, REPL } = args
 
       if (parsedOptions.last || parsedOptions['last-failed']) {
-        return REPL.qexec<ActivationListTable>('wsk activation list --limit 200')
-          .then(activations => activations.body)
+        return REPL.rexec<{ content: Activation[] }>('wsk activation list --limit 200')
+          .then(activations => activations.content)
           .then(activations => {
             return activations.find(activation => {
               if (
@@ -52,7 +52,7 @@ export default async (commandTree: Commands.Registrar) => {
                   if (activation.statusCode !== 0) {
                     if (typeof parsedOptions['last-failed'] === 'string') {
                       // handle 'session get --last-failed [appName]'
-                      if (activation.name === parsedOptions['last-failed']) return activation
+                      if (activation.metadata.name === parsedOptions['last-failed']) return activation
                     } else {
                       return activation // handle 'session get --last'
                     }
@@ -60,7 +60,7 @@ export default async (commandTree: Commands.Registrar) => {
                 } else {
                   // handle 'session get --last'
                   if (typeof parsedOptions.last === 'string') {
-                    if (activation.name === parsedOptions.last) return activation // handle 'session get --last [appName]'
+                    if (activation.metadata.name === parsedOptions.last) return activation // handle 'session get --last [appName]'
                   } else {
                     return activation // handle 'session get --last'
                   }
@@ -92,10 +92,10 @@ export default async (commandTree: Commands.Registrar) => {
           const last = opts.parsedOptions.last
 
           if (last) {
-            return opts.REPL.qexec<ActivationListTable>(
+            return opts.REPL.rexec<{ content: Activation[] }>(
               `wsk activation list --limit 1` + (typeof last === 'string' ? ` --name ${last}` : '')
             )
-              .then(activations => activations.body)
+              .then(activations => activations.content)
               .then(activations => {
                 if (activations.length === 0) {
                   throw new Error('No such activation found')

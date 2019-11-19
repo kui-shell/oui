@@ -54,6 +54,7 @@ export function asActivation<T extends Dict>(raw: RawActivation<T>): Activation<
     version: raw.version,
     logs: raw.logs,
     response: raw.response,
+    statusCode: (raw as any).statusCode,
     data: JSON.stringify(raw, undefined, 2)
   }
 }

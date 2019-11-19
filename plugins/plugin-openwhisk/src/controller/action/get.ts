@@ -19,9 +19,20 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import { fqn } from '../fqn'
 import respondWith from './as-action'
 import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { clientOptions, getClient } from '../../client/get'
 import { synonyms } from '../../lib/models/synonyms'
 import { currentSelection } from '../../lib/models/selection'
+import { deployedAction } from '../../lib/cmds/openwhisk-usage'
+
+export const usage = (syn: string) => ({
+  strict: 'get',
+  breadcrumb: 'get',
+  command: 'get',
+  docs: 'get the details of a given action',
+  example: `wsk ${syn} get <action>`,
+  required: deployedAction
+})
 
 const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNoOptions, execOptions }: Arguments) => {
   const name = argvNoOptions[argvNoOptions.indexOf(verb || 'get') + 1] || fqn(currentSelection(tab, 'Action'))
@@ -44,7 +55,7 @@ const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNo
 
 export default (registrar: Registrar) => {
   synonyms('actions').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/get`, doGet(), standardOptions)
+    registrar.listen(`/wsk/${syn}/get`, doGet(), withStandardOptions(usage(syn)))
     registrar.listen(`/wsk/${syn}/annotations`, doGet('annotations'), standardOptions)
     registrar.listen(`/wsk/${syn}/params`, doGet('parameters', 'params'), standardOptions)
     registrar.listen(`/wsk/${syn}/parameters`, doGet('parameters'), standardOptions)

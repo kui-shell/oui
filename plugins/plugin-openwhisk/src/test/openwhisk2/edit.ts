@@ -89,7 +89,7 @@ describe('edit actions', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(SidecarExpect.showing('foo'))
-        .then(SidecarExpect.badge('v0.0.1'))
+        .then(SidecarExpect.badge('0.0.1'))
         .catch(Common.oops(this)))
   }
 
@@ -98,7 +98,7 @@ describe('edit actions', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('foo2'))
-      .then(SidecarExpect.badge('v0.0.1'))
+      .then(SidecarExpect.badge('0.0.1'))
       .catch(Common.oops(this)))
 
   it('should create a sequence', () =>

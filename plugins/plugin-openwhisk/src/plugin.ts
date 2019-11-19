@@ -22,20 +22,25 @@ import rm from './lib/cmds/rm'
 import auth from './lib/cmds/auth'
 import wipe from './lib/cmds/wipe'
 import context from './lib/cmds/context'
-import listAll from './lib/cmds/list-all'
 import loadTest from './lib/cmds/load-test'
 import letCommand from './lib/cmds/actions/let'
-import invoke from './lib/cmds/actions/invoke'
 import webbify from './lib/cmds/actions/webbify'
 import last from './lib/cmds/activations/last'
 import on from './lib/cmds/rules/on'
 import every from './lib/cmds/rules/every'
-// import modes from './lib/views/mode'
 import core from './lib/cmds/openwhisk-core'
 
-import activationList from './lib/cmds/activations/list'
+import listAll from './controller/list-all'
 
-// import registerViews from './views'
+// namespaces
+import namespaceGet from './controller/namespace/get'
+import namespaceList from './controller/namespace/list'
+import {
+  namespaceListActions,
+  namespaceListPackages,
+  namespaceListRules,
+  namespaceListTriggers
+} from './controller/namespace/list-innards'
 
 // actions
 import actionGet from './controller/action/get'
@@ -62,6 +67,7 @@ import { packageListActions, packageListFeeds } from './controller/package/list-
 
 // activations
 import activationGet from './controller/activation/get'
+import activationList from './controller/activation/list'
 import activationLogs from './controller/activation/logs'
 import activationAwait from './controller/activation/await'
 import activationResult from './controller/activation/result'
@@ -76,7 +82,7 @@ import ruleStatus from './controller/rule/status'
 export default async (commandTree: Commands.Registrar) => {
   await core(commandTree)
 
-  // commands
+  // oui value-add commands, on top of the basic openwhisk commands
   await cp(commandTree)
   await mv(commandTree)
   await rm(commandTree)
@@ -85,24 +91,21 @@ export default async (commandTree: Commands.Registrar) => {
   await context(commandTree)
   await listAll(commandTree)
   await loadTest(commandTree)
-
-  // action extensions
   await letCommand(commandTree)
-  await invoke(commandTree)
   await webbify(commandTree)
-
-  // activation extensions
-  await activationList(commandTree)
   await last(commandTree)
-
-  // rule extension
   await on(commandTree)
   await every(commandTree)
 
-  // views
-  // await modes(commandTree)
-  // await registerViews()
+  // basic openwhisk namespace commands
+  namespaceGet(commandTree)
+  namespaceList(commandTree)
+  namespaceListActions(commandTree)
+  namespaceListPackages(commandTree)
+  namespaceListRules(commandTree)
+  namespaceListTriggers(commandTree)
 
+  // basic openwhisk action commands
   actionGet(commandTree)
   actionList(commandTree)
   actionAsync(commandTree)
@@ -110,12 +113,14 @@ export default async (commandTree: Commands.Registrar) => {
   actionDelete(commandTree)
   actionInvoke(commandTree)
 
+  // basic openwhisk trigger commands
   triggerGet(commandTree)
   triggerFire(commandTree)
   triggerList(commandTree)
   triggerCreate(commandTree)
   triggerDelete(commandTree)
 
+  // basic openwhisk package commands
   packageGet(commandTree)
   packageBind(commandTree)
   packageList(commandTree)
@@ -124,11 +129,14 @@ export default async (commandTree: Commands.Registrar) => {
   packageListActions(commandTree)
   packageListFeeds(commandTree)
 
+  // basic openwhisk activation commands
   activationGet(commandTree)
+  activationList(commandTree)
   activationLogs(commandTree)
   activationAwait(commandTree)
   activationResult(commandTree)
 
+  // basic openwhisk rule commands
   ruleGet(commandTree)
   ruleList(commandTree)
   ruleCreate(commandTree)

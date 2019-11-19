@@ -18,7 +18,7 @@ jobs:
   include:
     - stage: test
       script: npm run test
-      env: LAYERS="openwhisk1 openwhisk-editor grid" MOCHA_RUN_TARGET=electron
+      env: LAYERS="openwhisk1 grid" MOCHA_RUN_TARGET=electron
     - stage: test
       script: npm run test
       # re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
