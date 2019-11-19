@@ -14,39 +14,51 @@
  * limitations under the License.
  */
 
-import { Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import standardOptions from '../aliases'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 
+/**
+ * A request to delete a trigger. If this trigger has an
+ * associated feed, we are responsible for invoking the DELETE
+ * lifecycle event on the feed.
+ *
+ */
+async function removeTrigger({ argvNoOptions, execOptions }: Arguments) {
+  const name = argvNoOptions[argvNoOptions.length - 1]
+  const client = getClient(execOptions)
+
+  const trigger = await client.triggers.delete(Object.assign({ name: name }, clientOptions))
+
+  const feedAnnotation = trigger.annotations && trigger.annotations.find(kv => kv.key === 'feed')
+  if (feedAnnotation) {
+    // special case of feed
+    await client.feeds.delete(
+      Object.assign(
+        {
+          name: feedAnnotation.value,
+          trigger: name
+        },
+        clientOptions
+      )
+    )
+  }
+
+  return {
+    verb: 'delete',
+    type: 'trigger',
+    name,
+    metadata: {
+      name: trigger.name,
+      namespace: trigger.namespace
+    }
+  }
+}
+
 export default (registrar: Registrar) => {
   synonyms('triggers').forEach(syn => {
-    registrar.listen(
-      `/wsk/${syn}/delete`,
-      async ({ argvNoOptions, execOptions }) => {
-        const name = argvNoOptions[argvNoOptions.indexOf('delete') + 1]
-
-        const response = await getClient(execOptions).triggers.delete(
-          Object.assign(
-            {
-              name
-            },
-            clientOptions
-          )
-        )
-
-        return {
-          verb: 'delete',
-          type: 'trigger',
-          name,
-          metadata: {
-            name: response.name,
-            namespace: response.namespace
-          }
-        }
-      },
-      standardOptions
-    )
+    registrar.listen(`/wsk/${syn}/delete`, removeTrigger, standardOptions)
   })
 }
