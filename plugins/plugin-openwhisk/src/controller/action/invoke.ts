@@ -21,14 +21,13 @@ import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/command
 
 import { fqn } from '../fqn'
 import toDict from '../dict'
-import { clientOptions, getClient } from '../../client/get'
-import { withStandardOptions } from '../usage'
-import { Activation } from '../../lib/models/resource'
-import { currentSelection } from '../../lib/models/selection'
-import { synonyms } from '../../lib/models/synonyms'
 import { kvOptions } from '../key-value'
+import { withStandardOptions } from '../usage'
+import { synonyms } from '../../lib/models/synonyms'
 import respondWith from '../activation/as-activation'
-
+import { Activation } from '../../lib/models/resource'
+import { clientOptions, getClient } from '../../client/get'
+import { currentSelection } from '../../lib/models/selection'
 import { actionImplicitOK, params, timeout } from '../../lib/cmds/openwhisk-usage'
 
 interface Options extends ParsedOptions {
@@ -36,7 +35,7 @@ interface Options extends ParsedOptions {
   result?: boolean
 }
 
-const usage = {
+export const usage = withStandardOptions({
   command: 'invoke',
   docs: 'invoke a given action',
   strict: 'invoke',
@@ -58,7 +57,7 @@ const usage = {
       }
     ].concat(timeout)
   )
-}
+})
 
 /**
  * Invoke an action
@@ -113,6 +112,6 @@ async function invokeAction<T extends Dict>({
 
 export default (registrar: Registrar) => {
   synonyms('actions').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/invoke`, invokeAction, withStandardOptions(usage))
+    registrar.listen(`/wsk/${syn}/invoke`, invokeAction, usage)
   })
 }

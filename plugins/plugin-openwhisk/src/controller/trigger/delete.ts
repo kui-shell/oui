@@ -16,9 +16,18 @@
 
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
+import { deployedTrigger } from '../../lib/cmds/openwhisk-usage'
+
+const usage = withStandardOptions({
+  command: 'delete',
+  strict: 'delete',
+  docs: 'delete a given trigger',
+  example: 'wsk trigger delete <trigger>',
+  required: deployedTrigger
+})
 
 /**
  * A request to delete a trigger. If this trigger has an
@@ -59,6 +68,6 @@ async function removeTrigger({ argvNoOptions, execOptions }: Arguments) {
 
 export default (registrar: Registrar) => {
   synonyms('triggers').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/delete`, removeTrigger, standardOptions)
+    registrar.listen(`/wsk/${syn}/delete`, removeTrigger, usage)
   })
 }

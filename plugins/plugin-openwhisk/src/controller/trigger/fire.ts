@@ -21,10 +21,20 @@ import ok from '../ok'
 import { fqn } from '../fqn'
 import toDict from '../dict'
 import { kvOptions } from '../key-value'
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 import { currentSelection } from '../../lib/models/selection'
+import { params, deployedTrigger } from '../../lib/cmds/openwhisk-usage'
+
+const usage = {
+  command: 'fire',
+  strict: 'fire',
+  docs: 'fire a trigger',
+  example: 'wsk trigger fire <trigger>',
+  required: deployedTrigger,
+  optional: params
+}
 
 /**
  * Invoke an action
@@ -57,6 +67,6 @@ async function fireTrigger({ tab, argv, execOptions }: Arguments): Promise<HTMLE
 
 export default (registrar: Registrar) => {
   synonyms('triggers').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/fire`, fireTrigger, standardOptions)
+    registrar.listen(`/wsk/${syn}/fire`, fireTrigger, withStandardOptions(usage))
   })
 }

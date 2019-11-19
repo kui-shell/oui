@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import { hasVersion, WithVersion } from '../lib/models/resource'
+import { encodeComponent } from '@kui-shell/core/api/repl-util'
+
+import { fqn } from '../../controller/fqn'
+import { WithPackages, hasPackages } from '../../lib/models/resource'
 
 /**
- * Display resource version as a badge
+ * Namespace packages drilldown
  *
  */
 export default {
-  when: hasVersion,
-  badge: (resource: WithVersion) => ({
-    title: resource.version,
-    css: 'version'
-  })
+  when: hasPackages,
+  mode: {
+    mode: 'packages',
+    label: 'Show Packages',
+    kind: 'drilldown' as const,
+
+    command: (_, resource: WithPackages) => `wsk namespace list-packages ${encodeComponent(fqn(resource))}`
+  }
 }

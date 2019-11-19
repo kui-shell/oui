@@ -19,9 +19,19 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import { fqn } from '../fqn'
 import respondWith from './as-rule'
 import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { clientOptions, getClient } from '../../client/get'
 import { synonyms } from '../../lib/models/synonyms'
 import { currentSelection } from '../../lib/models/selection'
+import { deployedRule } from '../../lib/cmds/openwhisk-usage'
+
+const usage = withStandardOptions({
+  command: 'get',
+  strict: 'get',
+  docs: 'get the details of a given rule',
+  example: 'wsk rule get <rule>',
+  required: deployedRule
+})
 
 const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNoOptions, execOptions }: Arguments) => {
   const name = argvNoOptions[argvNoOptions.indexOf(verb || 'get') + 1] || fqn(currentSelection(tab))
@@ -41,7 +51,7 @@ const doGet = (defaultMode?: string, verb = defaultMode) => async ({ tab, argvNo
 
 export default (registrar: Registrar) => {
   synonyms('rules').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/get`, doGet(), standardOptions)
+    registrar.listen(`/wsk/${syn}/get`, doGet(), usage)
     registrar.listen(`/wsk/${syn}/raw`, doGet('raw'), standardOptions)
     registrar.listen(`/wsk/${syn}/content`, doGet(undefined, 'content'), standardOptions)
   })

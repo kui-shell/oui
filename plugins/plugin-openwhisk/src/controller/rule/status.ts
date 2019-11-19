@@ -17,10 +17,50 @@
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import { fqn } from '../fqn'
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 import { currentSelection } from '../../lib/models/selection'
+import { deployedRule } from '../../lib/cmds/openwhisk-usage'
+
+const disableUsage = withStandardOptions({
+  command: 'disable',
+  strict: 'disable',
+  docs: 'disable a given rule',
+  example: 'wsk rule disable <rule>',
+  required: deployedRule
+})
+
+const enableUsage = withStandardOptions({
+  command: 'enable',
+  strict: 'enable',
+  docs: 'enable a given rule',
+  example: 'wsk rule enable <rule>',
+  required: deployedRule
+})
+
+const statusUsage = withStandardOptions({
+  command: 'status',
+  strict: 'status',
+  docs: 'get the status (enabled or disabled) of given rule',
+  example: 'wsk rule status <rule>',
+  required: deployedRule
+})
+
+async function doStatus({ tab, argvNoOptions, execOptions }: Arguments) {
+  const name = argvNoOptions[argvNoOptions.indexOf('status') + 1] || fqn(currentSelection(tab))
+
+  return (
+    await getClient(execOptions).rules.get(
+      Object.assign(
+        {
+          name
+        },
+        clientOptions
+      )
+    )
+  ).status
+}
 
 async function doEnable({ tab, argvNoOptions, execOptions, REPL }: Arguments) {
   const name = argvNoOptions[argvNoOptions.indexOf('enable') + 1] || fqn(currentSelection(tab))
@@ -54,7 +94,8 @@ async function doDisable({ tab, argvNoOptions, execOptions, REPL }: Arguments) {
 
 export default (registrar: Registrar) => {
   synonyms('rules').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/enable`, doEnable, standardOptions)
-    registrar.listen(`/wsk/${syn}/disable`, doDisable, standardOptions)
+    registrar.listen(`/wsk/${syn}/status`, doStatus, statusUsage)
+    registrar.listen(`/wsk/${syn}/enable`, doEnable, enableUsage)
+    registrar.listen(`/wsk/${syn}/disable`, doDisable, disableUsage)
   })
 }

@@ -195,9 +195,10 @@ class Validation {
             fetch(0)
           })
         })
-        .then(sessionId => {
-          // session list
-          return new Promise((resolve, reject) => {
+        .then(
+          /* sessionId */ () => {
+            // session list
+            /* return new Promise((resolve, reject) => {
             const fetchList = retry =>
               cli
                 .command(`wsk session list`)
@@ -242,8 +243,9 @@ class Validation {
                 .catch(reject)
 
             fetchList(0)
-          })
-        })
+          }) */
+          }
+        )
         .catch(Common.oops(this.ctx)))
   }
 

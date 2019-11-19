@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import { hasVersion, WithVersion } from '../lib/models/resource'
+import { encodeComponent } from '@kui-shell/core/api/repl-util'
+
+import { fqn } from '../../controller/fqn'
+import { WithActionDescs, hasActionDescs } from '../../lib/models/resource'
 
 /**
- * Display resource version as a badge
+ * Namespace actions drilldown
  *
  */
 export default {
-  when: hasVersion,
-  badge: (resource: WithVersion) => ({
-    title: resource.version,
-    css: 'version'
-  })
+  when: hasActionDescs,
+  mode: {
+    mode: 'actions',
+    label: 'Show Actions',
+    kind: 'drilldown' as const,
+
+    command: (_, resource: WithActionDescs) => `wsk namespace list-actions ${encodeComponent(fqn(resource))}`
+  }
 }

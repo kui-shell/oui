@@ -18,17 +18,14 @@ import Debug from 'debug'
 import { existsSync, readFileSync } from 'fs'
 import { type as osType } from 'os'
 
-import { oopsMessage } from '@kui-shell/core/core/oops'
-import { Capabilities, Commands, Errors, eventBus, Models, Settings, REPL, UI, Util } from '@kui-shell/core'
+import { Capabilities, Commands, eventBus, Settings, REPL, UI, Util } from '@kui-shell/core'
 
 import agent from '../models/agent'
-import withHeader from '../models/withHeader'
 import { isCRUDable } from '../models/crudable'
-import { synonymsTable, synonyms } from '../models/synonyms'
+import { synonymsTable } from '../models/synonyms'
 import { actionSpecificModes, activationModes } from '../models/modes'
 import { ow as globalOW, apihost, initOWFromConfig, initOW } from '../models/auth'
-import { Action, Rule, Annotations, Parameters, Package, currentSelection } from '../models/openwhisk-entity'
-import { isOpenWhiskResource } from '../models/resource'
+import { Action, Rule, Annotations, Parameters, Package } from '../models/openwhisk-entity'
 
 import * as namespace from '../models/namespace'
 
@@ -39,7 +36,6 @@ const debug = Debug('plugins/openwhisk/cmds/core-commands')
  *
  */
 
-import * as minimist from 'yargs-parser'
 import * as usage from './openwhisk-usage'
 const isLinux = osType() === 'Linux'
 
@@ -51,11 +47,6 @@ export const getClient = (execOptions: Commands.ExecOptions) => {
   } else {
     return globalOW
   }
-}
-
-// verbs where implicit name hurts; e.g. list with name will filter by name!
-const noImplicitName = {
-  list: true
 }
 
 // some verbs not directly exposed by the openwhisk npm (hidden in super-prototypes)
@@ -75,25 +66,6 @@ const booleans = {
   }
 }
 booleans.actions['update'] = booleans.actions.create
-
-const aliases = {
-  create: {
-    m: 'memory',
-    t: 'timeout',
-    p: 'param',
-    a: 'annotation',
-    f: 'feed'
-  },
-  invoke: {
-    b: 'blocking',
-    r: 'result',
-    p: 'param'
-  },
-  list: {
-    l: 'limit',
-    s: 'skip'
-  }
-}
 
 /** turn a key-value map into an array of {key:, value:} objects */
 const toArray = (map: Record<string, string>) => {
@@ -316,46 +288,6 @@ const ignore = {
   rules: {
     invoke: true // the openwhisk npm has package.invoke, which just throws an error. oof
   }
-}
-
-/**
- * if i do `wsk action get binding/action`, i get back an action
- * struct that has the expected binding parameters from the `binding`
- * package, but the `name` and `namespace` field, and indeed the
- * entire returned struct, are devoid of any mention of the
- * binding. so, in the Shell, when i ask to `invoke` this action, the
- * Shell incorrectly invokes the non-bound package, thus the binding
- * parameters are missing from the invoke
- *
- */
-const correctMissingBindingName = options => entity => {
-  let packageName: string
-
-  if (options.namespace) {
-    //
-    const slashIndex = options.namespace.indexOf('/')
-    if (slashIndex >= 0) {
-      packageName = options.namespace.substring(slashIndex + 1)
-    }
-  }
-
-  if (!packageName) {
-    if (options.name) {
-      const A = options.name.split('/')
-      if (A.length > 1) {
-        packageName = A.length === 4 ? A[2] : A[0]
-      }
-    }
-  }
-
-  if (packageName) {
-    if (entity.namespace) {
-      entity.namespace = entity.namespace.replace(new RegExp(`/${entity.packageName}$`), `/${packageName}`)
-    }
-    entity.packageName = packageName
-  }
-
-  return entity
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -1036,273 +968,6 @@ export const parseOptions = (argvFull: string[], type: string) => {
 }
 
 /**
- * Handle 204 No-Content responses; e.g. for trigger fire
- *
- */
-const handle204 = name => response => {
-  if (Buffer.isBuffer(response)) {
-    return {
-      name,
-      activationId: 'trigger fire',
-      annotations: [],
-      response: { result: { success: true, status: 'Success' } }
-    }
-  } else {
-    return response
-  }
-}
-
-/**
- * Execute a given command
- *
- */
-const executor = (commandTree: Commands.Registrar, _entity, _verb: string, verbSynonym?: string) => async ({
-  argv: argvFull,
-  execOptions,
-  tab,
-  REPL
-}: Commands.Arguments) => {
-  let entity = _entity
-  let verb = _verb
-
-  if (execOptions && execOptions.credentials && execOptions.credentials.openwhisk) {
-    // FIXME we can do better here
-    initOWFromConfig(execOptions.credentials.openwhisk)
-  }
-
-  const pair = parseOptions(argvFull, toOpenWhiskKind(entity))
-  const regularOptions = minimist(pair.argv, {
-    boolean: booleans[entity] && booleans[entity][verb],
-    alias: aliases[verb],
-    configuration: {
-      'camel-case-expansion': false,
-      'duplicate-arguments-array': false // see shell issue #616
-    }
-  })
-  const argv = regularOptions._
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let options: Record<string, any> = Object.assign({}, regularOptions, pair.kvOptions)
-  delete options._
-
-  debug('exec', entity, verb, argv, options, execOptions)
-
-  const verbIndex = argv.findIndex(arg => arg === verbSynonym)
-  const nameIndex = verbIndex + 1
-  const hasName = argv[nameIndex] !== undefined // !== undefined important, as minimist turns all-zeroes into numeric 0 (shell #284)
-  const restIndex = hasName ? nameIndex + 1 : nameIndex
-
-  if (hasName) {
-    options.name = argv[nameIndex]
-    if (typeof options.name === 'number') {
-      // see https://github.com/ibm-functions/shell/issues/284
-      // minimist bug: it auto-converts numeric-looking strings
-      // into Numbers! thus all-numeric uuids become javascript
-      // Numbers :(
-
-      // the solution is to scan the original (before minimist
-      // mucked things up) argvFull, looking for an arg that is
-      // ==, but not === the one that minimist gave us.
-      // THUS NOTE THE USE OF == in `arg == options.name` <-- important
-      options.name = argvFull.find(
-        // eslint-disable-next-line eqeqeq
-        arg => arg == options.name && arg !== options.name
-      )
-    }
-  } else if (!noImplicitName[verb]) {
-    //
-    // OPERATION WITH IMPLICIT ENTITY: try to get the name from the current selection
-    //
-    const selection = currentSelection(tab)
-    debug('seeing if we can use an implicit entity', selection)
-    if (selection) {
-      const namespace = isOpenWhiskResource(selection) ? selection.metadata.namespace : selection.namespace
-      const name = isOpenWhiskResource(selection) ? selection.metadata.name : selection.name
-      options.name = `/${namespace || '_'}/${name}`
-
-      if (selection.type === 'activations') {
-        //
-        // special case for activations... the proper entity path is an annotation. nice
-        //
-        const pathAnnotation = selection.annotations && selection.annotations.find(kv => kv.key === 'path')
-        if (pathAnnotation) {
-          // note: the path doesn't have a leading slash. nice nice
-          options.name = `/${pathAnnotation.value}`
-        }
-      }
-
-      debug('using implicit entity name', options.name)
-    }
-  }
-
-  // programmatic passing of parameters?
-  const paramVars = ['params', 'parameters']
-  paramVars.forEach(paramVar => {
-    if (execOptions && execOptions[paramVar]) {
-      debug('found execOptions parameters', execOptions[paramVar])
-      let details = options[toOpenWhiskKind(entity)]
-      if (!details) {
-        details = {}
-        options[toOpenWhiskKind(entity)] = details
-      }
-      if (!details[paramVar]) {
-        details[paramVar] = []
-      }
-
-      const params = details[paramVar]
-      for (const key in execOptions[paramVar]) {
-        const value = execOptions[paramVar][key]
-        params.push({ key, value })
-      }
-    }
-  })
-
-  // pre and post-process the output of openwhisk; default is do nothing
-  let postprocess = x => x
-  let preprocess = options => options
-
-  if (entity === 'activations' && verb === 'get' && options.last) {
-    // special case for wsk activation get --last
-    return REPL.qexec(`wsk activation last ${typeof options.last === 'string' ? options.last : ''}`)
-  }
-
-  if (specials[entity] && specials[entity][verb]) {
-    const res = await specials[entity][verb](options, argv.slice(restIndex), verb, execOptions)
-    if (res && res.verb) {
-      // updated verb? e.g. 'package bind' => 'package update'
-      verb = res.verb
-    }
-    if (res && res.entity) {
-      entity = res.entity
-    }
-    if (res && res.options) {
-      options = res.options
-    }
-
-    if (res && res.preprocess) {
-      // postprocess the output of openwhisk
-      preprocess = res.preprocess
-    }
-
-    if (res && res.postprocess) {
-      // postprocess the output of openwhisk
-      postprocess = res.postprocess
-    }
-  }
-  // process the entity-naming "nominal" argument
-  // if (!(syn_options && syn_options.noNominalArgument) && argv_without_options[idx]) {
-  // options.name = argv_without_options[idx++]
-  // }
-
-  // process any idiosyncratic non-optional arguments
-  /* if (syn._options && syn._options.nonOptArgs) {
-     const res = syn._options.nonOptArgs(options, idx, argv_without_options, entity)
-     if (res.verb) {
-     // updated verb? e.g. 'package bind' => 'package update'
-     verb = res.verb
-     }
-     } */
-
-  const kind = toOpenWhiskKind(entity)
-  if (execOptions && execOptions.entity && execOptions.entity[kind]) {
-    // passing entity options programatically rather than via the command line
-    options[kind] = Object.assign({}, options[entity] || {}, execOptions.entity[kind])
-    debug('programmatic entity', execOptions.entity[kind], options[entity])
-  }
-
-  if (!options.then) options = Promise.resolve(options)
-
-  return options.then(async options => {
-    // this will format a prettyType for the given type. e.g. 'sequence' for actions of kind sequence
-    const pretty = addPrettyType(entity, verb, options.name)
-
-    debug(`calling openwhisk ${entity} ${verb} ${options.name}`, options)
-
-    // amend the history entry with the details
-    if (execOptions && execOptions.history) {
-      Models.History.update(execOptions.history, entry => {
-        entry['entityType'] = entity
-        entry['verb'] = verb
-        entry['name'] = options.name
-        entry['options'] = Object.assign({}, options)
-
-        if (options.action && options.action.exec) {
-          // don't store the code in history!
-          entry['options'].action = Object.assign({}, options.action)
-          entry['options'].action.exec = Object.assign({}, options.action.exec)
-          delete entry['options'].action.exec.code
-        }
-      })
-    }
-
-    const ow = getClient(execOptions)
-
-    if (!ow[entity][verb]) {
-      return Promise.reject(new Error('Unknown OpenWhisk command'))
-    } else {
-      owOpts(options)
-
-      return Promise.resolve(options)
-        .then(options => preprocess(options))
-        .then(options => ow[entity][verb](options))
-        .then(handle204(options.name))
-        .then(postprocess)
-        .then(response => {
-          // amend the history entry with a selected subset of the response
-          if (execOptions && execOptions.history) {
-            Models.History.update(execOptions.history, entry => {
-              entry.response = { activationId: response.activationId }
-              return entry.response
-            })
-          }
-          return response
-        })
-        .then(pretty)
-        .then(correctMissingBindingName(options))
-        .then(response => (Array.isArray(response) ? Promise.all(response.map(pretty)) : response))
-        .then(response => (Array.isArray(response) ? withHeader(response, execOptions) : response))
-        .then(response => {
-          if (
-            commandTree &&
-            (!execOptions || !execOptions.noHistory || (execOptions && execOptions.contextChangeOK)) && // don't update context for nested execs
-            (response.verb === 'get' || response.verb === 'create' || response.verb === 'update')
-          ) {
-            return response
-          } else {
-            return response
-          }
-        })
-        .catch(err => {
-          if (err.error && err.error.activationId) {
-            // then this is a failed activation
-            throw err
-          } else if (execOptions.nested && !execOptions.failWithUsage) {
-            throw err
-          } else {
-            //
-            // wrap the backend error in a usage error
-            //
-            const message = oopsMessage(err)
-            const code = err.statusCode || err.code
-            const __usageModel = typeof usage[entity] === 'function' ? usage[entity](entity) : usage[entity]
-            const _usageModel = __usageModel.available && __usageModel.available.find(({ command }) => command === verb)
-            const usageModel: Errors.UsageModel =
-              _usageModel && typeof _usageModel.fn === 'function' ? _usageModel.fn(verb, entity) : _usageModel
-
-            console.error(err)
-            if (!usageModel) {
-              debug('no usage model', usage[entity])
-              throw err
-            } else {
-              throw new Errors.UsageError({ message, usage: usageModel, code })
-            }
-          }
-        })
-    }
-  })
-}
-
-/**
  * Update an entity
  *
  */
@@ -1361,7 +1026,7 @@ const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) =
   const ow = isReinit ? globalOW : initOW()
 
   // for each entity type
-  commandTree.subtree(`/wsk`, { usage: usage.wsk })
+  // commandTree.subtree(`/wsk`, { usage: usage.wsk })
 
   for (const api in ow) {
     const clazz = ow[api].constructor
@@ -1402,10 +1067,10 @@ const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) =
             usage: docs(eee.nickname || eee)
           })
 
-          const handler = executor(commandTree, eee.name || api, verb, verb)
-          const entityAliasMaster = commandTree.listen(`/wsk/${eee.nickname || eee}/${verb}`, handler, {
+          /* const handler = executor(commandTree, eee.name || api, verb, verb)
+           const entityAliasMaster = commandTree.listen(`/wsk/${eee.nickname || eee}/${verb}`, handler, {
             usage: docs(api, verb)
-          })
+          }) */
 
           // register e.g. wsk action help; we delegate to
           // "wsk action", which will print out usage (this
@@ -1414,18 +1079,18 @@ const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) =
           // commandTree.listen(`/wsk/${eee.nickname || eee}/help`, () => REPL.qexec(`wsk ${eee.nickname || eee}`), { noArgs: true })
 
           verbs.forEach(vvv => {
-            const handler = executor(commandTree, eee.name || api, vvv.name || verb, vvv.nickname || vvv)
+            // const handler = executor(commandTree, eee.name || api, vvv.name || verb, vvv.nickname || vvv)
             if (vvv.notSynonym || vvv === verb) {
               if (vvv.limitTo && vvv.limitTo[api]) {
-                commandTree.listen(`/wsk/${eee.nickname || eee}/${vvv.nickname || vvv}`, handler, {
+                /* commandTree.listen(`/wsk/${eee.nickname || eee}/${vvv.nickname || vvv}`, handler, {
                   usage: docs(api, vvv.nickname || vvv)
-                })
+                }) */
               }
             } else {
-              const handler = executor(commandTree, eee.name || api, verb, vvv.nickname || vvv)
-              commandTree.synonym(`/wsk/${eee.nickname || eee}/${vvv.nickname || vvv}`, handler, entityAliasMaster, {
+              /* const handler = executor(commandTree, eee.name || api, verb, vvv.nickname || vvv)
+               commandTree.synonym(`/wsk/${eee.nickname || eee}/${vvv.nickname || vvv}`, handler, entityAliasMaster, {
                 usage: docs(api, verb, vvv.nickname || vvv)
-              })
+              }) */
             }
 
             // if (alsoInstallAtRoot) {
@@ -1435,167 +1100,6 @@ const makeInit = (commandTree: Commands.Registrar) => async (isReinit = false) =
         })
       }
     }
-  }
-
-  // trigger fire special case?? hacky
-  const doFire = executor(commandTree, 'triggers', 'invoke', 'fire')
-  synonyms('triggers').forEach(syn => {
-    commandTree.listen(`/wsk/${syn}/fire`, doFire, {
-      usage: usage.triggers.available.find(({ command }) => command === 'fire')
-    })
-  })
-
-  /**
-   * A request to delete a trigger. If this trigger has an
-   * associated feed, we are responsible for invoking the DELETE
-   * lifecycle event on the feed.
-   *
-   */
-  const removeTrigger = ({ argv, execOptions }) => {
-    const name = argv[argv.length - 1]
-    const ow = getClient(execOptions)
-
-    return ow.triggers
-      .delete(owOpts({ name: name }))
-      .then(trigger => {
-        const feedAnnotation = trigger.annotations && trigger.annotations.find(kv => kv.key === 'feed')
-        debug('trigger delete success', trigger, feedAnnotation)
-        if (feedAnnotation) {
-          // special case of feed
-          debug('delete feed', trigger)
-          return ow.feeds.delete(
-            owOpts({
-              feedName: feedAnnotation.value,
-              trigger: name
-            })
-          )
-        } else {
-          return trigger
-        }
-      })
-      .then(() => true)
-  }
-  synonymsTable.entities.triggers.forEach(syn => {
-    commandTree.listen(`/wsk/${syn}/delete`, removeTrigger, {
-      usage: usage.triggers.available.find(({ command }) => command === 'delete')
-    })
-  })
-
-  /**
-   * As per the delete trigger comment for removeTrigger, we
-   * similarly must invoke the CREATE lifecycle event for feed
-   * creation
-   *
-   */
-  const createTrigger = ({ argvNoOptions: argv, parsedOptions: options, execOptions }) => {
-    const name = argv[argv.length - 1]
-    const triggerSpec = owOpts({ name })
-    const paramsArray = []
-    const params = {}
-    const ow = getClient(execOptions)
-
-    if (options.param) {
-      for (let idx = 0; idx < options.param.length; idx += 2) {
-        const key = options.param[idx]
-        let value = options.param[idx + 1]
-
-        try {
-          value = JSON.parse(options.param[idx + 1])
-        } catch (err) {
-          // ok
-        }
-
-        params[key] = value
-        paramsArray.push({ key, value })
-      }
-    }
-
-    if (options.feed) {
-      // add the feed annotation
-
-      const annotation = { key: 'feed', value: options.feed }
-      debug('adding feed annotation', annotation)
-
-      if (!triggerSpec['trigger']) {
-        triggerSpec['trigger'] = {}
-      }
-      if (!triggerSpec['trigger'].annotations) {
-        triggerSpec['trigger'].annotations = []
-      }
-
-      triggerSpec['trigger'].annotations.push(annotation)
-    } else {
-      if (!triggerSpec['trigger']) {
-        triggerSpec['trigger'] = {}
-      }
-      if (!triggerSpec['trigger'].parameters) {
-        triggerSpec['trigger'].parameters = paramsArray
-      } else {
-        triggerSpec['trigger'].parameters = triggerSpec['trigger'].parameters.concat(paramsArray)
-      }
-    }
-
-    debug('creating trigger', triggerSpec)
-    return ow.triggers
-      .create(triggerSpec)
-      .then(trigger => {
-        /** remove trigger if something bad happened instantiating the feed */
-        const removeTrigger = err => {
-          console.error(err)
-          ow.triggers.delete(owOpts({ name }))
-          throw new Error('Internal Error')
-        }
-
-        if (options.feed) {
-          try {
-            // special case of feed: invoke CREATE lifecycle
-            const feedName = options.feed
-
-            debug('create feed', feedName, name, params)
-            return ow.feeds
-              .create(owOpts({ feedName, trigger: name, params }))
-              .then(() => trigger) // return the trigger, not the result of invoking the feed lifecycle
-              .catch(removeTrigger) // catastrophe, clean up after ourselves
-          } catch (err) {
-            // make sure to clean up after ourselves in case of catastrophe
-            return removeTrigger(err)
-          }
-        } else {
-          // otherwise, this is a normal trigger, not a feed
-          return trigger
-        }
-      })
-      .then(addPrettyType('triggers', 'create', name))
-  }
-  synonymsTable.entities.triggers.forEach(syn => {
-    commandTree.listen(`/wsk/${syn}/create`, createTrigger, {
-      usage: usage.triggers.available.find(({ command }) => command === 'create')
-    })
-  })
-
-  // count APIs
-  for (const entityType in synonymsTable.entities) {
-    synonymsTable.entities[entityType].forEach(syn => {
-      commandTree.listen(
-        `/wsk/${syn}/count`,
-        ({ argvNoOptions, parsedOptions: options, execOptions }) => {
-          const name = argvNoOptions[argvNoOptions.indexOf('count') + 1]
-          const overrides = { count: true }
-          delete options._
-          delete options.limit
-          delete options.skip
-          if (name) {
-            overrides['name'] = name
-          }
-
-          const opts = owOpts(Object.assign({}, options, overrides))
-          const ow = getClient(execOptions)
-
-          return ow[entityType].list(opts).then(res => res[entityType])
-        },
-        {}
-      )
-    })
   }
 
   debug('init done')

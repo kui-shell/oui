@@ -16,9 +16,18 @@
 
 import { Registrar } from '@kui-shell/core/api/commands'
 
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
+import { deployedPackage } from '../../lib/cmds/openwhisk-usage'
+
+const usage = {
+  command: 'delete',
+  strict: 'delete',
+  docs: 'delete a given package',
+  example: `wsk package delete <package>`,
+  required: deployedPackage
+}
 
 export default (registrar: Registrar) => {
   synonyms('packages').forEach(syn => {
@@ -46,7 +55,7 @@ export default (registrar: Registrar) => {
           }
         }
       },
-      standardOptions
+      withStandardOptions(usage)
     )
   })
 }

@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-import { Dict, KeyVal, Limits, Response, PathName, Status } from 'openwhisk'
+import {
+  Dict,
+  KeyVal,
+  Limits,
+  Response,
+  PathName,
+  Status,
+  ActionDesc,
+  PackageDesc,
+  RuleDesc,
+  TriggerDesc
+} from 'openwhisk'
 import { ResourceWithMetadata } from '@kui-shell/core/api/models'
 
 /** our synthetic apiVersion */
@@ -203,9 +214,55 @@ export interface WithActions extends ResourceWithNonOptionalMetadata {
   actions: FQN[]
 }
 
+export interface WithActionDescs extends ResourceWithNonOptionalMetadata {
+  actions: ActionDesc[]
+}
+
+function isActionDesc(resource: ActionDesc | object): resource is ActionDesc {
+  const desc = resource as ActionDesc
+  return typeof desc.name === 'string' && typeof desc.version === 'string'
+}
+
+function isFQN(resource: FQN | object): resource is FQN {
+  const fqn = resource as FQN
+  return typeof fqn.name === 'string'
+}
+
 export function hasActions(resource: ResourceWithNonOptionalMetadata): resource is WithActions {
   const res = resource as WithActions
-  return Array.isArray(res.actions) && res.actions.length > 0
+  return Array.isArray(res.actions) && res.actions.length > 0 && isFQN(res.actions[0]) && !isActionDesc(res.actions[0])
+}
+
+export function hasActionDescs(resource: ResourceWithNonOptionalMetadata): resource is WithActionDescs {
+  const res = resource as WithActionDescs
+  return Array.isArray(res.actions) && res.actions.length > 0 && isActionDesc(res.actions[0])
+}
+
+export interface WithPackages extends ResourceWithNonOptionalMetadata {
+  packages: PackageDesc[]
+}
+
+export function hasPackages(resource: ResourceWithNonOptionalMetadata): resource is WithPackages {
+  const res = resource as WithPackages
+  return Array.isArray(res.packages) && res.packages.length > 0
+}
+
+export interface WithRules extends ResourceWithNonOptionalMetadata {
+  rules: RuleDesc[]
+}
+
+export function hasRules(resource: ResourceWithNonOptionalMetadata): resource is WithRules {
+  const res = resource as WithRules
+  return Array.isArray(res.rules) && res.rules.length > 0
+}
+
+export interface WithTriggers extends ResourceWithNonOptionalMetadata {
+  triggers: TriggerDesc[]
+}
+
+export function hasTriggers(resource: ResourceWithNonOptionalMetadata): resource is WithTriggers {
+  const res = resource as WithTriggers
+  return Array.isArray(res.triggers) && res.triggers.length > 0
 }
 
 export interface WithFeeds extends ResourceWithNonOptionalMetadata {
@@ -283,6 +340,7 @@ export type Activation<T = Dict> = WithAnnotations &
     kind: 'Activation'
     start: number
     end: number
+    statusCode: number
   }
 
 export function isActivation<T extends Dict>(resource: ResourceWithNonOptionalMetadata): resource is Activation<T> {
@@ -361,3 +419,11 @@ export function isWebExported(resource: ResourceWithNonOptionalMetadata): boolea
     return false
   }
 }
+
+export type Namespace = OpenWhiskResource &
+  WithActionDescs &
+  WithPackages &
+  WithRules &
+  WithTriggers & {
+    kind: 'Namespace'
+  }

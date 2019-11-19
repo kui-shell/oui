@@ -21,7 +21,7 @@ import * as prettyPrintDuration from 'pretty-ms'
 
 import { Commands, REPL, UI } from '@kui-shell/core'
 
-import Activation from '../activation'
+import { Activation } from '../activation'
 import { sort, sortActivations, startTimeSorter, countSorter } from '../sorting'
 import { GroupData, TimelineData, groupByAction } from '../grouping'
 import { formatLegend } from '../legend'

@@ -16,10 +16,16 @@
 
 import { Registrar } from '@kui-shell/core/api/commands'
 
-import standardOptions from '../aliases'
 import respondWith from './as-activation'
+import { withStandardOptions } from '../usage'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
+
+const usage = {
+  command: 'result',
+  docs: 'get the result, i.e. return value, of an activation',
+  partial: '<activationId>'
+}
 
 export default (registrar: Registrar) => {
   synonyms('activations').forEach(syn => {
@@ -40,7 +46,7 @@ export default (registrar: Registrar) => {
           'result'
         )
       },
-      standardOptions
+      withStandardOptions(usage)
     )
   })
 }

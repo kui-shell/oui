@@ -17,26 +17,18 @@
 import Debug from 'debug'
 import * as prettyPrintDuration from 'pretty-ms'
 
+import { ActivationDesc } from 'openwhisk'
 import { Commands, REPL, Tables, UI } from '@kui-shell/core'
 
 import installHighlightJS from '../../hljs'
-import { Activation } from '../../../models/activation'
+import { Activation } from '../../../models/resource'
+import { ListOptions } from '../../../../controller/options'
 
 declare let hljs
 
 const debug = Debug('plugins/openwhisk/views/cli/activations/list')
 
-export interface ActivationListRow extends Tables.Row {
-  namespace?: string
-
-  annotations?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  sessionId?: string
-
-  activationId?: string
-
-  statusCode?: number
-}
+export type ActivationListRow = Tables.Row & Activation
 
 export interface ActivationListTable extends Tables.Table {
   body: ActivationListRow[]
@@ -86,6 +78,14 @@ const fetch = async (tab: UI.Tab, activationIds: Activation[] | string[]): Promi
 }
 
 /**
+ * Is this `activation` an apache composer session?
+ *
+ */
+export function isSession(activation: Activation | ActivationDesc) {
+  return !!activation.annotations.find(_ => _.key === 'conductor')
+}
+
+/**
  * Show an activation
  *
  */
@@ -99,9 +99,9 @@ const show = (activation: Activation): string => {
     // code will fall back to an activation get, if not
     const sessionId = activation.logs[0]
     return `wsk session get ${sessionId}`
-  } else if (activation.sessionId) {
+  } else if (isSession(activation)) {
     // we know for certain that this is a session
-    return `wsk session get ${activation.sessionId}`
+    return `wsk session get ${activation.activationId}`
   } else {
     // we know of certain that this is a plain activation, and
     // already have it in hand! no need to re-fetch
@@ -206,7 +206,9 @@ const _render = (args: Args) => {
   return Promise.all([
     fetch(tab, activationIds).then(activations => (entity ? [entity, ...activations] : activations)), // add entity to the front
     parsedOptions &&
-      (tab.REPL.qexec(`wsk activation count ${parsedOptions.name ? parsedOptions.name : ''}`) as Promise<number>)
+      (tab.REPL.qexec(`wsk activation count ${parsedOptions.name ? '--name ' + parsedOptions.name : ''}`) as Promise<
+        number
+      >)
   ]).then(([activations, count]) => {
     // duration of the activation. this will be helpful for
     // normalizing the bar dimensions
@@ -279,8 +281,8 @@ const _render = (args: Args) => {
       if (newLine) line = logTable.insertRow(-1)
       else line.classList.remove('not-displayed')
       line.className = 'log-line entity'
-      line.classList.add(activation.sessionId ? 'session' : 'activation')
-      line.setAttribute('data-name', activation.name)
+      line.classList.add(isSession(activation) ? 'session' : 'activation')
+      line.setAttribute('data-name', activation.metadata.name)
       if (entity && idx === 0) line.classList.add('log-line-root')
 
       let cellIdx = 0
@@ -294,7 +296,7 @@ const _render = (args: Args) => {
       if (newLine) id.appendChild(clicky)
       id.className = 'log-field activationId'
       if (noCrop) id.classList.add('full-width')
-      clicky.innerText = activation.originalActivationId || activation.activationId
+      clicky.innerText = activation.activationId
       id.setAttribute('data-activation-id', id.innerText)
       clicky.onclick = pip(show(activation))
 
@@ -304,7 +306,7 @@ const _render = (args: Args) => {
       const nameWithPackage = activation.annotations
         .find(_ => _.key === 'path')
         .value.toString()
-        .replace(`${activation.namespace}/`, '')
+        .replace(`${activation.metadata.namespace}/`, '')
       name.className = 'slightly-deemphasize log-field entity-name'
       nameClick.className = 'clickable'
       nameClick.innerText = nameWithPackage
@@ -313,7 +315,7 @@ const _render = (args: Args) => {
       // command to be executed when clicking on the entity name cell
       const path = activation.annotations && activation.annotations.find(({ key }) => key === 'path')
       const gridCommand = !path
-        ? `grid ${tab.REPL.encodeComponent(`/${activation.namespace}/${activation.name}`)}` // triggers, at least, have no path annotation
+        ? `grid ${tab.REPL.encodeComponent(`/${activation.metadata.namespace}/${activation.metadata.name}`)}` // triggers, at least, have no path annotation
         : `grid ${tab.REPL.encodeComponent(`/${path.value}`)}`
 
       nameClick.onclick = pip(gridCommand)
@@ -561,19 +563,14 @@ const _render = (args: Args) => {
       }
 
       // paginator description text
-      const ofNText =
-        activations.length > 0 && !activations[0].sessionId
-          ? ` of ${count < 10000 ? count : count.toLocaleString()}`
-          : ''
+      const ofNText = activations.length > 0 ? ` of ${count < 10000 ? count : count.toLocaleString()}` : ''
       description.innerText = `${skip + 1}\u2013${skip + activationIds.length} items${ofNText}`
 
       // pagination click handlers
       const goto = (skip: number) => () => {
-        const listCommand = activations.every(activation => activation.sessionId !== undefined)
-          ? 'session list'
-          : 'wsk activation list'
-        return tab.REPL.qexec<ActivationListTable>(`${listCommand} ${mapToOptions(parsedOptions, { skip })}`)
-          .then(activations => activations.body)
+        const listCommand = 'wsk activation list'
+        return tab.REPL.rexec<{ content: Activation[] }>(`${listCommand} ${mapToOptions(parsedOptions, { skip })}`)
+          .then(_ => _.content)
           .then(activationIds => {
             if (activationIds.length === 0) {
               // we're at the end! disable the next button
@@ -641,22 +638,20 @@ export const render = (opts: Args) => {
   }
 }
 
-interface Options extends Commands.ParsedOptions {
-  skip?: string
-  limit?: string
-}
-
 /**
  * A handler intended to be passed to cli.registerListView
  *
  */
 export const renderActivationListView = (
   tab: UI.Tab,
-  activationsTable: Tables.Table,
-  container: Element,
-  parsedOptions: Options
+  //  activationsTable: Tables.Table,
+  activations: Activation[],
+  parsedOptions: ListOptions
 ) => {
-  const activations = activationsTable.body as Activation[]
+  const ccontainer = document.createElement('div')
+  const container = document.createElement('div')
+  ccontainer.appendChild(container)
+  //  const activations = activationsTable.body as Activation[]
   debug('rendering activation list view', activations)
 
   const subset = Object.assign({}, parsedOptions)
@@ -673,8 +668,8 @@ export const renderActivationListView = (
     activationIds: activations,
     container,
     parsedOptions: subset,
-    skip: parsedOptions.skip ? parseInt(parsedOptions.skip, 10) : 0,
-    limit: parsedOptions.limit ? parseInt(parsedOptions.limit, 10) : activations.length,
+    skip: parsedOptions.skip || 0,
+    limit: parsedOptions.limit || 10,
     noPip: true,
     showResult: false,
     showStart: true,
@@ -686,4 +681,6 @@ export const renderActivationListView = (
     ;(container.parentNode as HTMLElement).classList.add('result-as-table')
     ;(container.parentNode as HTMLElement).classList.add('result-as-table-full-width')
   }
+
+  return ccontainer
 }

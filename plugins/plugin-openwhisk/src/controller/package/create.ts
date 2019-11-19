@@ -19,12 +19,31 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import ok from '../ok'
 import respondWith from './as-package'
-import standardOptions from '../aliases'
 import { kvOptions } from '../key-value'
+import { withStandardOptions } from '../usage'
 import { Package } from '../../lib/models/resource'
 import { synonyms } from '../../lib/models/synonyms'
-import { clientOptions, getClient } from '../../client/get'
 import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { clientOptions, getClient } from '../../client/get'
+import { paramsAndAnnotations, shared, aPackage, maybeDeployedPackage } from '../../lib/cmds/openwhisk-usage'
+
+const createUsage = {
+  command: 'create',
+  strict: 'create',
+  docs: 'create a new package',
+  example: `wsk package create <package>`,
+  required: aPackage,
+  optional: paramsAndAnnotations.concat(shared)
+}
+
+const updateUsage = {
+  command: 'update',
+  strict: 'update',
+  docs: 'update an existing package, or create one if it does not exist',
+  example: `wsk package update <package>`,
+  required: maybeDeployedPackage,
+  optional: paramsAndAnnotations.concat(shared)
+}
 
 /**
  * Create a package
@@ -61,7 +80,7 @@ const createPackage = (verb: string, overwrite: boolean) => async ({
 
 export default (registrar: Registrar) => {
   synonyms('packages').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/create`, createPackage('create', false), standardOptions)
-    registrar.listen(`/wsk/${syn}/update`, createPackage('update', true), standardOptions)
+    registrar.listen(`/wsk/${syn}/create`, createPackage('create', false), withStandardOptions(createUsage))
+    registrar.listen(`/wsk/${syn}/update`, createPackage('update', true), withStandardOptions(updateUsage))
   })
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 IBM Corporation
+ * Copyright 2019 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import { Common, Util } from '@kui-shell/test'
-import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
-describe('Suggestions for command not found ow-editor', function(this: Common.ISuite) {
-  before(openwhisk.before(this))
-  after(Common.after(this))
+import standardOptions from '../aliases'
+import { synonyms } from '../../lib/models/synonyms'
+import { getClient } from '../../client/get'
 
-  it('should present suggestions for "ne" -> new', () => {
-    return Util.expectSuggestionsFor.call(
-      this,
-      'ne', // type this
-      ['new'] // expect these completions
-    )
+async function doList({ execOptions }: Arguments) {
+  const raw = await getClient(execOptions).namespaces.list()
+  return raw[0]
+}
+
+export default (registrar: Registrar) => {
+  synonyms('namespaces').forEach(syn => {
+    registrar.listen(`/wsk/${syn}/list`, doList, standardOptions)
   })
-})
+}

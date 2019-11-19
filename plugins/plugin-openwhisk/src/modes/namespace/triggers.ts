@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import { hasVersion, WithVersion } from '../lib/models/resource'
+import { encodeComponent } from '@kui-shell/core/api/repl-util'
+
+import { fqn } from '../../controller/fqn'
+import { WithTriggers, hasTriggers } from '../../lib/models/resource'
 
 /**
- * Display resource version as a badge
+ * Namespace triggers drilldown
  *
  */
 export default {
-  when: hasVersion,
-  badge: (resource: WithVersion) => ({
-    title: resource.version,
-    css: 'version'
-  })
+  when: hasTriggers,
+  mode: {
+    mode: 'triggers',
+    label: 'Show Triggers',
+    kind: 'drilldown' as const,
+
+    command: (_, resource: WithTriggers) => `wsk namespace list-triggers ${encodeComponent(fqn(resource))}`
+  }
 }

@@ -25,12 +25,31 @@ import ok from '../ok'
 import toDict from '../dict'
 import kvOptions from '../key-value'
 import respondWith from './as-trigger'
-import standardOptions from '../aliases'
+import { withStandardOptions } from '../usage'
 import { Trigger } from '../../lib/models/resource'
 import { synonyms } from '../../lib/models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
+import { trigger, maybeDeployedTrigger, feed, paramsAndAnnotations } from '../../lib/cmds/openwhisk-usage'
 
 const debug = Debug('openwhisk/trigger/create')
+
+const createUsage = {
+  command: 'create',
+  strict: 'create',
+  docs: 'create new trigger',
+  example: 'wsk trigger create <trigger>',
+  required: trigger,
+  optional: feed.concat(paramsAndAnnotations)
+}
+
+const updateUsage = {
+  command: 'update',
+  strict: 'update',
+  docs: 'update an existing an trigger, or create one if it does not exist',
+  example: 'wsk trigger update <trigger>',
+  required: maybeDeployedTrigger,
+  optional: feed.concat(paramsAndAnnotations)
+}
 
 export interface Options extends ParsedOptions {
   feed?: string
@@ -124,7 +143,7 @@ const createTrigger = (verb: string, overwrite: boolean) => async ({
 
 export default (registrar: Registrar) => {
   synonyms('triggers').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/create`, createTrigger('create', false), standardOptions)
-    registrar.listen(`/wsk/${syn}/update`, createTrigger('update', true), standardOptions)
+    registrar.listen(`/wsk/${syn}/create`, createTrigger('create', false), withStandardOptions(createUsage))
+    registrar.listen(`/wsk/${syn}/update`, createTrigger('update', true), withStandardOptions(updateUsage))
   })
 }

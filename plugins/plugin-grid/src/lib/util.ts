@@ -21,7 +21,7 @@ import * as prettyPrintDuration from 'pretty-ms'
 
 import { Capabilities, Commands, Errors, eventBus, REPL, UI, Util } from '@kui-shell/core'
 
-import { ActivationListTable, currentNamespace } from '@kui-shell/plugin-openwhisk'
+import { currentNamespace } from '@kui-shell/plugin-openwhisk'
 
 import Activation from './activation'
 import { range as rangeParser } from './time'
@@ -173,8 +173,10 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
   const uptoArg = upto ? ` --upto ${upto}` : '' // this is part of the openwhisk API; upto a millis since epoch
   const sinceArg = since ? ` --since ${since}` : '' // ibid; after a millis since epoch
   const fetch = extraSkip =>
-    REPL.qexec(`wsk activation list ${nameFilter} --skip ${skip + extraSkip} --limit ${batchSize}${uptoArg}${sinceArg}`)
-      .then((activations: ActivationListTable) => activations.body)
+    REPL.rexec<{ content: Activation[] }>(
+      `wsk activation list ${nameFilter} --skip ${skip + extraSkip} --limit ${batchSize}${uptoArg}${sinceArg}`
+    )
+      .then(activations => activations.content)
       .catch(err => {
         // log but swallow errors, so that we can show the user something... hopefully, at least one of the fetches succeeds
         console.error(err)

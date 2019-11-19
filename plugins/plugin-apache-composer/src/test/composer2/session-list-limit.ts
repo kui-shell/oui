@@ -63,7 +63,7 @@ describe('session list --limit --skip', function(this: Common.ISuite) {
         if (expectedLength) {
           debug('acutal length', actualSessions.length)
           debug('expected length', expectedLength)
-          assert.ok(actualSessions.length === expectedLength)
+          assert.strictEqual(actualSessions.length, expectedLength)
         }
         for (let index = 0; index < expectedSessions.length; index++) {
           debug('actual session', actualSessions[index])

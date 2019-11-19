@@ -25,13 +25,12 @@ export function withStandardOptions(model: Errors.UsageModel): CommandOptions {
   return Object.assign({}, standardOptions, { usage })
 }
 
-export const standardListUsage = (syn: string) =>
+export const standardListUsage = (syn: string, withName = false, command = 'list') =>
   withStandardOptions({
-    breadcrumb: 'list',
-    command: 'list',
-    strict: 'list',
+    command,
+    strict: command,
     docs: `list all ${syn} entities`,
-    example: `wsk ${syn} list`,
+    example: `wsk ${syn} ${command}`,
     optional: [
       {
         name: 'package',
@@ -39,5 +38,7 @@ export const standardListUsage = (syn: string) =>
         entity: 'wsk package',
         docs: `list all ${syn} entities in a given package`
       }
-    ].concat(skipAndLimit)
+    ]
+      .concat(skipAndLimit)
+      .concat(withName ? [{ name: '--name', positional: false, entity: '', docs: 'Filter by name' }] : [])
   })

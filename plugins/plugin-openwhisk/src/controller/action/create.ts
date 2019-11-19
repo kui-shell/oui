@@ -30,7 +30,6 @@ import { synonyms } from '../../lib/models/synonyms'
 import { KeyValOptions, kvOptions } from '../key-value'
 import respondWith from './as-action'
 import { withStandardOptions } from '../usage'
-
 import { actionMix, deployedAction, sourceFile } from '../../lib/cmds/openwhisk-usage'
 
 const debug = Debug('openwhisk/actions/create')
@@ -284,23 +283,23 @@ async function spec(
   return Object.assign(action, clientOptions)
 }
 
-const createUsage = {
+export const createUsage = withStandardOptions({
   command: 'create',
   docs: 'create a new action',
   strict: 'create',
   example: 'wsk action create <action> <sourceFile>',
   required: [{ name: 'name', docs: 'the name of your new action' }],
   optional: sourceFile.concat([{ name: '--docker', docs: 'use a dockerhub image for the action' }]).concat(actionMix)
-}
+})
 
-const updateUsage = {
+export const updateUsage = withStandardOptions({
   command: 'update',
   docs: 'update an existing action, or create one if it does not exist',
   strict: 'update',
   example: 'wsk action update <action> [sourceFile]',
   required: deployedAction,
   optional: sourceFile.concat(actionMix)
-}
+})
 
 const doCreate = (verb: string, overwrite: boolean) => async (args: Arguments<Options>) => {
   const { argv, parsedOptions, execOptions } = args
@@ -322,7 +321,7 @@ const doCreate = (verb: string, overwrite: boolean) => async (args: Arguments<Op
 
 export default (registrar: Registrar) => {
   synonyms('actions').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/create`, doCreate('create', false), withStandardOptions(createUsage))
-    registrar.listen(`/wsk/${syn}/update`, doCreate('update', true), withStandardOptions(updateUsage))
+    registrar.listen(`/wsk/${syn}/create`, doCreate('create', false), createUsage)
+    registrar.listen(`/wsk/${syn}/update`, doCreate('update', true), updateUsage)
   })
 }

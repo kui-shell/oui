@@ -18,6 +18,7 @@ import * as prettyPrintDuration from 'pretty-ms'
 
 import { UI } from '@kui-shell/core'
 
+import { Activation } from './activation'
 import { drilldownWith } from './drilldown'
 import { newline, latencyBucket } from './util'
 
@@ -29,7 +30,7 @@ export const renderCell = (
   tab: UI.Tab,
   returnTo: string,
   cell: HTMLElement,
-  activation: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  activation: Activation,
   isFailure = !activation.response.success,
   duration: number = activation.end - activation.start,
   latBucket: number = isFailure ? -1 : latencyBucket(duration),
@@ -92,8 +93,13 @@ export const renderCell = (
     const statusCode =
       isFailure &&
       result &&
-      (result.code || result.statusCode || (result.error && (result.error.code || result.error.statusCode)))
-    const errorMessage = isFailure && result && (result.message || (result.error && result.error.message))
+      (result.code ||
+        result.statusCode ||
+        (result.error && typeof result.error !== 'string' && (result.error.code || result.error.statusCode)))
+    const errorMessage =
+      isFailure &&
+      result &&
+      (result.message || (result.error && typeof result.error !== 'string' && result.error.message))
 
     // failure versus success message for tooltip
     const msg = isFailure
@@ -112,16 +118,16 @@ export const renderCell = (
       second: 'numeric'
     })
 
+    const name = activation.name || (activation.metadata && activation.metadata.name)
+
     // cell.setAttribute('data-activation-id', activation.activationId)
     cell.id = activation.activationId
     cell['isFailure'] = isFailure
-    cell.setAttribute('data-action-name', activation.name)
+    cell.setAttribute('data-action-name', name)
     cell.setAttribute('data-balloon-break', 'data-balloon-break')
     cell.setAttribute(
       'data-balloon',
-      `${
-        options && options.nameInTooltip ? 'Action: ' + activation.name + newline : ''
-      }${prettyStart}${msg}${extraTooltip}`
+      `${options && options.nameInTooltip ? 'Action: ' + name + newline : ''}${prettyStart}${msg}${extraTooltip}`
     )
     cell.setAttribute('data-balloon-pos', options.balloonPos || 'up')
   }
