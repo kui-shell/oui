@@ -22,7 +22,7 @@ import { synonyms } from '../../lib/models/synonyms'
 import { copy, nameForList, ListOptions } from '../options'
 import { clientOptions, getClient } from '../../client/get'
 import { asActivation, asActivationTable } from './as-activation'
-import { isSession, renderActivationListView } from '../../lib/views/cli/activations/list'
+import { isSession, renderActivationListView } from '../../views/activation/list'
 
 import { list as listUsage } from './usage'
 

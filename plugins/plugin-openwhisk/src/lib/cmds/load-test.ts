@@ -22,9 +22,10 @@
 
 import Debug from 'debug'
 
-import { Commands } from '@kui-shell/core'
+import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
 
-import { parseOptions, getClient, owOpts } from './openwhisk-core'
+import { kvOptions } from '../../controller/key-value'
+import { clientOptions, getClient } from '../../client/get'
 
 const debug = Debug('plugins/openwhisk/cmds/load-test')
 
@@ -171,42 +172,38 @@ const makeValidator = (template, { numThreads, numIters }) => {
   }
 }
 
+interface Options extends ParsedOptions {
+  numIters?: number
+  numThreads?: number
+  thinkTime?: number
+  validator?: string
+}
+
 /**
  * The loadtest command handler
  *
  */
-const loadtest = (verb: string) => ({
-  argv: argvWithOptions,
-  argvNoOptions: argv,
-  parsedOptions,
-  execOptions
-}: Commands.Arguments) => {
-  const pair = parseOptions(argvWithOptions.slice(argvWithOptions.indexOf(verb) + 1), 'action')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const options: Record<string, any> = Object.assign({}, parsedOptions, pair.kvOptions)
+const loadtest = (verb: string) => ({ argv, parsedOptions, execOptions }: Arguments<Options>) => {
+  const { kv, nameIdx } = kvOptions(argv, verb)
 
-  const action = argv[argv.indexOf(verb) + 1]
-  const numThreads = options.numThreads || 4
-  const numIters = options.numIters || 10
-  const thinkTime = Object.prototype.hasOwnProperty.call(options, 'thinkTime') ? options.thinkTime : 100
+  const action = argv[nameIdx]
+  const numThreads = parsedOptions.numThreads || 4
+  const numIters = parsedOptions.numIters || 10
+  const thinkTime = Object.prototype.hasOwnProperty.call(parsedOptions, 'thinkTime') ? parsedOptions.thinkTime : 100
 
   debug('action', action)
-  debug('options', options)
   debug('numThreads', numThreads)
   debug('numIters', numIters)
   debug('thinkTime', thinkTime)
 
-  if (!action || options.help) {
+  if (!action) {
     throw new Error(usage(verb))
   }
 
   const results = []
-  const validator = makeValidator(options.validator, { numThreads, numIters })
+  const validator = makeValidator(parsedOptions.validator, { numThreads, numIters })
 
-  console.error(
-    `loadtest action=${action} numThreads=${numThreads} numIters=${numIters} thinkTime=${thinkTime}`,
-    options
-  )
+  console.error(`loadtest action=${action} numThreads=${numThreads} numIters=${numIters} thinkTime=${thinkTime}`)
 
   interface Tally {
     durations: {
@@ -239,16 +236,13 @@ const loadtest = (verb: string) => ({
         countDown()
       } else {
         // invoke the action with the given parameters
-        const params =
-          options.action &&
-          options.action.parameters &&
-          options.action.parameters.reduce((M, kv) => {
-            M[kv.key] = kv.value
-            return M
-          }, {})
+        const params = kv.parameters.reduce((M, kv) => {
+          M[kv.key] = kv.value
+          return M
+        }, {})
 
         getClient(execOptions)
-          .actions.invoke(owOpts({ name: action, params: params || {}, blocking: true }))
+          .actions.invoke(Object.assign({ name: action, params: params || {}, blocking: true }, clientOptions))
           .then(activation => {
             const duration = activation.end - activation.start
             if (activation.response && activation.response.success) {
@@ -284,7 +278,7 @@ const loadtest = (verb: string) => ({
 }
 
 /** this is the auth body */
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   const loadtestCmd = commandTree.listen('/wsk/testing/lt', loadtest('lt'), {
     usage: {
       command: 'lt',

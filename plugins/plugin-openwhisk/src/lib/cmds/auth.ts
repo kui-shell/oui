@@ -25,8 +25,8 @@ import Debug from 'debug'
 import { Capabilities, Commands, Errors, eventBus, Tables, UI, Util } from '@kui-shell/core'
 import { clearSelection } from '@kui-shell/core/webapp/views/sidecar'
 
+import getClient from '../../client/get'
 import * as namespace from '../models/namespace'
-import { getClient, owOpts } from './openwhisk-core'
 import { apiHost, auth as authModel } from '../models/auth'
 
 const debug = Debug('plugins/openwhisk/cmds/auth')
@@ -637,7 +637,7 @@ export default async (commandTree: Commands.Registrar) => {
     ({ execOptions }) => {
       // the api returns, as a historical artifact, an array of length 1
       return getClient(execOptions)
-        .namespaces.list(owOpts())
+        .namespaces.list()
         .then(A => A[0])
     },
     { hidden: true }
