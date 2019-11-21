@@ -32,25 +32,25 @@
  */
 
 import Debug from 'debug'
-import { Action as OWAction, Exec, Kind } from 'openwhisk'
+import { basename } from 'path'
 import * as needle from 'needle'
 import * as withRetry from 'promise-retry'
-import { basename } from 'path'
+import { Action as OWAction, Exec, Kind } from 'openwhisk'
 import { existsSync, lstat, readFile, readFileSync, unlink, writeFile } from 'fs'
 
-import { inBrowser } from '@kui-shell/core/api/capabilities'
-import Commands from '@kui-shell/core/api/commands'
 import Util from '@kui-shell/core/api/util'
+import Commands from '@kui-shell/core/api/commands'
+import { inBrowser } from '@kui-shell/core/api/capabilities'
 
-import { synonyms } from '../../models/synonyms'
-import { deployHTMLViaOpenWhisk } from './_html'
-import { current as currentNamespace } from '../../models/namespace'
+import { synonyms } from '../../../lib/models/synonyms'
+import { deployHTMLViaOpenWhisk } from './html'
+import { current as currentNamespace } from '../../../lib/models/namespace'
 import { ANON_KEY, ANON_KEY_FQN, ANON_CODE, isAnonymousLet, isAnonymousLetFor } from './let-core'
 
+import respondWith from '../as-action'
 import { Action } from '../../../lib/models/resource'
-import { KeyValOptions, kvOptions } from '../../../controller/key-value'
+import { KeyValOptions, kvOptions } from '../../key-value'
 import { clientOptions, getClient } from '../../../client/get'
-import respondWith from '../../../controller/action//as-action'
 
 const debug = Debug('plugin/openwhisk/cmds/actions/let')
 

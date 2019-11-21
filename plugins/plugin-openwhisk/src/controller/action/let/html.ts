@@ -18,13 +18,14 @@ import { lstat, readFile } from 'fs'
 import { dirname, resolve as pathResolve } from 'path'
 import { Parser } from 'htmlparser2/lib/Parser'
 
-import { Commands, Util } from '@kui-shell/core'
+import { Arguments } from '@kui-shell/core/api/commands'
+import Util from '@kui-shell/core/api/util'
 
 /**
  * Deploy a linked asset
  *
  */
-const link = ({ REPL }: Commands.Arguments, dir: string, file: string): Promise<void> =>
+const link = ({ REPL }: Arguments, dir: string, file: string): Promise<void> =>
   new Promise((resolve, reject) => {
     const filepath = pathResolve(dir, file)
     lstat(filepath, (err, stats) => {
@@ -67,7 +68,7 @@ const webbify = (uri: string): string => {
  * Deploy an HTML page, along with any locally linked scripts and stylesheets
  *
  */
-export const deployHTMLViaOpenWhisk = (command: Commands.Arguments, location: string) =>
+export const deployHTMLViaOpenWhisk = (command: Arguments, location: string) =>
   new Promise((resolve, reject) => {
     try {
       const filepath = Util.expandHomeDir(location)

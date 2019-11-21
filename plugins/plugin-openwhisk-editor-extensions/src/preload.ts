@@ -18,10 +18,8 @@ import Debug from 'debug'
 const debug = Debug('plugins/openwhisk-editor-extensions/preload')
 debug('loading')
 
-import { Tabs } from '@kui-shell/core/api/ui'
 import Capabilities from '@kui-shell/core/api/capabilities'
-
-import { lockIcon, edit, registerFetcher } from '@kui-shell/plugin-editor'
+import { registerFetcher } from '@kui-shell/plugin-editor'
 
 debug('done loading prereqs')
 
@@ -33,36 +31,8 @@ export default async () => {
   debug('initializing')
 
   if (!Capabilities.isHeadless()) {
-    const { Models } = await import('@kui-shell/core/api/models')
-    const { persisters } = await import('./lib/cmds/new')
-
-    const getEntity = (tab: Tabs.Tab) => {
-      const entity = Models.Selection.current(tab)
-      entity['persister'] = persisters.actions
-      debug('getEntity', entity)
-      return entity
-    }
-
-    const { gotoReadonlyView, fetchAction } = await import('./lib/cmds/new')
-
+    const { fetchAction } = await import('./lib/cmds/new')
     registerFetcher(fetchAction())
-
-    const unlock = lockIcon({
-      getEntity,
-      mode: 'unlock',
-      label: 'Edit',
-      // icon: 'fas fa-lock',
-      tooltip: 'Click to edit', // TODO externalize string
-      direct: edit({
-        getEntity,
-        lock: ({ getEntity }) => lockIcon({ getEntity, direct: gotoReadonlyView({ getEntity }) })
-      })
-    })
-
-    setTimeout(async () => {
-      const { addActionMode } = await import('@kui-shell/plugin-openwhisk')
-      addActionMode(unlock, 'unshift')
-    })
   }
 }
 

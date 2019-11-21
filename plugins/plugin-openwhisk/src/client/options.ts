@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { type as osType } from 'os'
 import { Agent as HttpAgent } from 'http'
 import { Agent as HttpsAgent } from 'https'
-import { type as osType } from 'os'
-import agent from '../lib/models/agent'
+
 import Settings from '@kui-shell/core/api/settings'
 import { inBrowser } from '@kui-shell/core/api/capabilities'
+
+import agent from './agent'
 
 const isLinux = osType() === 'Linux'
 

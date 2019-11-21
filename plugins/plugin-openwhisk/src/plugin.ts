@@ -65,8 +65,11 @@ import ruleStatus from './controller/rule/status'
 
 // oui value-add commands
 import listAll from './controller/list-all'
-import last from './controller/activation/last'
 import webbify from './controller/action/webbify'
+import letCommand from './controller/action/let/let'
+import last from './controller/activation/last'
+import on from './controller/rule/on'
+import every from './controller/rule/every'
 
 // finally, these commands have yet to be audited against the latest
 // kui-core API
@@ -77,9 +80,6 @@ import auth from './lib/cmds/auth'
 import wipe from './lib/cmds/wipe'
 import context from './lib/cmds/context'
 import loadTest from './lib/cmds/load-test'
-import letCommand from './lib/cmds/actions/let'
-import on from './lib/cmds/rules/on'
-import every from './lib/cmds/rules/every'
 
 export default async (registrar: Registrar) => {
   // oui value-add commands, on top of the basic openwhisk commands

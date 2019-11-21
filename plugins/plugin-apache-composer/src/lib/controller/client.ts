@@ -18,7 +18,7 @@ import Debug from 'debug'
 
 import * as Client from 'openwhisk-composer/client'
 
-import { agent } from '@kui-shell/plugin-openwhisk'
+import { clientOptions } from '@kui-shell/plugin-openwhisk'
 
 const debug = Debug('plugins/apache-composer/client')
 const options = {
@@ -36,9 +36,8 @@ const options = {
 export const deploy = ({ composition, overwrite }) => {
   // deploys the JSON-encoded composition
   debug('deploying composition', composition)
-  const httpOptons = { agent: agent() }
   return Client(options)
-    .compositions.deploy(composition, overwrite, undefined, undefined, undefined, undefined, undefined, httpOptons)
+    .compositions.deploy(composition, overwrite, undefined, undefined, undefined, undefined, undefined, clientOptions)
     .then(entity => {
       // delploy returns [{...}]
       return Object.assign({}, { name: entity[0].id, verb: 'update', type: 'composition' }, entity[0])

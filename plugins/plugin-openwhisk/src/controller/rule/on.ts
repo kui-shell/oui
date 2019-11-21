@@ -22,18 +22,21 @@
  *
  */
 
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Rule, Trigger } from '../../lib/models/resource'
+
 /**
  * on <trigger> do <action>
  *
  */
-const on = ({ argvNoOptions: argv, parsedOptions, REPL }) => {
+const on = ({ argvNoOptions: argv, parsedOptions, REPL }: Arguments) => {
   const idx = argv.indexOf('on') + 1
 
   const trigger = argv[idx]
   const action = argv[idx + 2]
   const rule = parsedOptions.name || `on_${trigger}_do_${action.replace(/\//g, '_')}`
 
-  return REPL.qexec(`wsk trigger get ${trigger}`, null, null, { noRetry: true })
+  return REPL.qexec<Trigger>(`wsk trigger get ${trigger}`, null, null, { noRetry: true })
     .catch(err => {
       if (err.statusCode === 404) {
         return REPL.qexec(`wsk trigger update ${trigger}`)
@@ -43,13 +46,13 @@ const on = ({ argvNoOptions: argv, parsedOptions, REPL }) => {
     })
     .then(() => REPL.qexec(`wsk rule update ${rule} ${trigger} ${action}`))
     .then(() => REPL.qexec(`wsk rule enable ${rule}`))
-    .then(() => REPL.qexec(`wsk rule get ${rule}`))
+    .then(() => REPL.qexec<Rule>(`wsk rule get ${rule}`))
 }
 
 /**
  * Register command handlers
  *
  */
-export default commandTree => {
-  commandTree.listen(`/wsk/on`, on, { docs: 'Create an OpenWhisk rule' })
+export default (registrar: Registrar) => {
+  registrar.listen(`/wsk/on`, on, { docs: 'Create an OpenWhisk rule' })
 }

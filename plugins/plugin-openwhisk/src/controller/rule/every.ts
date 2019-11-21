@@ -25,7 +25,8 @@
 
 import * as parse from 'parse-duration'
 
-import { Commands } from '@kui-shell/core'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Rule, Trigger } from '../../lib/models/resource'
 
 const MILLIS_PER_SECOND = 1000
 
@@ -33,7 +34,7 @@ const MILLIS_PER_SECOND = 1000
  * Command handler
  *
  */
-const doEvery = async ({ argv, REPL }: Commands.Arguments) => {
+const doEvery = async ({ argv, REPL }: Arguments) => {
   const actionName = argv[argv.length - 1]
   const timeSpec = argv.slice(1, argv.length - 2)
   const timeSpecString = timeSpec.join(' ')
@@ -47,7 +48,7 @@ const doEvery = async ({ argv, REPL }: Commands.Arguments) => {
   const safeTimeSpec = timeSpecString.replace(/"/, '').replace(/'/, '') // no quotes
 
   try {
-    await REPL.qexec(`wsk trigger get ${triggerName}`, null, null, {
+    await REPL.qexec<Trigger>(`wsk trigger get ${triggerName}`, null, null, {
       noRetry: true
     })
   } catch (err) {
@@ -60,17 +61,16 @@ const doEvery = async ({ argv, REPL }: Commands.Arguments) => {
     }
   }
 
-  return REPL.qexec(`wsk rule update ${ruleName} ${triggerName} ${actionName}`)
+  return REPL.qexec<Rule>(`wsk rule update ${ruleName} ${triggerName} ${actionName}`)
 }
 
 /**
  * Register the command
  *
  */
-export default commandTree => {
+export default (registrar: Registrar) => {
   // install the routes
-  commandTree.listen('/wsk/every', doEvery, {
+  registrar.listen('/wsk/every', doEvery, {
     docs: 'Execute an OpenWhisk action periodically; e.g. "every 5 sec do foo"'
   })
-  // commandTree.listen('/wsk/never', doEvery, { docs: 'Remove a periodic execution; e.g. "never 5 sec do foo"' })
 }
