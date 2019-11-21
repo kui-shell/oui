@@ -34,7 +34,7 @@ import { currentSelection } from '../models/selection'
 import { OpenWhiskResource, Package, Action } from '../models/resource'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { isAnonymousLet } = require('./actions/let-core')
+const { isAnonymousLet } = require('../../controller/action/let/let-core')
 
 /** sum of numbers in an array */
 // const arraySum = A => A.reduce((sum, c) => sum + c, 0)

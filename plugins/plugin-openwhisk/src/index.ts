@@ -16,9 +16,8 @@
 
 // this file defines the external API
 
-export { default as agent } from './lib/models/agent'
+export { default as clientOptions } from './client/options'
 export { synonyms } from './lib/models/synonyms'
-export { addActionMode } from './lib/models/modes'
 export { default as withHeader } from './lib/models/withHeader'
 export { currentSelection } from './lib/models/selection'
 export {
