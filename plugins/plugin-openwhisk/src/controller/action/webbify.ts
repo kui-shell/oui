@@ -21,15 +21,18 @@
  *
  */
 
-import { Commands, Models, UI } from '@kui-shell/core'
+import { KeyVal } from 'openwhisk'
+import Models from '@kui-shell/core/api/models'
+import { Tab } from '@kui-shell/core/api/ui-lite'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
-import { getClient, owOpts } from '../openwhisk-core'
-import { synonyms } from '../../models/synonyms'
-import { fqnOfDesc } from '../../../controller/fqn'
+import { fqnOfDesc } from '../fqn'
+import { synonyms } from '../../lib/models/synonyms'
+import { clientOptions, getClient } from '../../client/get'
 
 // some helpers for the pattern matcher, helping to find the components of a match
-const matchOf = idx => match => match[idx] // the match is idx'th element of the result of string.match
-const fixedOf = val => () => val // the match is always a fixed value
+const matchOf = (idx: number) => match => match[idx] // the match is idx'th element of the result of string.match
+const fixedOf = (val: string) => () => val // the match is always a fixed value
 
 /**
  * The patterns to look for. These are carefully ordered in priority order.
@@ -38,7 +41,7 @@ const fixedOf = val => () => val // the match is always a fixed value
 const matchers = [
   {
     pattern: /^\s*wsk\s+(action|actions)\s+webbify\s+as\s+(.+)\s*$/,
-    action: (_, tab: UI.Tab) => Models.Selection.current(tab),
+    action: (_, tab: Tab) => Models.Selection.current(tab),
     mimeType: matchOf(2)
   },
   {
@@ -53,7 +56,7 @@ const matchers = [
   },
   {
     pattern: /^\s*wsk\s+(action|actions)\s+webbify\s*$/,
-    action: (_, tab: UI.Tab) => Models.Selection.current(tab),
+    action: (_, tab: Tab) => Models.Selection.current(tab),
     mimeType: fixedOf('json')
   }
 ]
@@ -75,7 +78,7 @@ const theDocs = (docString: string) =>
  * Add the webbifying annotations to the given `annotations` key-value array.
  *
  */
-const addAnnotations = (annotations, mimeType) => {
+const addAnnotations = (annotations: KeyVal[], mimeType: string) => {
   if (!annotations) {
     annotations = []
   }
@@ -102,7 +105,7 @@ const addAnnotations = (annotations, mimeType) => {
  * required annotations, then updates the backend.
  *
  */
-const doWebbify = ({ command, execOptions, tab, REPL }: Commands.Arguments) => {
+const doWebbify = ({ command, execOptions, tab, REPL }: Arguments) => {
   return Promise.all(
     matchers.map(matcher => ({
       matcher: matcher,
@@ -128,16 +131,19 @@ const doWebbify = ({ command, execOptions, tab, REPL }: Commands.Arguments) => {
       // fetch, update, render to user
       const ow = getClient(execOptions)
       return ow.actions
-        .get(owOpts({ name: action.name || action, namespace: action.namespace }))
+        .get(Object.assign({ name: action.name || action, namespace: action.namespace }, clientOptions))
         .then(action =>
           ow.actions.update(
-            owOpts({
-              name: action.name,
-              namespace: action.namespace,
-              action: Object.assign(action, {
-                annotations: addAnnotations(action.annotations, mimeType)
-              })
-            })
+            Object.assign(
+              {
+                name: action.name,
+                namespace: action.namespace,
+                action: Object.assign(action, {
+                  annotations: addAnnotations(action.annotations, mimeType)
+                })
+              },
+              clientOptions
+            )
           )
         )
         .then(_ => REPL.qexec(`wsk action get "${fqnOfDesc(_)}"`))
@@ -149,7 +155,7 @@ const doWebbify = ({ command, execOptions, tab, REPL }: Commands.Arguments) => {
  * /wsk/action/webbify commands.
  *
  */
-export default (commandTree: Commands.Registrar) => {
+export default (commandTree: Registrar) => {
   synonyms('actions').forEach(syn => {
     commandTree.listen(`/wsk/${syn}/webbify`, doWebbify, theDocs('Export an action to the web'))
   })

@@ -28,3 +28,5 @@ export const getClient = (execOptions: ExecOptions.ExecOptions): Client => {
     return initOW()
   }
 }
+
+export default getClient

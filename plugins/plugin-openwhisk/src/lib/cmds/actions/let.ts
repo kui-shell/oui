@@ -32,20 +32,25 @@
  */
 
 import Debug from 'debug'
-import * as minimist from 'yargs-parser'
+import { Action as OWAction, Exec, Kind } from 'openwhisk'
 import * as needle from 'needle'
 import * as withRetry from 'promise-retry'
 import { basename } from 'path'
 import { existsSync, lstat, readFile, readFileSync, unlink, writeFile } from 'fs'
 
-import { Capabilities, Commands, Util } from '@kui-shell/core'
+import { inBrowser } from '@kui-shell/core/api/capabilities'
+import Commands from '@kui-shell/core/api/commands'
+import Util from '@kui-shell/core/api/util'
 
-import { OpenWhiskEntity, Action } from '../../models/openwhisk-entity'
 import { synonyms } from '../../models/synonyms'
 import { deployHTMLViaOpenWhisk } from './_html'
 import { current as currentNamespace } from '../../models/namespace'
-import { addPrettyType, getClient, owOpts as wskOpts, parseOptions } from '../openwhisk-core'
 import { ANON_KEY, ANON_KEY_FQN, ANON_CODE, isAnonymousLet, isAnonymousLetFor } from './let-core'
+
+import { Action } from '../../../lib/models/resource'
+import { KeyValOptions, kvOptions } from '../../../controller/key-value'
+import { clientOptions, getClient } from '../../../client/get'
+import respondWith from '../../../controller/action//as-action'
 
 const debug = Debug('plugin/openwhisk/cmds/actions/let')
 
@@ -214,7 +219,12 @@ const isWebAsset = (action: Options) => action.annotations && action.annotations
  * Create a zip action, given the location of a zip file
  *
  */
-const makeZipActionFromZipFile = (name: string, location: string, options, execOptions: Commands.ExecOptions) =>
+const makeZipActionFromZipFile = (
+  name: string,
+  location: string,
+  options: { kind: Kind; kv: KeyValOptions },
+  execOptions: Commands.ExecOptions
+) =>
   new Promise((resolve, reject) => {
     try {
       debug('makeZipActionFromZipFile', name, location, options)
@@ -228,7 +238,7 @@ const makeZipActionFromZipFile = (name: string, location: string, options, execO
             )
           )
         } else {
-          readFile(location, (err, data) => {
+          readFile(location, async (err, data) => {
             if (err) {
               reject(err)
             } else {
@@ -237,17 +247,20 @@ const makeZipActionFromZipFile = (name: string, location: string, options, execO
                   kind: options.kind || 'nodejs:default',
                   code: data.toString('base64')
                 },
-                annotations: (options.action && options.action.annotations) || [],
-                parameters: (options.action && options.action.parameters) || [],
-                limits: (options.action && options.action.limits) || {}
+                annotations: options.kv.annotations,
+                parameters: options.kv.parameters,
+                limits: options.kv.limits
               }
               debug('body', action)
 
-              const owOpts = wskOpts({
-                name,
-                // options.action may be defined, if the command has e.g. -a or -p
-                action
-              })
+              const owOpts = Object.assign(
+                {
+                  name,
+                  // options.action may be defined, if the command has e.g. -a or -p
+                  action
+                },
+                clientOptions
+              )
 
               // location on local filesystem
               owOpts.action.annotations.push({
@@ -270,11 +283,13 @@ const makeZipActionFromZipFile = (name: string, location: string, options, execO
               // broadcast that this is a binary action
               owOpts.action.annotations.push({ key: 'binary', value: true })
 
-              return getClient(execOptions)
-                .actions.update(owOpts)
-                .then(addPrettyType('actions', 'update', name))
-                .then(resolve)
-                .catch(reject)
+              try {
+                const raw = await getClient(execOptions).actions.update(owOpts)
+
+                resolve(respondWith(raw))
+              } catch (err) {
+                reject(err)
+              }
             }
           })
         }
@@ -333,17 +348,17 @@ const webAssetTransformer = (location, text, extension) => {
  * Create an HTML, CSS, script-js, etc. action
  *
  */
-const makeWebAsset = (
+const makeWebAsset = async (
   name: string,
   extension: string,
   location: string,
   text: string,
-  options,
+  options: { kv: KeyValOptions },
   execOptions: Commands.ExecOptions
 ) => {
   const extensionWithoutDot = extension.substring(1)
-  const action = Object.assign({}, options.action, {
-    exec: { kind: 'nodejs:default' }
+  const action: OWAction = Object.assign({}, options.kv, {
+    exec: { kind: 'nodejs:default' as const, code: '' }
   })
 
   // add annotations
@@ -365,13 +380,10 @@ const makeWebAsset = (
       }
     ]
   })
+  ;(action.exec as Exec).code = webAssetTransformer(location, text, extension)
 
-  action.exec.code = webAssetTransformer(location, text, extension)
-
-  const owOpts = wskOpts({ name, action })
-  return getClient(execOptions)
-    .actions.update(owOpts)
-    .then(addPrettyType('actions', 'update', name))
+  const owOpts = Object.assign({ name, action }, clientOptions)
+  return respondWith(await getClient(execOptions).actions.update(owOpts))
 }
 
 /** here is the module */
@@ -387,7 +399,7 @@ export default async (commandTree: Commands.Registrar) => {
     mimeType: string,
     location: string,
     letType: string,
-    options,
+    options: { kind: Kind; kv: KeyValOptions },
     command: Commands.Arguments,
     execOptions: Commands.ExecOptions
   ) => {
@@ -427,23 +439,26 @@ export default async (commandTree: Commands.Registrar) => {
   ) =>
     getClient(execOptions)
       .actions.create(
-        wskOpts({
-          name: desiredName || `${baseName}-${idx}-${iter}`,
-          action: {
-            exec: {
-              kind: 'nodejs:default',
-              code: code
-            },
-            annotations: [
-              {
-                key: ANON_KEY_FQN,
-                value: `/${currentNamespace()}/${parentActionName}`
+        Object.assign(
+          {
+            name: desiredName || `${baseName}-${idx}-${iter}`,
+            action: {
+              exec: {
+                kind: 'nodejs:default' as const,
+                code: code
               },
-              { key: ANON_KEY, value: parentActionName },
-              { key: ANON_CODE, value: code.replace(/^let main = /, '') }
-            ] // .*\s*=>\s*
-          }
-        })
+              annotations: [
+                {
+                  key: ANON_KEY_FQN,
+                  value: `/${currentNamespace()}/${parentActionName}`
+                },
+                { key: ANON_KEY, value: parentActionName },
+                { key: ANON_CODE, value: code.replace(/^let main = /, '') }
+              ] // .*\s*=>\s*
+            }
+          },
+          clientOptions
+        )
       )
       .then(action => {
         currentIter++ // optimization
@@ -491,7 +506,7 @@ export default async (commandTree: Commands.Registrar) => {
       mimeType: string,
       location: string,
       letType = 'let',
-      options = {},
+      options: { kind: Kind; kv: KeyValOptions },
       command: Commands.Arguments,
       execOptions: Commands.ExecOptions = {}
     ) => {
@@ -537,7 +552,7 @@ export default async (commandTree: Commands.Registrar) => {
         const candidateName = `${parentActionName}-${idx + 1}`
         return createWithRetryOnName(body, parentActionName, execOptions, idx, currentIter, candidateName)
       } else {
-        if (!Capabilities.inBrowser() && existsSync(Util.expandHomeDir(component))) {
+        if (!inBrowser() && existsSync(Util.expandHomeDir(component))) {
           debug('sequence component is local file', component)
           // then we assume that the component identifies a local file
           //    note: the first step reserves a name
@@ -551,7 +566,7 @@ export default async (commandTree: Commands.Registrar) => {
           )
             .then(reservedAction => reservedAction.name)
             .then(reservedName =>
-              maybeComponentIsFile(reservedName, undefined, component, 'let', {}, args, { nested: true })
+              maybeComponentIsFile(reservedName, undefined, component, 'let', undefined, args, { nested: true })
             )
         } else {
           debug('sequence component is named action', component)
@@ -564,17 +579,7 @@ export default async (commandTree: Commands.Registrar) => {
       return Promise.all(components.map(furlSequenceComponent(parentActionName)))
     }
 
-    const argvWithOptions = fullArgv
-    const pair = parseOptions(argvWithOptions.slice(), 'action')
-    const regularOptions = minimist(pair.argv, {
-      configuration: { 'camel-case-expansion': false }
-    })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const options: Record<string, any> = Object.assign({}, regularOptions, pair.kvOptions)
-    const argv: string[] = options._
-
-    // remove the minimist bits
-    delete options._
+    const { kv, argvNoOptions: argv } = kvOptions(fullArgv, 'let')
 
     // debug('args', options, fullCommand)
 
@@ -603,13 +608,14 @@ export default async (commandTree: Commands.Registrar) => {
          throw new Error('Please use a name with an extension of .js, .py')
          } */
 
-      const action: OpenWhiskEntity = options.action || {}
-      action.exec = {
-        kind: kind,
-        code: code
-      }
+      const action: OWAction = {
+          exec: {
+            kind: kind,
+            code: code
+          }
+        }
 
-      // add any annotations
+        // add any annotations
       ;(annotators[letType] || []).forEach(annotator => annotator(action))
       if (annotators[extension]) annotators[extension].forEach(annotator => annotator(action))
 
@@ -644,13 +650,12 @@ export default async (commandTree: Commands.Registrar) => {
 
               if (execOptions['dryRun']) {
                 // caller is just asking for the details, not for us to create something
-                const action = options.action || {}
                 return {
                   name,
                   components,
                   componentEntities,
-                  annotations: action.annotations,
-                  parameters: action.parameters
+                  annotations: kv.annotations,
+                  parameters: kv.parameters
                 }
               }
 
@@ -682,7 +687,15 @@ export default async (commandTree: Commands.Registrar) => {
             const name = figureName(actionFromFileMatch[2], mimeType)
             const location = actionFromFileMatch[4]
 
-            return maybeComponentIsFile(name, mimeType, location, letType, options, args, execOptions)
+            return maybeComponentIsFile(
+              name,
+              mimeType,
+              location,
+              letType,
+              { kind: 'nodejs:default', kv },
+              args,
+              execOptions
+            )
           } else {
             throw new Error('Unable to parse your command')
           }

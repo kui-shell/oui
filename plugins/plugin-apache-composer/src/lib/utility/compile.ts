@@ -21,7 +21,7 @@ import * as fqn from 'openwhisk-composer/fqn'
 import * as Composer from 'openwhisk-composer'
 
 import { Capabilities, Errors, UI, Util } from '@kui-shell/core'
-import { currentSelection } from '@kui-shell/plugin-openwhisk'
+import { currentSelection, hasAnnotations } from '@kui-shell/plugin-openwhisk'
 
 import { isValidAst } from './ast'
 import { create } from './usage'
@@ -159,9 +159,9 @@ export const implicitInputFile = (tab: UI.Tab, inputFile?: string, name?: string
     // the user didn't provide an input file, maybe we can infer one from the current selection
     const selection = currentSelection(tab)
     debug('selection', selection)
-    if (selection && selection['ast'] && selection.prettyType === 'preview') {
+    if (selection && selection['ast'] && selection.kind === 'Preview') {
       debug('input from app preview selection') // then the sidecar is currently showing an app preview
-      const inputAnnotation = selection.annotations.find(({ key }) => key === 'file')
+      const inputAnnotation = hasAnnotations(selection) && selection.annotations.find(({ key }) => key === 'file')
 
       if (inputAnnotation) {
         inputFile = inputAnnotation.value.toString()
@@ -169,7 +169,7 @@ export const implicitInputFile = (tab: UI.Tab, inputFile?: string, name?: string
 
         if (!name) {
           // then the user typed "app create"; let's use the file name as the app name
-          name = selection.name.replace(/[^]*/, '') // strip off the ".js" suffix
+          name = selection.metadata.name.replace(/[^]*/, '') // strip off the ".js" suffix
           debug('using preview for name', name)
         }
       }

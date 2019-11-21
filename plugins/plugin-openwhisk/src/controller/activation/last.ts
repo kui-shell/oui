@@ -16,9 +16,8 @@
 
 import { Commands } from '@kui-shell/core'
 
-import { synonyms } from '../../models/synonyms'
-import { Activation } from '../../models/activation'
-import { ActivationListTable } from '../../views/cli/activations/list'
+import { synonyms } from '../../lib/models/synonyms'
+import { Activation } from '../../lib/models/resource'
 
 /**
  * wsk activation last: find and display the (temporally) last activation
@@ -28,12 +27,12 @@ const last = ({ argv: fullArgv, REPL }: Commands.Arguments): Promise<Activation>
   const argv = fullArgv.slice(fullArgv.indexOf('last'))
 
   const limit = argv.length === 1 ? 1 : 200 // if no options, then we're showing just the last activation
-  return REPL.qexec<ActivationListTable>(`wsk activation list --limit ${limit} ${argv.slice(1).join(' ')}`).then(
+  return REPL.rexec<{ content: Activation[] }>(`wsk activation list --limit ${limit} ${argv.slice(1).join(' ')}`).then(
     response => {
-      if (response.body.length === 0) {
+      if (response.content.length === 0) {
         throw new Error(argv.length === 1 ? 'You have no activations' : 'No matching activations')
       } else {
-        return REPL.qexec<Activation>(`wsk activation get ${response.body[0].activationId}`)
+        return REPL.qexec<Activation>(`wsk activation get ${response.content[0].activationId}`)
       }
     }
   )

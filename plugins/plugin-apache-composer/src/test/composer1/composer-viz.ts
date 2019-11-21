@@ -167,7 +167,7 @@ describe('show the composer visualization without creating openwhisk assets', fu
       .catch(Common.oops(this)))
 
   /** test: viz, then create with no args, testing for handling of implicit entity */
-  it(`should create with implicit entity`, () =>
+  xit(`should create with implicit entity`, () =>
     CLI.command('wsk app create', this.app)
       .then(verifyTheBasicStuff(seq.file))
       .then(verifyNodeExists('seq1', false)) // not deployed
@@ -198,7 +198,7 @@ describe('show the composer visualization without creating openwhisk assets', fu
       .catch(Common.oops(this)))
 
   /** test: viz, then create with -r, testing for handling of implicit entity and auto-deploy */
-  it(`should create wookiechat and dependent actions with implicit entity`, () =>
+  xit(`should create wookiechat and dependent actions with implicit entity`, () =>
     CLI.command('wsk app update', this.app)
       .then(verifyTheBasicStuff('app.js'))
       .then(verifyNodeExists('swapi', false)) // expect not to be deployed

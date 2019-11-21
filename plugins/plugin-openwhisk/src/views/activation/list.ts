@@ -20,13 +20,10 @@ import * as prettyPrintDuration from 'pretty-ms'
 import { ActivationDesc } from 'openwhisk'
 import { Commands, REPL, Tables, UI } from '@kui-shell/core'
 
-import installHighlightJS from '../../hljs'
-import { Activation } from '../../../models/resource'
-import { ListOptions } from '../../../../controller/options'
+import { Activation } from '../../lib/models/resource'
+import { ListOptions } from '../../controller/options'
 
-declare let hljs
-
-const debug = Debug('plugins/openwhisk/views/cli/activations/list')
+const debug = Debug('plugins/openwhisk/views/activations/list')
 
 export type ActivationListRow = Tables.Row & Activation
 
@@ -349,10 +346,6 @@ const _render = (args: Args) => {
         result.className = 'somewhat-smaller-text lighter-text log-field activation-result'
         if (activation.response) {
           code.innerText = JSON.stringify(activation.response.result || {}).substring(0, 40)
-          setTimeout(async () => {
-            await installHighlightJS()
-            hljs.highlightBlock(code)
-          }, 0)
         }
       }
 
@@ -639,15 +632,14 @@ export const render = (opts: Args) => {
 }
 
 /**
- * A handler intended to be passed to cli.registerListView
+ * Turn a list of `Activation` into an HTMLElement bespoke view
  *
  */
 export const renderActivationListView = (
   tab: UI.Tab,
-  //  activationsTable: Tables.Table,
   activations: Activation[],
   parsedOptions: ListOptions
-) => {
+): HTMLElement => {
   const ccontainer = document.createElement('div')
   const container = document.createElement('div')
   ccontainer.appendChild(container)
