@@ -28,7 +28,7 @@ import webbify from './lib/cmds/actions/webbify'
 import last from './lib/cmds/activations/last'
 import on from './lib/cmds/rules/on'
 import every from './lib/cmds/rules/every'
-import core from './lib/cmds/openwhisk-core'
+// import core from './lib/cmds/openwhisk-core'
 
 import listAll from './controller/list-all'
 
@@ -80,7 +80,7 @@ import ruleDelete from './controller/rule/delete'
 import ruleStatus from './controller/rule/status'
 
 export default async (commandTree: Commands.Registrar) => {
-  await core(commandTree)
+  //  await core(commandTree)
 
   // oui value-add commands, on top of the basic openwhisk commands
   await cp(commandTree)
