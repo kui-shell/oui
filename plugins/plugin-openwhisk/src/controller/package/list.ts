@@ -19,7 +19,7 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import { standardListUsage } from '../usage'
 import { asPackageTable } from './as-package'
 import { getClient } from '../../client/get'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { copy, nameForList, ListOptions } from '../options'
 
 export default (registrar: Registrar) => {

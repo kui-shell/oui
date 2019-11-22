@@ -18,7 +18,7 @@ import { isHeadless } from '@kui-shell/core/api/capabilities'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import { withStandardOptions, standardListUsage } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { copy, nameForList, ListOptions } from '../options'
 import { clientOptions, getClient } from '../../client/get'
 import { asActivation, asActivationTable } from './as-activation'

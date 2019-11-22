@@ -21,11 +21,10 @@ import ok from '../ok'
 import { fqn } from '../fqn'
 import toDict from '../dict'
 import { kvOptions } from '../key-value'
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { currentSelection } from '../../lib/models/selection'
-import { params, deployedTrigger } from '../../lib/cmds/openwhisk-usage'
+import { currentSelection } from '../../models/selection'
+import { params, deployedTrigger, withStandardOptions } from '../usage'
 
 const usage = {
   command: 'fire',

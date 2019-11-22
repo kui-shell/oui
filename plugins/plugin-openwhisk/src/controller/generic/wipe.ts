@@ -16,10 +16,11 @@
 
 import Debug from 'debug'
 
-import { Capabilities, Commands, Tables, UI } from '@kui-shell/core'
-import { hide as hideSidecar } from '@kui-shell/core/webapp/views/sidecar'
+import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import UI from '@kui-shell/core/api/ui'
 
-import { OpenWhiskResource } from '../models/resource'
+import { OpenWhiskResource } from '../../models/resource'
 
 const debug = Debug('plugins/openwhisk/cmds/wipe')
 
@@ -43,7 +44,7 @@ const logThen = (f: () => Promise<void>) => (msg: string) => {
  * Delete all of the entities in the given `entities` array
  *
  */
-const deleteAllOnce = async ({ REPL }: Commands.Arguments, entities: OpenWhiskResource[]): Promise<void> => {
+const deleteAllOnce = async ({ REPL }: Arguments, entities: OpenWhiskResource[]): Promise<void> => {
   await Promise.all(
     entities.map(entity => {
       const tryDelete = async () => {
@@ -78,16 +79,16 @@ const deleteAllOnce = async ({ REPL }: Commands.Arguments, entities: OpenWhiskRe
  * List the entities of a given entity type (e.g. actions)
  *
  */
-async function list({ REPL }: Commands.Arguments, type: string): Promise<OpenWhiskResource[]> {
-  const L = await REPL.qexec<Tables.Table>(`wsk ${type} list --limit 200`)
-  return ((L.body || []) as any) as OpenWhiskResource[]
+async function list({ REPL }: Arguments, type: string): Promise<OpenWhiskResource[]> {
+  const L = await REPL.qexec<{ body: OpenWhiskResource[] }>(`wsk ${type} list --limit 200`)
+  return L.body
 }
 
 /**
  * Because we can only list at most 200 entities at a time, we'll need to loop...
  *
  */
-const deleteAllUntilDone = (command: Commands.Arguments, type: string) => (entities: OpenWhiskResource[]) => {
+const deleteAllUntilDone = (command: Arguments, type: string) => (entities: OpenWhiskResource[]) => {
   debug(`deleteAllUntilDone ${type} ${entities.length}`)
 
   if (entities.length === 0) {
@@ -103,9 +104,9 @@ const deleteAllUntilDone = (command: Commands.Arguments, type: string) => (entit
  * This method initiates the deleteAllUntilDone loop
  *
  */
-const clean = (command: Commands.Arguments, type: string, quiet?: boolean) => {
+const clean = (command: Arguments, type: string, quiet?: boolean) => {
   if (!quiet) {
-    if (Capabilities.isHeadless()) {
+    if (isHeadless()) {
       process.stdout.write('.'['random'])
     } else {
       debug(`Cleaning ${type}`)
@@ -132,33 +133,33 @@ const handle404s = (retry: () => void) => err => {
  * The main wipe method: clean triggers and actions, then rules and packages
  *
  */
-const doWipe1 = (command: Commands.Arguments, quiet = false) =>
+const doWipe1 = (command: Arguments, quiet = false) =>
   Promise.all([clean(command, 'trigger', quiet), clean(command, 'action', quiet)]).catch(
     handle404s(() => doWipe1(command, true))
   )
 
-const doWipe2 = (command: Commands.Arguments, quiet = false) =>
+const doWipe2 = (command: Arguments, quiet = false) =>
   Promise.all([clean(command, 'rule', quiet), clean(command, 'package', quiet)]).catch(
     handle404s(() => doWipe2(command, true))
   )
 
-const doWipe = (command: Commands.Arguments) =>
+const doWipe = (command: Arguments) =>
   doWipe1(command)
     .then(() => doWipe2(command))
     .then(() => {
-      if (Capabilities.isHeadless()) {
+      if (isHeadless()) {
         // we did process.stdout.write above, so clear a newline
         console.log('.'['random'])
       }
     })
 
-const doWipeWithConfirmation = async (command: Commands.Arguments) => {
+const doWipeWithConfirmation = async (command: Arguments) => {
   const { tab, block, nextBlock } = command
 
   //
   // first, hide the sidecar
   //
-  hideSidecar(tab, true) // true means clean out current selection
+  // hideSidecar(tab, true) // true means clean out current selection
 
   //
   // then ask the user to confirm the dangerous operation
@@ -198,8 +199,8 @@ const doWipeWithConfirmation = async (command: Commands.Arguments) => {
  * This is the exported module
  *
  */
-export default (commandTree: Commands.Registrar) => {
-  commandTree.listen('/wsk/wipe', doWipeWithConfirmation, {
+export default (registrar: Registrar) => {
+  registrar.listen('/wsk/wipe', doWipeWithConfirmation, {
     docs: 'Remove all of your OpenWhisk assets from the current namespace'
   })
 }

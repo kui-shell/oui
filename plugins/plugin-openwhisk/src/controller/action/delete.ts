@@ -16,10 +16,9 @@
 
 import { Registrar } from '@kui-shell/core/api/commands'
 
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { deployedAction } from '../../lib/cmds/openwhisk-usage'
+import { deployedAction, withStandardOptions } from '../usage'
 
 const usage = withStandardOptions({
   command: 'delete',

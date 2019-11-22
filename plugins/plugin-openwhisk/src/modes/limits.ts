@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WithLimits, hasLimits } from '../lib/models/resource'
+import { WithLimits, hasLimits } from '../models/resource'
 
 /**
  * The Code mode applies to all Action resources.

@@ -16,8 +16,8 @@
 
 import { Commands } from '@kui-shell/core'
 
-import { synonyms } from '../../lib/models/synonyms'
-import { Activation } from '../../lib/models/resource'
+import { synonyms } from '../../models/synonyms'
+import { Activation } from '../../models/resource'
 
 /**
  * wsk activation last: find and display the (temporally) last activation

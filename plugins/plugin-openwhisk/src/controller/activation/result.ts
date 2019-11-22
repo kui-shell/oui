@@ -18,7 +18,7 @@ import { Registrar } from '@kui-shell/core/api/commands'
 
 import respondWith from './as-activation'
 import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 
 const usage = {

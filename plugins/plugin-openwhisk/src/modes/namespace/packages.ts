@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../../controller/fqn'
-import { WithPackages, hasPackages } from '../../lib/models/resource'
+import { WithPackages, hasPackages } from '../../models/resource'
 
 /**
  * Namespace packages drilldown

@@ -19,10 +19,9 @@
  *
  */
 
-import { Commands } from '@kui-shell/core'
-
-import { synonyms } from '../models/synonyms'
-import { CMD as copy } from './copy'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { synonyms } from '../../models/synonyms'
+import { CMD as copy } from './cp'
 
 /** name for the command */
 export const CMD = 'rename'
@@ -50,7 +49,7 @@ const usage = (type: string, command: string) => ({
  * This is the core logic
  *
  */
-const mv = (type: string) => (op: string) => ({ argvNoOptions: argv, REPL }: Commands.Arguments) => {
+const mv = (type: string) => (op: string) => ({ argvNoOptions: argv, REPL }: Arguments) => {
   const idx = argv.indexOf(op) + 1
   const oldName = argv[idx]
   const newName = argv[idx + 1]
@@ -64,12 +63,12 @@ const mv = (type: string) => (op: string) => ({ argvNoOptions: argv, REPL }: Com
  * Register commands
  *
  */
-export default async (commandTree: Commands.Registrar) => {
+export default async (registrar: Registrar) => {
   // Install the routes. for now, no renaming of packages or triggers or rules
   ;['actions'].forEach(type => {
     const handler = mv(type)
     synonyms(type).forEach(syn => {
-      commandTree.listen(`/wsk/${syn}/${CMD}`, handler(CMD), {
+      registrar.listen(`/wsk/${syn}/${CMD}`, handler(CMD), {
         usage: usage(type, CMD)
       })
     })

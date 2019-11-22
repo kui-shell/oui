@@ -24,9 +24,9 @@ import toDict from '../dict'
 import standardOptions from '../aliases'
 import { kvOptions } from '../key-value'
 import { clientOptions, getClient } from '../../client/get'
-import { synonyms } from '../../lib/models/synonyms'
-import { currentSelection } from '../../lib/models/selection'
-import { current as currentNamespace } from '../../lib/models/namespace'
+import { synonyms } from '../../models/synonyms'
+import { currentSelection } from '../../models/selection'
+import { current as currentNamespace } from '../../models/namespace'
 
 async function asyncOk(tab: Tab, name: string, response: ActivationDesc) {
   const nameParts = name.split(/\//)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WithAnnotations, hasAnnotations } from '../lib/models/resource'
+import { WithAnnotations, hasAnnotations } from '../models/resource'
 
 /**
  * The Annotations mode applies to all Action resources.

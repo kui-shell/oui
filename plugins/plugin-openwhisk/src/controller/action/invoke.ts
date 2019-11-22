@@ -22,13 +22,12 @@ import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/command
 import { fqn } from '../fqn'
 import toDict from '../dict'
 import { kvOptions } from '../key-value'
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import respondWith from '../activation/as-activation'
-import { Activation } from '../../lib/models/resource'
+import { Activation } from '../../models/resource'
 import { clientOptions, getClient } from '../../client/get'
-import { currentSelection } from '../../lib/models/selection'
-import { actionImplicitOK, params, timeout } from '../../lib/cmds/openwhisk-usage'
+import { currentSelection } from '../../models/selection'
+import { actionImplicitOK, params, timeout, withStandardOptions } from '../usage'
 
 interface Options extends ParsedOptions {
   blocking?: boolean

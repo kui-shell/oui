@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core/api/commands'
 
-import { current } from '../models/namespace'
+import { current } from '../../models/namespace'
 
-export default (commandTree: Commands.Registrar) => {
-  // register namespace.current command
+export default (commandTree: Registrar) => {
   commandTree.listen(`/wsk/namespace/current`, () => current(), {
     usage: {
       command: 'current',

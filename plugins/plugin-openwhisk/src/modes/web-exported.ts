@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isWebExported } from '../lib/models/resource'
+import { isWebExported } from '../models/resource'
 
 /**
  * Displays a web exported badge

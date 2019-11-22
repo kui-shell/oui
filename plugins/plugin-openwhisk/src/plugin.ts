@@ -64,38 +64,35 @@ import ruleDelete from './controller/rule/delete'
 import ruleStatus from './controller/rule/status'
 
 // oui value-add commands
-import listAll from './controller/list-all'
-import webbify from './controller/action/webbify'
-import letCommand from './controller/action/let/let'
-import last from './controller/activation/last'
-import on from './controller/rule/on'
-import every from './controller/rule/every'
-
-// finally, these commands have yet to be audited against the latest
-// kui-core API
-import cp from './lib/cmds/copy'
-import mv from './lib/cmds/mv'
-import rm from './lib/cmds/rm'
-import auth from './lib/cmds/auth'
-import wipe from './lib/cmds/wipe'
-import context from './lib/cmds/context'
-import loadTest from './lib/cmds/load-test'
+import listAll from './controller/generic/list-all'
+import wipeAll from './controller/generic/wipe'
+import cp from './controller/generic/cp'
+import mv from './controller/generic/mv'
+import rm from './controller/generic/rm'
+import loadTest from './controller/generic/load-test'
+import auth from './controller/generic/auth'
+import actionLet from './controller/action/let/let'
+import actionWebbify from './controller/action/webbify'
+import ruleOn from './controller/rule/on'
+import ruleEvery from './controller/rule/every'
+import activationLast from './controller/activation/last'
+import namespaceCurrent from './controller/namespace/current'
 
 export default async (registrar: Registrar) => {
   // oui value-add commands, on top of the basic openwhisk commands
-  await last(registrar)
-  await cp(registrar)
-  await mv(registrar)
-  await rm(registrar)
-  await auth(registrar)
-  await wipe(registrar)
-  await context(registrar)
-  await listAll(registrar)
-  await loadTest(registrar)
-  await letCommand(registrar)
-  await webbify(registrar)
-  await on(registrar)
-  await every(registrar)
+  listAll(registrar)
+  wipeAll(registrar)
+  cp(registrar)
+  mv(registrar)
+  rm(registrar)
+  loadTest(registrar)
+  auth(registrar)
+  actionLet(registrar)
+  actionWebbify(registrar)
+  ruleOn(registrar)
+  ruleEvery(registrar)
+  activationLast(registrar)
+  namespaceCurrent(registrar)
 
   // basic openwhisk namespace commands
   namespaceGet(registrar)

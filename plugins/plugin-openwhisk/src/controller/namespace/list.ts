@@ -17,7 +17,7 @@
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import standardOptions from '../aliases'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { getClient } from '../../client/get'
 
 async function doList({ execOptions }: Arguments) {

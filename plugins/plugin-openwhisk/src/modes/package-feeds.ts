@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../controller/fqn'
-import { WithFeeds, hasFeeds } from '../lib/models/resource'
+import { WithFeeds, hasFeeds } from '../models/resource'
 
 /**
  * The Annotations mode applies to all Action resources.

@@ -24,7 +24,7 @@ import Debug from 'debug'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import Tables from '@kui-shell/core/api/tables'
 
-import { withStandardOptions } from './usage'
+import { withStandardOptions } from '../usage'
 
 const debug = Debug('plugins/openwhisk/cmds/list-all')
 

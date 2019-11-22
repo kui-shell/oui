@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqnOfPath } from '../controller/fqn'
-import { WithTrigger, hasTrigger } from '../lib/models/resource'
+import { WithTrigger, hasTrigger } from '../models/resource'
 
 /**
  * Show the related trigger, e.g. for Rules.

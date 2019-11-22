@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BlackboxAction, isBlackbox } from '../lib/models/resource'
+import { BlackboxAction, isBlackbox } from '../models/resource'
 
 /**
  * Alternative to Code mode for blackbox actions

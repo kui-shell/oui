@@ -20,7 +20,7 @@ import { encodeComponent } from '@kui-shell/core/api/repl-util'
 import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import { asMetadata } from '../fqn'
-import { apiVersion, Namespace } from '../../lib/models/resource'
+import { apiVersion, Namespace } from '../../models/resource'
 
 export function asNamespace(name: string, raw: RawNamespace): Namespace {
   const metadata = asMetadata(name, '_')

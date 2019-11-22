@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WithParameters, hasParameters } from '../lib/models/resource'
+import { WithParameters, hasParameters } from '../models/resource'
 
 /**
  * The Parameters mode applies to all WithParameters.

@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../controller/fqn'
-import { Deleteable, isDeleteable } from '../lib/models/resource'
+import { Deleteable, isDeleteable } from '../models/resource'
 
 /**
  * The Annotations mode applies to all Action resources.

@@ -19,11 +19,10 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import { fqn } from '../fqn'
 import respondWith from './as-action'
 import standardOptions from '../aliases'
-import { withStandardOptions } from '../usage'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { synonyms } from '../../lib/models/synonyms'
-import { currentSelection } from '../../lib/models/selection'
-import { deployedAction } from '../../lib/cmds/openwhisk-usage'
+import { currentSelection } from '../../models/selection'
+import { deployedAction, withStandardOptions } from '../usage'
 
 export const usage = (syn: string) => ({
   strict: 'get',

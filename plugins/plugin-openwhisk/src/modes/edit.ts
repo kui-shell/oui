@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../controller/fqn'
-import { Action, hasCode } from '../lib/models/resource'
+import { Action, hasCode } from '../models/resource'
 
 /**
  * An Edit button

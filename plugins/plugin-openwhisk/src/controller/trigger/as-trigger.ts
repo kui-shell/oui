@@ -20,7 +20,7 @@ import { Table } from '@kui-shell/core/api/table-models'
 import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import asTable from '../as-table'
-import { apiVersion, Trigger } from '../../lib/models/resource'
+import { apiVersion, Trigger } from '../../models/resource'
 
 export function asTrigger(raw: RawTrigger): Trigger {
   const { version, name, namespace } = raw

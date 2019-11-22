@@ -17,11 +17,10 @@
 import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
 
 import respondWith from './as-activation'
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
-import { Activation } from '../../lib/models/resource'
+import { synonyms } from '../../models/synonyms'
+import { Activation } from '../../models/resource'
 import { clientOptions, getClient } from '../../client/get'
-import { activationID } from '../../lib/cmds/openwhisk-usage'
+import { activationID, withStandardOptions } from '../usage'
 
 interface Options extends ParsedOptions {
   last: boolean | string

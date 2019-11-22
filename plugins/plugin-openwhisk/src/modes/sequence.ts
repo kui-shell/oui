@@ -19,7 +19,7 @@ import { Tab } from '@kui-shell/core/api/tab'
 import { Action, ComponentArrayBearing } from '@kui-shell/plugin-wskflow'
 
 import { isAnonymousLet } from '../controller/action/let/let-core'
-import { Action as OWAction, Sequence, isSequence } from '../lib/models/resource'
+import { Action as OWAction, Sequence, isSequence } from '../models/resource'
 
 const debug = Debug('openwhisk/modes/sequence')
 

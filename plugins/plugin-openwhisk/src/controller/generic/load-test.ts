@@ -24,7 +24,7 @@ import Debug from 'debug'
 
 import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
 
-import { kvOptions } from '../../controller/key-value'
+import { kvOptions } from '../key-value'
 import { clientOptions, getClient } from '../../client/get'
 
 const debug = Debug('plugins/openwhisk/cmds/load-test')

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WithStatus, hasStatus } from '../lib/models/resource'
+import { WithStatus, hasStatus } from '../models/resource'
 import { bg as trafficLightColor } from '../views/traffic-light'
 
 /**
