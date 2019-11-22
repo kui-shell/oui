@@ -19,8 +19,8 @@ import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn, fqnOfPath } from './fqn'
 import { bg as trafficLightColor } from '../views/traffic-light'
-import { current as currentNamespace } from '../lib/models/namespace'
-import { hasKind, hasVersion, hasStatus, hasAction, hasTrigger, OpenWhiskResource } from '../lib/models/resource'
+import { current as currentNamespace } from '../models/namespace'
+import { hasKind, hasVersion, hasStatus, hasAction, hasTrigger, OpenWhiskResource } from '../models/resource'
 
 function maybeKind(resource: OpenWhiskResource, value = resource && resource.kind) {
   return resource && hasKind(resource) && { key: 'kind', value }

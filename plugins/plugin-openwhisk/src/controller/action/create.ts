@@ -25,12 +25,11 @@ import { Arguments, ParsedOptions, ExecOptions, Registrar } from '@kui-shell/cor
 
 import ok from '../ok'
 import fqn from '../fqn'
-import { clientOptions, getClient } from '../../client/get'
-import { synonyms } from '../../lib/models/synonyms'
-import { KeyValOptions, kvOptions } from '../key-value'
 import respondWith from './as-action'
-import { withStandardOptions } from '../usage'
-import { actionMix, deployedAction, sourceFile } from '../../lib/cmds/openwhisk-usage'
+import { synonyms } from '../../models/synonyms'
+import { KeyValOptions, kvOptions } from '../key-value'
+import { clientOptions, getClient } from '../../client/get'
+import { actionMix, deployedAction, sourceFile, withStandardOptions } from '../usage'
 
 const debug = Debug('openwhisk/actions/create')
 

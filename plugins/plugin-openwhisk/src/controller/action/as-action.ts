@@ -23,7 +23,7 @@ import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import asTable from '../as-table'
 import { packageName } from '../fqn'
-import { apiVersion, Action } from '../../lib/models/resource'
+import { apiVersion, Action } from '../../models/resource'
 
 export function asAction(raw: RawAction): Action {
   const nameHash = packageName(raw)

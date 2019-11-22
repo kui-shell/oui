@@ -19,10 +19,9 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import ok from '../ok'
 import respondWith from './as-rule'
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { rule, deployedTrigger, deployedAction, maybeDeployedRule } from '../../lib/cmds/openwhisk-usage'
+import { rule, deployedTrigger, deployedAction, maybeDeployedRule, withStandardOptions } from '../usage'
 
 const createUsage = {
   command: 'create',

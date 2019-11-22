@@ -27,7 +27,7 @@ import { Tab } from '@kui-shell/core/api/ui-lite'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import { fqnOfDesc } from '../fqn'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
 
 // some helpers for the pattern matcher, helping to find the components of a match

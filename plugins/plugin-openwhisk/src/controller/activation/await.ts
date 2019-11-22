@@ -28,8 +28,8 @@ import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import Models from '@kui-shell/core/api/models'
 
-import { synonyms } from '../../lib/models/synonyms'
-import { Activation } from '../../lib/models/resource'
+import { synonyms } from '../../models/synonyms'
+import { Activation } from '../../models/resource'
 import { asActivationResponse } from './as-activation'
 
 const POLL_INTERVAL = parseInt(process.env.POLL_INTERVAL, 10) || 1000

@@ -42,13 +42,13 @@ import Util from '@kui-shell/core/api/util'
 import Commands from '@kui-shell/core/api/commands'
 import { inBrowser } from '@kui-shell/core/api/capabilities'
 
-import { synonyms } from '../../../lib/models/synonyms'
+import { synonyms } from '../../../models/synonyms'
 import { deployHTMLViaOpenWhisk } from './html'
-import { current as currentNamespace } from '../../../lib/models/namespace'
+import { current as currentNamespace } from '../../../models/namespace'
 import { ANON_KEY, ANON_KEY_FQN, ANON_CODE, isAnonymousLet, isAnonymousLetFor } from './let-core'
 
 import respondWith from '../as-action'
-import { Action } from '../../../lib/models/resource'
+import { Action } from '../../../models/resource'
 import { KeyValOptions, kvOptions } from '../../key-value'
 import { clientOptions, getClient } from '../../../client/get'
 

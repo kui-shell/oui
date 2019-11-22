@@ -19,10 +19,10 @@ import { isHeadless } from '@kui-shell/core/api/capabilities'
 
 import respondWith from './as-activation'
 import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { isActivation } from '../../lib/models/resource'
-import { currentSelection } from '../../lib/models/selection'
+import { isActivation } from '../../models/resource'
+import { currentSelection } from '../../models/selection'
 
 const usage = {
   command: 'logs',

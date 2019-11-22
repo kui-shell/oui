@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { skipAndLimit } from '../../lib/cmds/openwhisk-usage'
+import { skipAndLimit } from '../usage'
 
 export const list = {
   command: 'list',

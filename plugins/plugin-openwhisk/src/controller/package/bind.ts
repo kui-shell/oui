@@ -16,14 +16,12 @@
 
 import { Registrar } from '@kui-shell/core/api/commands'
 
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { kvOptions } from '../key-value'
 import asPackage from './as-package'
 import { asMetadata } from '../fqn'
-import { withStandardOptions } from '../usage'
 import { clientOptions, getClient } from '../../client/get'
-
-import { paramsAndAnnotations, deployedPackage, aPackage } from '../../lib/cmds/openwhisk-usage'
+import { paramsAndAnnotations, deployedPackage, aPackage, withStandardOptions } from '../usage'
 
 const usage = withStandardOptions({
   command: 'bind',

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { Action } from '../../../models/resource'
+
 export const ANON_KEY = 'anonymous-function'
 export const ANON_KEY_FQN = 'anonymous-function-fqn'
 export const ANON_CODE = 'anonymous-code'
@@ -22,14 +24,14 @@ export const ANON_CODE = 'anonymous-code'
  * Is the given action entity an anonymous let
  *
  */
-export const isAnonymousLet = action => {
+export const isAnonymousLet = (action: Action) => {
   if (action.annotations && action.annotations.find(kv => kv.key === ANON_KEY)) {
     const code = action.annotations.find(kv => kv.key === ANON_CODE)
     return code && code.value
   }
 }
 
-export const isAnonymousLetFor = (action, parent) => {
+export const isAnonymousLetFor = (action: Action, parent: string) => {
   const annotation = action.annotations && action.annotations.find(kv => kv.key === ANON_KEY)
   const annotationFQN = action.annotations && action.annotations.find(kv => kv.key === ANON_KEY_FQN)
   return (annotation && annotation.value === parent) || (annotationFQN && annotationFQN.value === parent)

@@ -21,7 +21,7 @@ import { encodeComponent } from '@kui-shell/core/api/repl-util'
 import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import asTable from '../as-table'
-import { apiVersion, Activation } from '../../lib/models/resource'
+import { apiVersion, Activation } from '../../models/resource'
 
 export function fqn(activation: Activation) {
   const pathAnnotation = activation.annotations.find(_ => _.key === 'path')

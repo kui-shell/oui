@@ -17,9 +17,9 @@
 // this file defines the external API
 
 export { default as clientOptions } from './client/options'
-export { synonyms } from './lib/models/synonyms'
-export { default as withHeader } from './lib/models/withHeader'
-export { currentSelection } from './lib/models/selection'
+export { synonyms } from './models/synonyms'
+export { default as withHeader } from './models/withHeader'
+export { currentSelection } from './models/selection'
 export {
   Action,
   isAction,
@@ -28,8 +28,8 @@ export {
   OpenWhiskResource,
   hasAnnotation,
   hasAnnotations
-} from './lib/models/resource'
-export { current as currentNamespace } from './lib/models/namespace'
+} from './models/resource'
+export { current as currentNamespace } from './models/namespace'
 export { renderActivationListView, ActivationListTable } from './views/activation/list'
 export { fqn } from './controller/fqn'
 export { ListOptions } from './controller/options'
@@ -38,7 +38,7 @@ export { asActivationTable } from './controller/activation/as-activation'
 import { createUsage as actionCreateUsage, updateUsage as actionUpdateUsage } from './controller/action/create'
 import { usage as actionInvokeUsage } from './controller/action/invoke'
 import { usage as activationGetUsage } from './controller/activation/get'
-import { skipAndLimit } from './lib/cmds/openwhisk-usage'
+import { skipAndLimit } from './controller/usage'
 
 export const Usage = {
   action: {

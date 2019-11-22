@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WithStatus } from '../lib/models/resource'
+import { WithStatus } from '../models/resource'
 
 export function bg(resource: WithStatus) {
   return resource.status === 'active'

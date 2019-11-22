@@ -21,8 +21,8 @@ import asTable from '../as-table'
 import { asMetadata } from '../fqn'
 import asNamespace from './as-namespace'
 import standardOptions from '../aliases'
-import { synonyms } from '../../lib/models/synonyms'
-import { apiVersion, Namespace } from '../../lib/models/resource'
+import { synonyms } from '../../models/synonyms'
+import { apiVersion, Namespace } from '../../models/resource'
 import { clientOptions, getClient } from '../../client/get'
 
 /** List actions or feeds in a namespace */

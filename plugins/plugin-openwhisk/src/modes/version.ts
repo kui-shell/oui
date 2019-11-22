@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { hasVersion, WithVersion } from '../lib/models/resource'
+import { hasVersion, WithVersion } from '../models/resource'
 
 /**
  * Display resource version as a badge

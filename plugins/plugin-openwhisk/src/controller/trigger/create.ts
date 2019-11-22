@@ -25,11 +25,10 @@ import ok from '../ok'
 import toDict from '../dict'
 import kvOptions from '../key-value'
 import respondWith from './as-trigger'
-import { withStandardOptions } from '../usage'
-import { Trigger } from '../../lib/models/resource'
-import { synonyms } from '../../lib/models/synonyms'
+import { Trigger } from '../../models/resource'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { trigger, maybeDeployedTrigger, feed, paramsAndAnnotations } from '../../lib/cmds/openwhisk-usage'
+import { trigger, maybeDeployedTrigger, feed, paramsAndAnnotations, withStandardOptions } from '../usage'
 
 const debug = Debug('openwhisk/trigger/create')
 

@@ -15,7 +15,7 @@
  */
 
 import { Dict } from 'openwhisk'
-import { WithResponse, hasResponse } from '../lib/models/resource'
+import { WithResponse, hasResponse } from '../models/resource'
 
 /**
  * The Response mode for activations

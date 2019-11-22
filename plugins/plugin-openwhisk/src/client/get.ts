@@ -17,7 +17,7 @@
 import { Client } from 'openwhisk'
 import { ExecOptions } from '@kui-shell/core/api/commands'
 
-import { initOW, initOWFromConfig } from '../lib/models/auth'
+import { initOW, initOWFromConfig } from '../models/auth'
 
 export { default as clientOptions } from './options'
 

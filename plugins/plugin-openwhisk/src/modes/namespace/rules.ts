@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../../controller/fqn'
-import { WithRules, hasRules } from '../../lib/models/resource'
+import { WithRules, hasRules } from '../../models/resource'
 
 /**
  * Namespace rules drilldown

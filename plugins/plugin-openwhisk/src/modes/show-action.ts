@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqnOfPath } from '../controller/fqn'
-import { WithAction, hasAction } from '../lib/models/resource'
+import { WithAction, hasAction } from '../models/resource'
 
 /**
  * Show the related action, e.g. for Rules.

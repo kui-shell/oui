@@ -20,7 +20,7 @@ import { Table } from '@kui-shell/core/api/table-models'
 import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import asTable from '../as-table'
-import { apiVersion, Package, Metadata } from '../../lib/models/resource'
+import { apiVersion, Package, Metadata } from '../../models/resource'
 
 export function asPackage(raw: RawPackage): Package {
   return {

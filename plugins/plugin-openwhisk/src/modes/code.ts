@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Action, hasTextualCode } from '../lib/models/resource'
+import { Action, hasTextualCode } from '../models/resource'
 
 /**
  * The Code mode applies to all Action resources.

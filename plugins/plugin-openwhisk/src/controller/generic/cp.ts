@@ -20,10 +20,8 @@
  */
 
 import Debug from 'debug'
-
-import { Commands } from '@kui-shell/core'
-
-import { synonyms } from '../models/synonyms'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { synonyms } from '../../models/synonyms'
 
 const debug = Debug('plugins/openwhisk/cmds/copy')
 
@@ -53,7 +51,7 @@ const usage = (type: string, command: string) => ({
  * This is the core logic
  *
  */
-const copy = (type: string) => (op: string) => (command: Commands.Arguments, retryOK = true) => {
+const copy = (type: string) => (op: string) => (command: Arguments, retryOK = true) => {
   debug(`${type} ${op}`)
 
   const { argvNoOptions: argv, REPL } = command
@@ -90,12 +88,12 @@ const copy = (type: string) => (op: string) => (command: Commands.Arguments, ret
  * Register commands
  *
  */
-export default async (commandTree: Commands.Registrar) => {
+export default async (registrar: Registrar) => {
   // Install the routes. for now, no copying of packages or triggers or rules
   ;['actions'].forEach(type => {
     const handler = copy(type)
     synonyms(type).forEach(syn => {
-      commandTree.listen(`/wsk/${syn}/${CMD}`, handler(CMD), {
+      registrar.listen(`/wsk/${syn}/${CMD}`, handler(CMD), {
         usage: usage(type, CMD)
       })
     })

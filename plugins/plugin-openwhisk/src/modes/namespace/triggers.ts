@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../../controller/fqn'
-import { WithTriggers, hasTriggers } from '../../lib/models/resource'
+import { WithTriggers, hasTriggers } from '../../models/resource'
 
 /**
  * Namespace triggers drilldown

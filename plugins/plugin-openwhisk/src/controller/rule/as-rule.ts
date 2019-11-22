@@ -21,7 +21,7 @@ import { encodeComponent } from '@kui-shell/core/api/repl-util'
 import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
 
 import asTable from '../as-table'
-import { apiVersion, Rule } from '../../lib/models/resource'
+import { apiVersion, Rule } from '../../models/resource'
 
 export function asRule(raw: RawRule): Rule {
   return {

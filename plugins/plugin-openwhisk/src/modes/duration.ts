@@ -15,7 +15,7 @@
  */
 
 import * as prettyPrintDuration from 'pretty-ms'
-import { WithDuration, hasDuration, hasResponse } from '../lib/models/resource'
+import { WithDuration, hasDuration, hasResponse } from '../models/resource'
 
 /**
  * Display wall clock time as a badge

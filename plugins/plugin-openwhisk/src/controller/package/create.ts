@@ -20,12 +20,11 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import ok from '../ok'
 import respondWith from './as-package'
 import { kvOptions } from '../key-value'
-import { withStandardOptions } from '../usage'
-import { Package } from '../../lib/models/resource'
-import { synonyms } from '../../lib/models/synonyms'
+import { Package } from '../../models/resource'
+import { synonyms } from '../../models/synonyms'
 import { isHeadless } from '@kui-shell/core/api/capabilities'
 import { clientOptions, getClient } from '../../client/get'
-import { paramsAndAnnotations, shared, aPackage, maybeDeployedPackage } from '../../lib/cmds/openwhisk-usage'
+import { paramsAndAnnotations, shared, aPackage, maybeDeployedPackage, withStandardOptions } from '../usage'
 
 const createUsage = {
   command: 'create',

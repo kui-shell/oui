@@ -22,12 +22,19 @@
 
 import Debug from 'debug'
 
-import { Capabilities, Commands, Errors, eventBus, Tables, UI, Util } from '@kui-shell/core'
-import { clearSelection } from '@kui-shell/core/webapp/views/sidecar'
+import { inBrowser } from '@kui-shell/core/api/capabilities'
+import { Arguments, Response, Registrar } from '@kui-shell/core/api/commands'
+import { Table, Row } from '@kui-shell/core/api/table-models'
+import { Tab } from '@kui-shell/core/api/ui-lite'
+import UI from '@kui-shell/core/api/ui'
+import Util from '@kui-shell/core/api/util'
+import Errors from '@kui-shell/core/api/errors'
+import eventBus from '@kui-shell/core/api/events'
+import Models from '@kui-shell/core/api/models'
 
 import getClient from '../../client/get'
-import * as namespace from '../models/namespace'
-import { apiHost, auth as authModel } from '../models/auth'
+import * as namespace from '../../models/namespace'
+import { apiHost, auth as authModel } from '../../models/auth'
 
 const debug = Debug('plugins/openwhisk/cmds/auth')
 
@@ -145,7 +152,7 @@ usage.host.toplevel.available = [usage.host.get, usage.host.set]
  * The message we will use to inform the user of a auth switch event
  *
  */
-const informUserOfChange = (tab: UI.Tab, subject?: string) => () => {
+const informUserOfChange = (tab: Tab, subject?: string) => () => {
   setTimeout(
     async () =>
       eventBus.emit('/auth/change', {
@@ -156,7 +163,7 @@ const informUserOfChange = (tab: UI.Tab, subject?: string) => () => {
   )
 
   return apiHost.get().then(async host => {
-    clearSelection(tab)
+    Models.Selection.clear(tab)
     return `You are now using the OpenWhisk host ${host}, and namespace ${await namespace.current()}`
   })
 }
@@ -235,7 +242,7 @@ const writeToLocalWskProps = (wskprops): Promise<string> =>
  *
  */
 const updateLocalWskProps = (auth?: string, subject?: string): Promise<string> => {
-  if (!Capabilities.inBrowser()) {
+  if (!inBrowser()) {
     return readFromLocalWskProps(auth, subject).then(writeToLocalWskProps)
   } else {
     return Promise.resolve(auth)
@@ -246,7 +253,7 @@ const updateLocalWskProps = (auth?: string, subject?: string): Promise<string> =
  * List registered namespaces
  *
  */
-const list = async ({ REPL }: Commands.Arguments): Promise<Tables.Table> => {
+const list = async ({ REPL }: Arguments): Promise<Table> => {
   debug('list')
 
   const list = await namespace.list()
@@ -257,16 +264,16 @@ const list = async ({ REPL }: Commands.Arguments): Promise<Tables.Table> => {
   const type = 'namespaces'
   const current = await REPL.qexec('wsk namespace current')
 
-  const headerRow: Tables.Row = {
+  const headerRow: Row = {
     type,
     name: 'CURRENT',
     outerCSS: 'header-cell very-narrow',
     attributes: [{ value: 'NAMESPACE', outerCSS: 'header-cell' }]
   }
 
-  const body: Tables.Row[] = list.map(
-    (ns): Tables.Row => {
-      const row: Tables.Row = {
+  const body: Row[] = list.map(
+    (ns): Row => {
+      const row: Row = {
         type,
         name: ns.namespace,
         fontawesome: 'fas fa-check',
@@ -304,7 +311,7 @@ interface UseOptions {
  * Switch to use a different namespace, by name, given by argv[2]
  *
  */
-const use = (verb: string) => ({ argvNoOptions, parsedOptions, tab }: Commands.Arguments): Promise<string> =>
+const use = (verb: string) => ({ argvNoOptions, parsedOptions, tab }: Arguments): Promise<string> =>
   namespace.get(firstArg(argvNoOptions, verb)).then(auth => {
     if (auth) {
       /**
@@ -346,7 +353,7 @@ const clicky = (parent: HTMLElement, cmd: string, exec) => {
  * Command impl for auth add
  *
  */
-const addFn = (tab: UI.Tab, key: string, subject: string): Promise<string> => {
+const addFn = (tab: Tab, key: string, subject: string): Promise<string> => {
   debug('add', key, subject)
 
   const previousAuth = authModel.get()
@@ -379,7 +386,7 @@ const addFn = (tab: UI.Tab, key: string, subject: string): Promise<string> => {
  * Command impl for host set
  *
  */
-const hostSet = async (command: Commands.Arguments): Promise<Commands.Response> => {
+const hostSet = async (command: Arguments): Promise<Response> => {
   const { argvNoOptions, parsedOptions: options, execOptions, REPL } = command
   const argv = slice(argvNoOptions, 'set')
 
@@ -580,13 +587,13 @@ const pingLocal = async () => {
  * Register command handlers
  *
  */
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   debug('init')
 
   commandTree.subtree('/wsk/host', { usage: usage.host.toplevel })
   commandTree.subtree('/wsk/auth', { usage: usage.auth.toplevel })
 
-  const add = ({ argvNoOptions, tab }: Commands.Arguments) => addFn(tab, firstArg(argvNoOptions, 'add'), undefined)
+  const add = ({ argvNoOptions, tab }: Arguments) => addFn(tab, firstArg(argvNoOptions, 'add'), undefined)
 
   commandTree.listen('/wsk/auth/switch', use('switch'), {
     usage: usage.auth.switch,

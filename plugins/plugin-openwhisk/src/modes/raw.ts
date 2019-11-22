@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { RawDataBearing, hasRawData } from '../lib/models/resource'
+import { RawDataBearing, hasRawData } from '../models/resource'
 
 /**
  * The Raw mode applies to all OpenWhiskResources, and simply extracts

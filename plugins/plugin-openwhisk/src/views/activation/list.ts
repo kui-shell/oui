@@ -20,7 +20,7 @@ import * as prettyPrintDuration from 'pretty-ms'
 import { ActivationDesc } from 'openwhisk'
 import { Commands, REPL, Tables, UI } from '@kui-shell/core'
 
-import { Activation } from '../../lib/models/resource'
+import { Activation } from '../../models/resource'
 import { ListOptions } from '../../controller/options'
 
 const debug = Debug('plugins/openwhisk/views/activations/list')

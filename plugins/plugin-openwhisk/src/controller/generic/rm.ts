@@ -29,12 +29,10 @@ import * as minimist from 'yargs-parser'
 import { Table } from '@kui-shell/core/api/table-models'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
-import { synonyms } from '../models/synonyms'
-import { currentSelection } from '../models/selection'
-import { OpenWhiskResource, Package, Action } from '../models/resource'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { isAnonymousLet } = require('../../controller/action/let/let-core')
+import { synonyms } from '../../models/synonyms'
+import { currentSelection } from '../../models/selection'
+import { OpenWhiskResource, Package, Action } from '../../models/resource'
+import { isAnonymousLetFor } from '../action/let/let-core'
 
 /** sum of numbers in an array */
 // const arraySum = A => A.reduce((sum, c) => sum + c, 0)
@@ -215,7 +213,7 @@ export default async (commandTree: Registrar) => {
                     action.exec.components.map(component =>
                       REPL.qexec<Action>(`wsk action get "${component}"`, block)
                         .then(component => {
-                          if (isAnonymousLet(component, arg)) {
+                          if (isAnonymousLetFor(component, arg)) {
                             // arg is the parent sequence
                             return REPL.qexec<Action>(`wsk action delete "${component.metadata.name}"`, block)
                               .then(() => [component.metadata.name]) // deleted one

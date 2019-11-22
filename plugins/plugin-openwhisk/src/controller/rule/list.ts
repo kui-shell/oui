@@ -20,8 +20,8 @@ import { fqnOfDesc } from '../fqn'
 import asTable from '../as-table'
 import { standardListUsage } from '../usage'
 import { getClient } from '../../client/get'
-import { Rule } from '../../lib/models/resource'
-import { synonyms } from '../../lib/models/synonyms'
+import { Rule } from '../../models/resource'
+import { synonyms } from '../../models/synonyms'
 import { copy, nameForList, ListOptions } from '../options'
 
 export default (registrar: Registrar) => {

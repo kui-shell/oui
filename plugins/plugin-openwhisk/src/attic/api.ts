@@ -16,7 +16,7 @@
 
 import { REPL, Util } from '@kui-shell/core'
 
-import { clientOptions, getClient } from '../../client/get'
+import { clientOptions, getClient } from '../client/get'
 
 /** api gateway actions */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

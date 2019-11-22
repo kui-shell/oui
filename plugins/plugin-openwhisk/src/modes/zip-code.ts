@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ActionWithCode, hasZipCode } from '../lib/models/resource'
+import { ActionWithCode, hasZipCode } from '../models/resource'
 
 function extractMain(b64: string): string {
   const code = Buffer.from(b64, 'base64')

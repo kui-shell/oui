@@ -17,7 +17,7 @@
 import { encodeComponent } from '@kui-shell/core/api/repl-util'
 
 import { fqn } from '../controller/fqn'
-import { Invokeable, isInvokeable, isActivation } from '../lib/models/resource'
+import { Invokeable, isInvokeable, isActivation } from '../models/resource'
 
 /**
  * Invoke an invokeable resource

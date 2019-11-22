@@ -17,11 +17,10 @@
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 
 import { fqn } from '../fqn'
-import { withStandardOptions } from '../usage'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
-import { currentSelection } from '../../lib/models/selection'
-import { deployedRule } from '../../lib/cmds/openwhisk-usage'
+import { deployedRule, withStandardOptions } from '../usage'
+import { currentSelection } from '../../models/selection'
 
 const disableUsage = withStandardOptions({
   command: 'disable',

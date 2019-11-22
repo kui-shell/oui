@@ -19,7 +19,7 @@ import { Arguments, Registrar } from '@kui-shell/core/api/commands'
 import standardOptions from '../aliases'
 import respondWith from './as-namespace'
 import { getClient } from '../../client/get'
-import { synonyms } from '../../lib/models/synonyms'
+import { synonyms } from '../../models/synonyms'
 
 async function doGet({ argvNoOptions, execOptions }: Arguments) {
   const name = argvNoOptions[argvNoOptions.indexOf('get') + 1]

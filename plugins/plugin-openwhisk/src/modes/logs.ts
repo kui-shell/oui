@@ -15,7 +15,7 @@
  */
 
 import UI from '@kui-shell/core/api/ui'
-import { WithLogs, hasLogs } from '../lib/models/resource'
+import { WithLogs, hasLogs } from '../models/resource'
 
 /**
  * e.g. 2017-06-15T14:41:15.60027911Z  stdout:
