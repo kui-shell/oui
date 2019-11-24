@@ -22,10 +22,10 @@
   ],
   "main": "dist/index.js",
   "dependencies": {
-    "@kui-shell/core": "^5.3.12",
-    "@kui-shell/plugin-core-support": "^5.3.12",
-    "@kui-shell/plugin-wskflow": "^5.3.12",
-    "@kui-shell/test": "^5.3.12",
+    "@kui-shell/core": "^5.4.1",
+    "@kui-shell/plugin-core-support": "^5.4.1",
+    "@kui-shell/plugin-wskflow": "^5.4.1",
+    "@kui-shell/test": "^5.4.1",
     "adm-zip": "0.4.13",
     "debug": "4.1.1",
     "htmlparser2": "4.0.0",
@@ -34,7 +34,7 @@
     "needle": "2.4.0",
     "openwhisk": "3.18.0",
     "parse-duration": "0.1.1",
-    "pretty-ms": "5.0.0",
+    "pretty-ms": "5.1.0",
     "promise-retry": "1.1.1",
     "tmp": "0.1.0",
     "yargs-parser": "16.1.0"

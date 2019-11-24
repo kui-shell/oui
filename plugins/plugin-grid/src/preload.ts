@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
 
-/**
- * Flow view
- *
- */
-export default {
-  when: isComposition,
-  mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
-
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
-    })
+export default async (registrar: PreloadRegistrar) => {
+  if (!isHeadless()) {
+    const preloader = (await import('./non-headless-preload')).default
+    await preloader(registrar)
   }
 }

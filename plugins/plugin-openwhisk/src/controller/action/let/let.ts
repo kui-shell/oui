@@ -648,7 +648,7 @@ export default async (commandTree: Commands.Registrar) => {
               const last = componentEntities[componentEntities.length - 1]
               const components = componentEntities.map(C => (C.namespace ? '/' + C.namespace + '/' + C.name : C.name))
 
-              if (execOptions['dryRun']) {
+              /* if (execOptions['dryRun']) {
                 // caller is just asking for the details, not for us to create something
                 return {
                   name,
@@ -657,7 +657,7 @@ export default async (commandTree: Commands.Registrar) => {
                   annotations: kv.annotations,
                   parameters: kv.parameters
                 }
-              }
+              } */
 
               if (isWebAsset(last)) {
                 // if the last element in the sequence is a web action, then make the sequence a web action

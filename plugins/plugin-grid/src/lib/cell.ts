@@ -16,8 +16,6 @@
 
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { UI } from '@kui-shell/core'
-
 import { Activation } from './activation'
 import { drilldownWith } from './drilldown'
 import { newline, latencyBucket } from './util'
@@ -27,7 +25,6 @@ import { newline, latencyBucket } from './util'
  *
  */
 export const renderCell = (
-  tab: UI.Tab,
   returnTo: string,
   cell: HTMLElement,
   activation: Activation,

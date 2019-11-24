@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import Debug from 'debug'
-
-import { Capabilities, Commands, UI } from '@kui-shell/core'
-
-import { hasAst } from '../utility/ast'
-import { decorateAsApp } from '../utility/decorate'
-
-const debug = Debug('plugins/apache-composer/entity-view')
+import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { Arguments } from '@kui-shell/core/api/commands'
+import { ok } from '@kui-shell/plugin-openwhisk'
 
 /**
  * Format the given activation record for display as a session
@@ -32,16 +27,17 @@ export const formatSessionResponse = (_, activation) => {
   return activation
 }
 
-export const formatCompositionEntity = ({ REPL, execOptions }: Commands.Arguments) => response => {
-  return Capabilities.isHeadless()
-    ? response
-    : REPL.qexec(`wsk app get "${response.name}"`, undefined, undefined, execOptions)
+export const formatCompositionEntity = ({ REPL, execOptions }: Arguments) => response => {
+  if (isHeadless()) {
+    return ok(`updated composition ${response.name}`)
+  } else {
+    return REPL.qexec(`wsk app get "${response.name}"`, undefined, undefined, execOptions)
+  }
 }
 
-export const formatCompositionResult = ({ REPL }: Commands.Arguments, result, options) => {
+export const formatCompositionResult = ({ REPL }: Arguments, result, options) => {
   if (options.result || options.r) return result
-  else
-    return Capabilities.isHeadless() ? result.response.result : REPL.qexec(`wsk activation get ${result.activationId}`)
+  else return isHeadless() ? result.response.result : REPL.qexec(`wsk activation get ${result.activationId}`)
 }
 
 export const formatDeleteResult = response => {
@@ -49,67 +45,10 @@ export const formatDeleteResult = response => {
   return response
 }
 
-export const formatSessionGet = (command: Commands.Arguments, response) => {
-  debug('session get response', response)
+export const formatSessionGet = (command: Arguments, response) => {
   if (response && response.annotations && response.annotations.find(({ key, value }) => key === 'conductor' && value)) {
-    debug('activation is session')
     return formatSessionResponse(command, response)
   } else {
-    debug('activation is not session')
     return response
-  }
-}
-
-export const visualizeComposition = async (tab: UI.Tab, response, execOptions) => {
-  debug('Visualizing Composition', response)
-
-  const action = response.message || response
-  // const execOptions = opts.execOptions
-
-  debug('execOptions', execOptions)
-
-  if (hasAst(action) && !Capabilities.isHeadless()) {
-    const doVisualize = execOptions.override || !execOptions.nested
-    const options = execOptions.originalOptions || {}
-    // use require rather than import here to prevent from prequiring wskflow module in headless mode
-    const input = `/${response.namespace}/${response.name}`
-    const { content, subtext } = await decorateAsApp(tab, {
-      action,
-      input,
-      doVisualize,
-      options: Object.assign({}, execOptions, options)
-    })
-
-    if (doVisualize) {
-      debug('visualze composition')
-
-      const toolbarText = subtext && {
-        type: 'warning',
-        text: subtext
-      }
-      return Object.assign(action, {
-        type: 'custom',
-        viewName: action.type,
-        content,
-        input,
-        isEntity: true,
-        toolbarText,
-        controlHeaders: ['sidecar-header-secondary-content']
-      })
-    } else {
-      return response
-    }
-  } else {
-    return response
-  }
-}
-
-// TODO format a list view?
-export const formatSessionList = result => {
-  return {
-    sessionId: result.activationId,
-    name: result.name,
-    status: result.response.status,
-    duration: result.duration
   }
 }

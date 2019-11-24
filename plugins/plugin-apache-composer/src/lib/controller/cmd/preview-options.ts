@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 IBM Corporation
+ * Copyright 2017-2019 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { ParsedOptions } from '@kui-shell/core/api/commands'
 
-/**
- * Flow view
- *
- */
-export default {
-  when: isComposition,
-  mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
-
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
-    })
-  }
+interface Options extends ParsedOptions {
+  env: string[]
+  e: string[]
+  c: boolean
+  functions: boolean
+  ast: boolean
 }
+
+export default Options

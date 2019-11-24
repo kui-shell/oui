@@ -97,8 +97,8 @@ describe('wskflow test app preview should actively watching an external file', f
   })
 
   // error message is shown as action code
-  it('should update preview with the error message', () =>
-    this.app.client.waitForVisible(`${Selectors.SIDECAR}.entity-is-actions`, 3000))
+  it('should show an updated preview with the error message', () =>
+    this.app.client.waitForVisible(`${Selectors.SIDECAR} .apache-composer--composition-error`))
 
   it('should update the temp file to composer.sequence("a", "c")', () => {
     return new Promise((resolve, reject) => {
@@ -114,7 +114,7 @@ describe('wskflow test app preview should actively watching an external file', f
 
   it('should update preview', async () => {
     try {
-      await this.app.client.waitForVisible(Selectors.SIDECAR_CUSTOM_CONTENT)
+      await this.app.client.waitForVisible(`${Selectors.SIDECAR_CUSTOM_CONTENT} svg`)
     } catch (err) {
       return Common.oops(this)(err)
     }

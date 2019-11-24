@@ -15,6 +15,7 @@
  */
 
 import { ASTNode } from '@kui-shell/plugin-wskflow'
+import Models from '@kui-shell/core/api/models'
 import {
   Action,
   isAction,
@@ -23,6 +24,36 @@ import {
   OpenWhiskResource,
   hasAnnotation
 } from '@kui-shell/plugin-openwhisk'
+
+import PreviewOptions from '../lib/controller/cmd/preview-options'
+
+export const apiVersion = 'apache-composer/v1'
+
+export interface WithSource extends Models.ResourceWithMetadata {
+  source: string
+}
+
+export function hasSource(resource: WithSource | Models.ResourceWithMetadata): resource is WithSource {
+  const preview = resource as WithSource
+  return typeof preview.source === 'string'
+}
+
+export interface Preview extends Models.ResourceWithMetadata, WithSource {
+  apiVersion
+  kind: 'Preview'
+  ast: ASTNode
+  input: string
+
+  cmd: string
+  container: Element
+  options: PreviewOptions
+  alreadyWatching: boolean
+}
+
+export function isPreview(resource: Preview | Models.ResourceWithMetadata): resource is Preview {
+  const preview = resource as Preview
+  return preview.apiVersion === apiVersion && preview.kind === 'Preview'
+}
 
 export interface Composition extends Action {
   annotations: [

@@ -25,7 +25,10 @@ import initRequirePath from './initRequirePath'
 
 import flow from './modes/flow'
 import json from './modes/json'
+import jsonPreview from './modes/json-from-preview'
 import visualize from './modes/visualize'
+import visualizePreview from './modes/visualize-from-preview'
+import code from './modes/code'
 
 /**
  * This is the module
@@ -40,7 +43,7 @@ export default async (registrar: PreloadRegistrar) => {
     command: 'preview'
   })
 
-  registrar.registerModes(flow, visualize, json)
+  registrar.registerModes(flow, visualize, visualizePreview, json, jsonPreview, code)
 }
 
 debug('finished loading')

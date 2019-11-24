@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { WithSource, hasSource } from '../models/resource'
 
 /**
  * Flow view
  *
  */
 export default {
-  when: isComposition,
+  when: hasSource,
   mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
+    mode: 'code',
+    order: -8,
 
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
+    content: (_, preview: WithSource) => ({
+      content: preview.source,
+      contentType: 'javascript'
     })
   }
 }

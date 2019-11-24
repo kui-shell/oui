@@ -22,5 +22,5 @@ export const drilldownWith = (command: string | (() => Promise<string>), callThe
   // invoke any precursor functions
   callThese.forEach(_ => _())
 
-  return REPL.click(command, event)
+  REPL.click(command, event)
 }

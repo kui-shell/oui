@@ -17,7 +17,8 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 
 import { Activation, WaitTimeAnnotation, InitTimeAnnotation, LimitAnnotation } from './activation'
-import { isSuccess, pathOf, latencyBucket, nLatencyBuckets, Options as CommonOptions } from './util'
+import { isSuccess, pathOf, latencyBucket, nLatencyBuckets } from './util'
+import { Options } from './options'
 
 export interface TimelineData {
   activations: Activation[][]
@@ -35,8 +36,12 @@ interface RenderedOutlierReason {
   activation: Activation
 }
 
-interface StatData {
+export interface StatData {
+  min: number
+  max: number
+  count: number
   outlierMax: number
+  nFailures: number
   latBuckets: number[]
   n: Record<string | number, number>
   outliers?: RenderedOutlierReason[]
@@ -89,20 +94,11 @@ const durationOf = (_: Activation) => {
   return { duration, executionTime, wait, init }
 }
 
-interface Options extends CommonOptions {
-  groupBySuccess?: boolean
-  buckets?: number
-  nBuckets?: number
-  split?: true | string
-  full?: boolean
-  outliers?: true | number
-}
-
 /**
  * Compute statistical properties of a given group of activations
  *
  */
-export const summarizePerformance = (activations: Activation[], options: Options) => {
+export const summarizePerformance = (activations: Activation[], options: Options): StatData => {
   const latBuckets = Array(nLatencyBuckets).fill(0)
   const summaries = activations.map(_ => {
     const { duration, executionTime, wait, init } = durationOf(_)
@@ -120,6 +116,8 @@ export const summarizePerformance = (activations: Activation[], options: Options
     return
   }
 
+  const count = activations.length
+  const nFailures = activations.reduce((count, activation) => (count += isSuccess(activation) ? 0 : 1), 0)
   const min = summaries[0].duration
   const max = summaries[summaries.length - 1].duration
   const idx25 = ~~(summaries.length * 0.25)
@@ -187,6 +185,8 @@ export const summarizePerformance = (activations: Activation[], options: Options
   return {
     min,
     max,
+    count,
+    nFailures,
     latBuckets,
     explainOutlier,
     outliers,
