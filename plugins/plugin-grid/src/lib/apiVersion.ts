@@ -14,22 +14,4 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
-
-/**
- * Flow view
- *
- */
-export default {
-  when: isComposition,
-  mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
-
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
-    })
-  }
-}
+export default 'kui-shell.org/grid/v1'

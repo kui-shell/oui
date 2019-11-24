@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
+
+// modes
+import grid from './modes/grid'
+import table from './modes/table'
+
+// badges
+import gridLegend from './modes/grid-legend'
 
 /**
- * Flow view
+ * Notes: buttons and modes and badges will be presented in the order
+ * they are registered, unless they specify an `order` attribute.
  *
  */
-export default {
-  when: isComposition,
-  mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
+export default async (registrar: PreloadRegistrar) => {
+  registrar.registerModes(table, grid)
 
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
-    })
-  }
+  registrar.registerBadge(gridLegend)
 }

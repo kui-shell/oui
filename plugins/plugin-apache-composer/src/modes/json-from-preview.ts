@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { Preview, isPreview } from '../models/resource'
 
 /**
  * Flow view
  *
  */
 export default {
-  when: isComposition,
+  when: isPreview,
   mode: {
     mode: 'ast',
     label: 'JSON',
     order: -9,
 
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
+    content: (_, preview: Preview) => ({
+      content: preview.ast,
       contentType: 'json'
     })
   }

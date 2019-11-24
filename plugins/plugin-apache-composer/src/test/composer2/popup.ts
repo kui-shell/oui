@@ -44,7 +44,7 @@ const waitForPreview = function(this: Common.ISuite, name: string) {
       return Util.getValueFromMonaco(this.app).then(Util.expectSubset({ type: 'if' }, false)) // false: don't assert, return false instead
     })
 
-    await this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('source'))
+    await this.app.client.click(Selectors.SIDECAR_MODE_BUTTON('code'))
     await this.app.client.waitUntil(async () => {
       // source tab should contain something like require('openwhisk...)
       const source = await Util.getValueFromMonaco(this.app)
@@ -61,5 +61,5 @@ Common.localDescribe('popup preview', function(this: Common.ISuite) {
   before(openwhisk.before(this, { popup: preview('@demos/if.js') }))
   after(Common.after(this))
 
-  waitForPreview.bind(this)({ name: 'if.js' })
+  waitForPreview.bind(this)('if.js')
 })

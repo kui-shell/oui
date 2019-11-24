@@ -15,40 +15,34 @@
  */
 
 import Debug from 'debug'
-import { readFile as fsReadFile, stat } from 'fs'
 import { basename } from 'path'
+import { readFile as fsReadFile, stat } from 'fs'
 
-import { Capabilities, Commands, UI, Util } from '@kui-shell/core'
+import Util from '@kui-shell/core/api/util'
+import { inBrowser } from '@kui-shell/core/api/capabilities'
+import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { MultiModalResponse, Tab } from '@kui-shell/core/api/ui-lite'
 
 import * as usage from './preview-usage'
-import { codeViewMode, vizAndfsmViewModes } from '../../utility/decorate'
-import { ast as astBadge } from '../../utility/badges'
 import { invalidFSM, unknownInput } from '../../utility/messages'
 import { sourceToComposition } from '../../utility/compile'
+import { Preview, apiVersion } from '../../../models/resource'
+import Options from './preview-options'
 
 const debug = Debug('plugins/wskflow/preview')
 
-const viewName = 'preview' // for back button and sidecar header labels
 const viewNameLong = 'App Visualization' //    ... long form
 const defaultMode = 'visualization' // on open, which view mode should be selected?
 
-interface ViewOptions {
+/* interface ViewOptions {
   renderFunctionsInView?: boolean
   noHeader?: boolean
 }
-class DefaultViewOptions implements ViewOptions {}
+class DefaultViewOptions implements ViewOptions {} */
 
 interface CompositionWithCode {
   ast?: any // eslint-disable-line @typescript-eslint/no-explicit-any
   code?: string
-}
-
-interface Options extends Commands.ParsedOptions {
-  env: string[]
-  e: string[]
-  c: boolean
-  functions: boolean
-  ast: boolean
 }
 
 /**
@@ -72,13 +66,13 @@ const handleError = (err: Error, reject?: (reason: any) => void) => {
  * handlers.
  *
  */
-export default (commandTree: Commands.Registrar) => {
+export default (registrar: Registrar) => {
   const readFile = (input: string): Promise<string> =>
     // eslint-disable-next-line no-async-promise-executor
     new Promise(async (resolve, reject) => {
       const filepath = Util.findFile(Util.expandHomeDir(input))
 
-      if (!Capabilities.inBrowser()) {
+      if (!inBrowser()) {
         debug('readFile in headless mode or for electron')
         fsReadFile(filepath, (err, data) => {
           if (err) {
@@ -114,19 +108,16 @@ export default (commandTree: Commands.Registrar) => {
     })
 
   const render = (
-    tab: UI.Tab,
+    tab: Tab,
     input: string,
     options: Options,
-    execOptions: Commands.ExecOptions,
+    cmd: string,
     mode: string
-  ): Promise<Commands.Response> =>
+  ): Promise<MultiModalResponse<Preview>> =>
     new Promise((resolve, reject) => {
       debug('options', options)
 
-      let fsmPromise
-      let type
-      const coreModes = []
-
+      let fsmPromise: Promise<CompositionWithCode>
       const extension = input.substring(input.lastIndexOf('.') + 1)
 
       if (extension === 'json' || extension === 'ast') {
@@ -136,7 +127,6 @@ export default (commandTree: Commands.Registrar) => {
             inputFile: input,
             name: basename(input)
           })
-          type = astBadge
         } catch (err) {
           reject(invalidFSM)
         }
@@ -163,109 +153,56 @@ export default (commandTree: Commands.Registrar) => {
 
         const { ast } = composition
         const code = await readFile(input)
-        // pass through cli options for the wskflow renderer
-        const viewOptions: ViewOptions = new DefaultViewOptions()
 
-        coreModes.push(codeViewMode(code))
-
-        if (options.functions) {
+        /* if (options.functions) {
           // note we must be careful not to pass false; only undefined
           viewOptions.renderFunctionsInView = options.functions !== undefined // render all inline functions directly in the view?
-        }
+        } */
 
-        if (execOptions.container) {
-          // if we're rendering this inside of a given viewport, then don't modify the sidecar header
-          viewOptions.noHeader = true
-        }
+        const container = document.createElement('div')
+        container.style.flex = '1'
+        container.style.display = 'flex'
 
-        const { visualize, wskflow, zoomToFitButtons } = await import('@kui-shell/plugin-wskflow')
-        const { view, controller, subtext } = await wskflow(tab, visualize, {
-          ast,
-          name,
-          viewOptions,
-          container: execOptions.container,
-          namespace: undefined
-        })
-
-        const modes = vizAndfsmViewModes(visualize, viewName, mode, input, ast, options)
-        modes.splice(modes.length, 0, ...coreModes)
-        const extraModes = zoomToFitButtons(controller)
-
-        let entity = {
-          isEntity: true,
-          type: mode === 'visualization' ? 'custom' : 'actions',
-          prettyType: viewName,
-          name,
+        let entity: MultiModalResponse<Preview> = {
+          apiVersion,
+          kind: 'Preview',
+          metadata: {
+            name
+          },
           ast,
           input,
-          content: view,
+          cmd,
+          options,
+          container,
+          alreadyWatching: false,
           source: code,
-          verb: 'get',
-          show: mode,
-          exec: {
-            kind: 'source'
-          },
-          presentation: UI.Presentation.FixedSize,
-          modes: modes.concat(extraModes),
-          annotations: [
-            {
-              key: 'wskng.combinators',
-              value: [{ role: 'replacement', type: 'composition', badge: type }]
-            },
-            { key: 'ast', value: ast },
-            { key: 'code', value: code },
-            { key: 'file', value: input }
-          ]
+          defaultMode: mode,
+          modes: []
         }
 
-        if (!viewOptions.noHeader) {
-          entity = Object.assign(entity, {
-            controlHeaders: ['sidecar-header-secondary-content'],
-            subtext,
-            toolbarText: {
-              type: 'info',
-              text: 'This is a preview of your composition, it is not yet deployed'
-            }
-          })
-        }
+        entity = Object.assign(entity, {
+          controlHeaders: ['sidecar-header-secondary-content'],
+          toolbarText: {
+            type: 'info',
+            text: 'This is a preview of your composition, it is not yet deployed'
+          }
+        })
 
-        if (options.ast || mode === 'ast') {
+        if (options.ast) {
           // then the user asked to see the fsm
           debug('showing JSON')
-          entity.verb = 'get'
-          entity.show = 'ast'
-          entity.type = 'actions'
+          entity.defaultMode = 'ast'
         }
 
         resolve(entity)
       } /* formatForUser */
 
       fsmPromise.then(formatForUser(mode)).catch(err => {
-        debug('got error generating IR', err)
-
-        if (err.type === 'EMPTY_FILE') {
-          // start rendering an empty JSON
-          formatForUser(mode)({})
-        } else if (execOptions.alreadyWatching) {
-          // we already have the sidecar open to this file,
-          // so we can report the error in the sidecar
-
-          // createFromSource returns error as either an object that's {fsm:errMsg, code:originalCode}, or just the errMsg string
-          // here we check the error format and send the correct input to formatForUser/handleError
-          // in sidecar, error message shows in the fsm (JSON) tab. code tab shows the user's js code (if existed).
-          debug('already watching')
-          if (err.ast) {
-            formatForUser('ast')(err)
-          } else {
-            formatForUser('ast')({ ast: err })
-          }
+        // report the error in the REPL
+        if (err.ast) {
+          handleError(err.ast, reject)
         } else {
-          // otherwise, report the error in the REPL
-          if (err.ast) {
-            handleError(err.ast, reject)
-          } else {
-            handleError(err, reject)
-          }
+          handleError(err, reject)
         }
       })
     })
@@ -274,10 +211,9 @@ export default (commandTree: Commands.Registrar) => {
   const doIt = (cmd: string, mode = defaultMode) => ({
     tab,
     REPL,
-    execOptions,
     argvNoOptions,
     parsedOptions: options
-  }: Commands.Arguments<Options>) =>
+  }: Arguments<Options>) =>
     new Promise((resolve, reject) => {
       const idx = argvNoOptions.indexOf(cmd)
       const inputFile = argvNoOptions[idx + 1]
@@ -306,7 +242,7 @@ export default (commandTree: Commands.Registrar) => {
             return error
           }
 
-          if (!Capabilities.inBrowser()) {
+          if (!inBrowser()) {
             stat(input, err => {
               if (err) {
                 reject(ENOENT())
@@ -347,23 +283,15 @@ export default (commandTree: Commands.Registrar) => {
           }
 
           try {
-            render(tab, input, options, execOptions, mode).then(resolve, reject)
+            const response = await render(tab, input, options, cmd, mode)
+            resolve(response)
+          } catch (err) {
+            reject(err)
           } finally {
             // restore any env vars we smashed
             for (const key in backupEnv) {
               debug('restoring env var', key)
               process.env[key] = backupEnv[key]
-            }
-          }
-
-          // and set up a file watcher to re-render upon change of the file
-          if (!execOptions || !execOptions.alreadyWatching) {
-            if (!Capabilities.inBrowser()) {
-              const chokidar = await import('chokidar')
-              chokidar.watch(input).on('change', path => {
-                debug('change observed to file', path)
-                REPL.update(tab, `${cmd} ${path} ${Commands.unparse(options)}`)
-              })
             }
           }
         })
@@ -380,15 +308,13 @@ export default (commandTree: Commands.Registrar) => {
     clearREPLOnLoad: true,
     placeholder: 'Loading visualization ...'
   }
-  commandTree.listen(`/preview`, doIt('preview'), opts)
-  const vizCmd = commandTree.listen(`/wsk/app/preview`, doIt('preview'), opts)
-  commandTree.synonym(`/wsk/app/viz`, doIt('viz'), vizCmd, {
+  registrar.listen(`/preview`, doIt('preview'), opts)
+  const vizCmd = registrar.listen(`/wsk/app/preview`, doIt('preview'), opts)
+  registrar.synonym(`/wsk/app/viz`, doIt('viz'), vizCmd, {
     usage: usage.preview('viz')
   })
 
-  commandTree.listen('/wsk/app/src', doIt('src', 'src'), {
+  registrar.listen('/wsk/app/src', doIt('src', 'code'), {
     usage: usage.source('src')
   })
-
-  return Promise.resolve()
 }

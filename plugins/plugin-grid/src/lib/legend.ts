@@ -16,9 +16,7 @@
 
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { UI } from '@kui-shell/core'
-
-import { SummaryData } from './grouping'
+import { StatData } from './grouping'
 import { renderCell } from './cell'
 import { enDash, latencyBuckets } from './util'
 
@@ -33,12 +31,8 @@ import { enDash, latencyBuckets } from './util'
  * @param options user options from the CLI
  *
  */
-export const formatLegend = (
-  tab: UI.Tab,
-  viewName: string,
-  { statData, nFailures }: SummaryData,
-  gridContainer: HTMLElement
-): UI.Badge => {
+export const formatLegend = (viewName: string, statData: StatData) => {
+  const gridContainer = document.createElement('div')
   const wrapper = document.createElement('div')
   const wrapper2 = document.createElement('div')
 
@@ -102,7 +96,7 @@ export const formatLegend = (
       valueCell.classList.add('kind')
       gridCellCell.appendChild(valueCell)
 
-      renderCell(tab, 'Legend', cell, null, isFailure, 0, latBucket, {
+      renderCell('Legend', cell, null, isFailure, 0, latBucket, {
         zoom: options.zoom
       }) // null means no activation associated with cell
 
@@ -182,12 +176,12 @@ export const formatLegend = (
   // render the legend entry for failures
   //
   const opts: EntryOptions = { zoom: -1, useThisLabelInstead: 'fail' }
-  if (nFailures > 0) {
+  if (statData.nFailures > 0) {
     opts.onclick = toggleFilter(-1)
   }
   entry(
     'these cells represent activation failures',
-    nFailures,
+    statData.nFailures,
     true,
     -1, // true means render as failure
     opts

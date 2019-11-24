@@ -170,7 +170,7 @@ describe('grid visualization', function(this: Common.ISuite) {
       this.app.client
         .waitForVisible(button)
         .then(() => this.app.client.waitForEnabled(button))
-        .then(() =>
+        /* .then(() =>
           this.app.client.waitUntil(async () => {
             try {
               await this.app.client.click(button)
@@ -197,7 +197,7 @@ describe('grid visualization', function(this: Common.ISuite) {
               return false
             }
           })
-        )
+        ) */
         .catch(Common.oops(this)))
   }
   const switcheroo = () => {

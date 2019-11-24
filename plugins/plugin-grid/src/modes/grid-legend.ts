@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import { Composition, isComposition } from '../models/resource'
+import { ActivationData, isActivationData } from '../models/activation-data'
+import { GridOptions } from '../lib/options'
+import { formatLegend } from '../lib/legend'
 
 /**
- * Flow view
+ * Display grid legend
  *
  */
 export default {
-  when: isComposition,
-  mode: {
-    mode: 'ast',
-    label: 'JSON',
-    order: -9,
-
-    content: (_, composition: Composition) => ({
-      content: JSON.stringify(composition.annotations.find(_ => _.key === 'conductor').value, undefined, 2),
-      contentType: 'json'
-    })
-  }
+  when: isActivationData,
+  badge: (resource: ActivationData<GridOptions>) => formatLegend('Grid', resource.content.stats)
 }

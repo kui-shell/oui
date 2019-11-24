@@ -34,6 +34,7 @@ export { renderActivationListView, ActivationListTable } from './views/activatio
 export { fqn } from './controller/fqn'
 export { ListOptions } from './controller/options'
 export { asActivationTable } from './controller/activation/as-activation'
+export { default as ok } from './controller/ok'
 
 import { createUsage as actionCreateUsage, updateUsage as actionUpdateUsage } from './controller/action/create'
 import { usage as actionInvokeUsage } from './controller/action/invoke'

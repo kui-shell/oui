@@ -19,7 +19,8 @@ import { dirname, join } from 'path'
 import { v4 as uuid } from 'uuid'
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { Capabilities, Commands, Errors, eventBus, REPL, UI, Util } from '@kui-shell/core'
+import { Capabilities, Errors, eventBus, REPL, UI, Util } from '@kui-shell/core'
+import { Arguments, ParsedOptions, Response } from '@kui-shell/core/api/commands'
 
 import { currentNamespace } from '@kui-shell/plugin-openwhisk'
 
@@ -27,6 +28,7 @@ import Activation from './activation'
 import { range as rangeParser } from './time'
 import * as usage from '../usage'
 import defaults from '../defaults'
+import { StatData, summarizePerformance } from './grouping'
 
 const debug = Debug('plugins/grid/utils')
 debug('loading')
@@ -299,35 +301,28 @@ const strong = (container: HTMLElement, N: number) => {
     return element
   }
 }
-export const formatTimeRange = ({
-  minTime,
-  maxTime,
-  totalCount
-}: {
-  minTime: number
-  maxTime: number
-  totalCount: number
-}): UI.ToolbarText => {
+
+function formatToolbarText(stats: StatData): UI.ToolbarText {
   const container = document.createElement('span')
 
-  if (totalCount === 0) {
+  if (stats.count === 0) {
     container.innerText = 'No activations to display'
   } else {
     const fresh = !container.querySelector('strong')
 
     if (fresh && container.innerText.length > 0) {
-      // in case we had a previous totalCount === 0
+      // in case we had a previous stats.count === 0
       container.innerText = ''
     }
 
-    strong(container, 1).innerText = totalCount.toString()
+    strong(container, 1).innerText = stats.count.toString()
 
     if (fresh) container.appendChild(document.createTextNode(' activations | '))
-    strong(container, 2).appendChild(UI.PrettyPrinters.time(minTime, 'short'))
+    strong(container, 2).appendChild(UI.PrettyPrinters.time(stats.min, 'short'))
 
     if (fresh) container.appendChild(document.createTextNode(' | '))
     // strong(container, 3).innerText = UI.PrettyPrinters.time(maxTime, 'short')
-    strong(container, 3).innerText = prettyPrintDuration(maxTime - minTime, {
+    strong(container, 3).innerText = prettyPrintDuration(stats.max - stats.min, {
       compact: true
     })
   }
@@ -335,7 +330,19 @@ export const formatTimeRange = ({
   return new UI.ToolbarText('info', container)
 }
 
-export interface Options extends Commands.ParsedOptions {
+export function formatStats(
+  activations: Activation[],
+  options: Options
+): { stats: StatData; toolbarText: UI.ToolbarText } {
+  const stats = summarizePerformance(activations, options)
+
+  return {
+    stats,
+    toolbarText: formatToolbarText(stats)
+  }
+}
+
+export interface Options extends ParsedOptions {
   help?: string
   batches?: number
   live?: boolean
@@ -350,17 +357,13 @@ export type Renderer<ParsedOptions extends Options> = (
   options: Options,
   uuid: string,
   isRedraw?: boolean
-) => (activations: Activation[]) => Commands.Response
+) => (activations: Activation[]) => Response
 export const visualize = <ParsedOptions extends Options>(
   cmd: string,
   viewName: string,
   draw: Renderer<Options>,
   extraOptions?: { live: boolean }
-) => ({
-  tab,
-  argvNoOptions,
-  parsedOptions: options
-}: Commands.Arguments<ParsedOptions>): Promise<Commands.Response> => {
+) => ({ tab, argvNoOptions, parsedOptions: options }: Arguments<ParsedOptions>): Promise<Response> => {
   debug('visualize')
 
   // number of batches (of 200) to fetch
@@ -384,7 +387,7 @@ export const visualize = <ParsedOptions extends Options>(
   const ourUUID = uuid()
 
   // let timeRange
-  const fetchAndDraw = (isRedraw = false): Promise<Commands.Response> => {
+  const fetchAndDraw = (isRedraw = false): Promise<Response> => {
     const N = cliN || defaults.N
     if (N > defaults.maxN) {
       throw new Error(`Please provide a maximum value of ${defaults.maxN}`)
@@ -495,7 +498,7 @@ export const latencyBucketRange = bucket => {
  * user.
  *
  */
-export const optionsToString = (options: Commands.ParsedOptions, except?: string[]) => {
+export const optionsToString = <O extends ParsedOptions>(options: O, except?: string[]) => {
   let str = ''
   for (const key in options) {
     // underscore comes from minimist
