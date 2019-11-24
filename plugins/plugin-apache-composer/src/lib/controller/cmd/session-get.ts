@@ -38,7 +38,7 @@ export default async (commandTree: Commands.Registrar) => {
       const { command, parsedOptions, REPL } = args
 
       if (parsedOptions.last || parsedOptions['last-failed']) {
-        return REPL.rexec<{ content: Activation[] }>('wsk activation list --limit 200')
+        return REPL.rexec<Activation[]>('wsk activation list --limit 200')
           .then(activations => activations.content)
           .then(activations => {
             return activations.find(activation => {
@@ -92,7 +92,7 @@ export default async (commandTree: Commands.Registrar) => {
           const last = opts.parsedOptions.last
 
           if (last) {
-            return opts.REPL.rexec<{ content: Activation[] }>(
+            return opts.REPL.rexec<Activation[]>(
               `wsk activation list --limit 1` + (typeof last === 'string' ? ` --name ${last}` : '')
             )
               .then(activations => activations.content)

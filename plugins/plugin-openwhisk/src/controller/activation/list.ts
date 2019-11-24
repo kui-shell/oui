@@ -69,7 +69,7 @@ const doList = async ({ tab, argvNoOptions, parsedOptions, execOptions }: Argume
     } else {
       const list = raw.map(asActivation)
       if (execOptions.raw) {
-        return { type: 'custom', content: list }
+        return { mode: 'raw', content: list }
       } else if (isHeadless()) {
         const L = await asActivationTable(list)
         if (L.body.length > 0) {

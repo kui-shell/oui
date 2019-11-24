@@ -127,7 +127,7 @@ class Occupancy {
           }
 
           if (cell.id && cell['isFailure'] && !cell['failureMessage']) {
-            this.tab.REPL.qexec(`wsk activation get ${cell.id}`).then(({ response }: Activation) => {
+            this.tab.REPL.qexec<Activation>(`wsk activation get ${cell.id}`).then(({ response }) => {
               if (response.result.error) {
                 const failureMessage =
                   typeof response.result.error === 'string'

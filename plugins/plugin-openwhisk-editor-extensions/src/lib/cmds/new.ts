@@ -149,7 +149,7 @@ const failIfNot404 = err => {
  */
 export const gotoReadonlyView = ({ getEntity }) => async (tab: Tab) => {
   debug('readonly', fqn)
-  return tab.REPL.pexec<Action>(`wsk action get ${encodeComponent(fqn(getEntity()))}`)
+  return tab.REPL.pexec(`wsk action get ${encodeComponent(fqn(getEntity()))}`)
 }
 
 export const persisters = {
@@ -276,12 +276,7 @@ export const newAction = ({
   placeholder = undefined,
   placeholderFn = undefined,
   persister = persisters.actions
-} = {}) => async ({
-  tab,
-  argvNoOptions,
-  parsedOptions: options,
-  execOptions
-}: Commands.Arguments<Options>): Promise<Commands.Response> => {
+} = {}) => async ({ tab, argvNoOptions, parsedOptions: options, execOptions }: Commands.Arguments<Options>) => {
   const name = argvNoOptions[argvNoOptions.indexOf(cmd) + 1]
   const prettyKind = addVariantSuffix(options.kind || _kind)
   const kind = addVariantSuffix(options.kind || defaults.kind)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar, KResponse } from '@kui-shell/core/api/commands'
 
 import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
@@ -34,7 +34,7 @@ const usage = withStandardOptions({
  * lifecycle event on the feed.
  *
  */
-async function removeTrigger({ argvNoOptions, execOptions }: Arguments) {
+async function removeTrigger({ argvNoOptions, execOptions }: Arguments): Promise<KResponse> {
   const name = argvNoOptions[argvNoOptions.length - 1]
   const client = getClient(execOptions)
 
@@ -55,9 +55,8 @@ async function removeTrigger({ argvNoOptions, execOptions }: Arguments) {
   }
 
   return {
-    verb: 'delete',
-    type: 'trigger',
-    name,
+    verb: 'delete' as const,
+    kind: 'Trigger',
     metadata: {
       name: trigger.name,
       namespace: trigger.namespace

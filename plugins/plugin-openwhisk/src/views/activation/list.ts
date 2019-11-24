@@ -562,7 +562,7 @@ const _render = (args: Args) => {
       // pagination click handlers
       const goto = (skip: number) => () => {
         const listCommand = 'wsk activation list'
-        return tab.REPL.rexec<{ content: Activation[] }>(`${listCommand} ${mapToOptions(parsedOptions, { skip })}`)
+        return tab.REPL.rexec<Activation[]>(`${listCommand} ${mapToOptions(parsedOptions, { skip })}`)
           .then(_ => _.content)
           .then(activationIds => {
             if (activationIds.length === 0) {

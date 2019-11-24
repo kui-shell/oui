@@ -72,7 +72,7 @@ const waitForDelete = function(this: Common.ISuite, spec: DeleteSpec) {
     return this.app.client
       .waitUntil(async () => {
         const okText = await this.app.client.getText(`${Selectors.SIDECAR} .ok-line`)
-        return okText === `ok: deleted action ${name}`
+        return okText === `ok: deleted Action ${name}`
       }, CLI.waitTimeout)
       .catch(Common.oops(this, true))
   })

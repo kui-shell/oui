@@ -57,7 +57,7 @@ export default async (commandTree: Registrar) => {
 
         // find sessions in activation list
         const findSessions = async (skip = 0, name = '', limit = 20) => {
-          return REPL.rexec<{ content: Activation[] }>(`wsk activation list "${name}" --skip ${skip} --limit ${limit}`)
+          return REPL.rexec<Activation[]>(`wsk activation list "${name}" --skip ${skip} --limit ${limit}`)
             .then(activations => {
               // filter activations to find session
               debug('finding sessions in activation list', activations)
