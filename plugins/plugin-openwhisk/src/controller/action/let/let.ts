@@ -474,7 +474,7 @@ export default async (commandTree: Commands.Registrar) => {
         }
       })
 
-  const doCreate = (args: Commands.Arguments): Promise<Commands.Response> => {
+  const doCreate = (args: Commands.Arguments) => {
     const { argv: fullArgv, command: fullCommand, execOptions, REPL } = args
     // const update = execOptions.createOnly ? 'create' : 'update'
 
@@ -620,7 +620,7 @@ export default async (commandTree: Commands.Registrar) => {
       if (annotators[extension]) annotators[extension].forEach(annotator => annotator(action))
 
       debug('inline-function::create', name)
-      return REPL.qexec<Commands.Response>(`wsk action update "${name}"`, undefined, undefined, {
+      return REPL.qexec(`wsk action update "${name}"`, undefined, undefined, {
         entity: { action }
       }).catch(packageAutoCreate(name))
     } else {
@@ -669,9 +669,7 @@ export default async (commandTree: Commands.Registrar) => {
               }
 
               debug('creating sequence', extraArgs, name, components)
-              return REPL.qexec<Commands.Response>(
-                `wsk action update --sequence ${extraArgs} "${name}" ${components.join(',')}`
-              )
+              return REPL.qexec(`wsk action update --sequence ${extraArgs} "${name}" ${components.join(',')}`)
             })
             .catch(packageAutoCreate(name))
         } else {

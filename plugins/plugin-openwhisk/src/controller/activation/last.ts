@@ -27,15 +27,13 @@ const last = ({ argv: fullArgv, REPL }: Commands.Arguments): Promise<Activation>
   const argv = fullArgv.slice(fullArgv.indexOf('last'))
 
   const limit = argv.length === 1 ? 1 : 200 // if no options, then we're showing just the last activation
-  return REPL.rexec<{ content: Activation[] }>(`wsk activation list --limit ${limit} ${argv.slice(1).join(' ')}`).then(
-    response => {
-      if (response.content.length === 0) {
-        throw new Error(argv.length === 1 ? 'You have no activations' : 'No matching activations')
-      } else {
-        return REPL.qexec<Activation>(`wsk activation get ${response.content[0].activationId}`)
-      }
+  return REPL.rexec<Activation[]>(`wsk activation list --limit ${limit} ${argv.slice(1).join(' ')}`).then(response => {
+    if (response.content.length === 0) {
+      throw new Error(argv.length === 1 ? 'You have no activations' : 'No matching activations')
+    } else {
+      return REPL.qexec<Activation>(`wsk activation get ${response.content[0].activationId}`)
     }
-  )
+  })
 }
 
 export default (commandTree: Commands.Registrar) => {

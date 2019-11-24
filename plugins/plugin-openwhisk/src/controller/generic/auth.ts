@@ -23,7 +23,7 @@
 import Debug from 'debug'
 
 import { inBrowser } from '@kui-shell/core/api/capabilities'
-import { Arguments, Response, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, RawResponse, Registrar } from '@kui-shell/core/api/commands'
 import { Table, Row } from '@kui-shell/core/api/table-models'
 import { Tab } from '@kui-shell/core/api/ui-lite'
 import UI from '@kui-shell/core/api/ui'
@@ -296,7 +296,7 @@ const list = async ({ REPL }: Arguments): Promise<Table> => {
     }
   )
 
-  return { header: headerRow, body, noSort: true, type, title: type }
+  return { header: headerRow, body, noSort: true, title: type }
 }
 
 /** return the argv sliced after the index of verb */
@@ -382,15 +382,21 @@ const addFn = (tab: Tab, key: string, subject: string): Promise<string> => {
     })
 }
 
+interface HostConfig {
+  host: string
+  ignoreCerts: boolean
+  isLocal: boolean
+}
+
 /**
  * Command impl for host set
  *
  */
-const hostSet = async (command: Arguments): Promise<Response> => {
+const hostSet = async (command: Arguments) => {
   const { argvNoOptions, parsedOptions: options, execOptions, REPL } = command
   const argv = slice(argvNoOptions, 'set')
 
-  let hostConfig = {
+  let hostConfig: HostConfig = {
     host: argv[0] || options.host, // the new apihost to use
     ignoreCerts: !!(options.ignoreCerts || options.insecureSSL || options.insecure),
     isLocal: false // is this a local openwhisk?
@@ -439,7 +445,7 @@ const hostSet = async (command: Arguments): Promise<Response> => {
     hostConfig.ignoreCerts = true
     hostConfig.isLocal = true
   } else if (hostConfig.host === 'local' || hostConfig.host === 'localhost') {
-    hostConfig = await REPL.qexec('wsk host pinglocal', undefined, undefined, execOptions)
+    hostConfig = (await REPL.rexec<HostConfig>('wsk host pinglocal', execOptions)).content
   }
 
   const { host, ignoreCerts, isLocal } = await Promise.resolve(hostConfig)
@@ -511,7 +517,7 @@ const hostSet = async (command: Arguments): Promise<Response> => {
  * Ping a variety of localhost options to see if one is awake
  *
  */
-const pingLocal = async () => {
+const pingLocal = async (): Promise<RawResponse<HostConfig>> => {
   debug('pingLocal')
 
   // we will try a variety of options
@@ -564,9 +570,12 @@ const pingLocal = async () => {
             debug('found local openwhisk', host)
 
             resolve({
-              host,
-              ignoreCerts: true,
-              isLocal: true
+              mode: 'raw',
+              content: {
+                host,
+                ignoreCerts: true,
+                isLocal: true
+              }
             })
           }
         })

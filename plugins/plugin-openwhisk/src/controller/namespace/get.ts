@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Namespace as RawNamespace } from 'openwhisk'
+import { Arguments, Registrar, RawResponse, KResponse } from '@kui-shell/core/api/commands'
 
-import standardOptions from '../aliases'
 import respondWith from './as-namespace'
 import { getClient } from '../../client/get'
 import { synonyms } from '../../models/synonyms'
+import { withStandardOptions } from '../usage'
+
+const verb = 'get'
+
+export const usage = (syn: string) => ({
+  strict: verb,
+  command: verb,
+  docs: 'get the details of a given namespace',
+  example: `wsk ${syn} ${verb} <namespace>`,
+  required: [{ name: 'namespace', docs: 'The name of a namespace' }]
+})
 
 async function doGet({ argvNoOptions, execOptions }: Arguments) {
   const name = argvNoOptions[argvNoOptions.indexOf('get') + 1]
   const raw = await getClient(execOptions).namespaces.get(name)
 
   if (execOptions.raw) {
-    return { content: raw }
+    const response: KResponse<RawNamespace> = { mode: 'raw', content: raw } as RawResponse<RawNamespace>
+    return response
   } else {
     return respondWith(name, raw)
   }
@@ -34,6 +46,6 @@ async function doGet({ argvNoOptions, execOptions }: Arguments) {
 
 export default (registrar: Registrar) => {
   synonyms('namespaces').forEach(syn => {
-    registrar.listen(`/wsk/${syn}/get`, doGet, standardOptions)
+    registrar.listen(`/wsk/${syn}/${verb}`, doGet, withStandardOptions(usage(syn)))
   })
 }

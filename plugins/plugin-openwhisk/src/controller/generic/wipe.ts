@@ -18,6 +18,7 @@ import Debug from 'debug'
 
 import { isHeadless } from '@kui-shell/core/api/capabilities'
 import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Table, Row } from '@kui-shell/core/api/table-models'
 import UI from '@kui-shell/core/api/ui'
 
 import { OpenWhiskResource } from '../../models/resource'
@@ -80,7 +81,7 @@ const deleteAllOnce = async ({ REPL }: Arguments, entities: OpenWhiskResource[])
  *
  */
 async function list({ REPL }: Arguments, type: string): Promise<OpenWhiskResource[]> {
-  const L = await REPL.qexec<{ body: OpenWhiskResource[] }>(`wsk ${type} list --limit 200`)
+  const L = await REPL.qexec<Table<Row & OpenWhiskResource>>(`wsk ${type} list --limit 200`)
   return L.body
 }
 

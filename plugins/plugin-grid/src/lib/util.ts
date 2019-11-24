@@ -16,17 +16,15 @@
 
 import Debug from 'debug'
 import { dirname, join } from 'path'
-import { v4 as uuid } from 'uuid'
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { Capabilities, Errors, eventBus, REPL, UI, Util } from '@kui-shell/core'
-import { Arguments, ParsedOptions, Response } from '@kui-shell/core/api/commands'
+import { Capabilities, REPL, UI, Util } from '@kui-shell/core'
+import { ParsedOptions } from '@kui-shell/core/api/commands'
 
 import { currentNamespace } from '@kui-shell/plugin-openwhisk'
 
 import Activation from './activation'
 import { range as rangeParser } from './time'
-import * as usage from '../usage'
 import defaults from '../defaults'
 import { StatData, summarizePerformance } from './grouping'
 
@@ -346,120 +344,6 @@ export interface Options extends ParsedOptions {
   help?: string
   batches?: number
   live?: boolean
-}
-
-/**
- * The command handler for visualizing as a table
- *
- */
-export type Renderer<ParsedOptions extends Options> = (
-  tab: UI.Tab,
-  options: Options,
-  uuid: string,
-  isRedraw?: boolean
-) => (activations: Activation[]) => Response
-export const visualize = <ParsedOptions extends Options>(
-  cmd: string,
-  viewName: string,
-  draw: Renderer<Options>,
-  extraOptions?: { live: boolean }
-) => ({ tab, argvNoOptions, parsedOptions: options }: Arguments<ParsedOptions>): Promise<Response> => {
-  debug('visualize')
-
-  // number of batches (of 200) to fetch
-  const idx = argvNoOptions.indexOf(cmd)
-
-  if (options.help || argvNoOptions[idx + 1] === 'help') {
-    throw new Errors.UsageError(usage[cmd])
-  }
-
-  if (idx < 0) {
-    throw new Error('Parse error')
-  }
-
-  const appName = argvNoOptions[idx + 1]
-  const cliN = options.batches
-
-  // add the CSS to the document
-  injectContent()
-
-  // to help with view replacement; so we don't clear ourselves, mostly
-  const ourUUID = uuid()
-
-  // let timeRange
-  const fetchAndDraw = (isRedraw = false): Promise<Response> => {
-    const N = cliN || defaults.N
-    if (N > defaults.maxN) {
-      throw new Error(`Please provide a maximum value of ${defaults.maxN}`)
-    }
-    return (
-      fetchActivationData(N, Object.assign(options, { name: appName }))
-        /* .then(data => {
-                if (!isRedraw) {
-                    // remember the time range, so that the redraw can
-                    // keep the same fixed window of time on every
-                    // redraw
-                    const {min, max} = data.reduce((range, activation) => {
-                        if (!range.min || activation.start < range.min) {
-                            range.min = activation.start
-                        }
-                        if (!range.max || activation.start > range.max) {
-                            range.max = activation.start
-                        }
-                        return range
-                    }, {})
-                    timeRange = max - min
-                }
-                return data
-            }) */
-        .then(draw(tab, options, ourUUID, isRedraw))
-    )
-  }
-
-  return fetchAndDraw().then(response => {
-    const invokeListener = ({ name, namespace }: { name: string; namespace: string }) => {
-      if (!appName || appName === name || appName === `/${namespace}/${name}`) {
-        debug('invoke match for update')
-        fetchAndDraw(true)
-      }
-    }
-    const fireListener = () => {
-      // TODO we can optimize this
-      debug('trigger fire match for update')
-      fetchAndDraw(true)
-    }
-
-    eventBus.on('/action/invoke', invokeListener)
-    eventBus.on('/trigger/fire', fireListener)
-
-    let poller: NodeJS.Timer
-    let disabled = false
-    if ((extraOptions && extraOptions.live) || options.live) {
-      debug('live mode')
-      // eventBus.on('/mirror/update', () => fetchAndDraw(true))
-      poller = setInterval(() => {
-        if (!disabled) {
-          fetchAndDraw(true)
-        }
-      }, 5000)
-    }
-
-    eventBus.once('/sidecar/replace', (otherUUID: string) => {
-      if (otherUUID !== ourUUID) {
-        debug('disabling our listeners', ourUUID)
-        disabled = true
-
-        if (poller) {
-          clearInterval(poller)
-        }
-
-        eventBus.removeListener('/action/invoke', invokeListener)
-        eventBus.removeListener('/trigger/fire', fireListener)
-      }
-    })
-
-    return response
-  })
 }
 
 export const nLatencyBuckets = 6

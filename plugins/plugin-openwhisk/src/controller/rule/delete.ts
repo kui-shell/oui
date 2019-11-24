@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Registrar } from '@kui-shell/core/api/commands'
+import { Registrar, KResponse } from '@kui-shell/core/api/commands'
 
 import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'
@@ -32,7 +32,7 @@ export default (registrar: Registrar) => {
   synonyms('rules').forEach(syn => {
     registrar.listen(
       `/wsk/${syn}/delete`,
-      async ({ argvNoOptions, execOptions }) => {
+      async ({ argvNoOptions, execOptions }): Promise<KResponse> => {
         const name = argvNoOptions[argvNoOptions.indexOf('delete') + 1]
 
         const response = await getClient(execOptions).rules.delete(
@@ -46,8 +46,7 @@ export default (registrar: Registrar) => {
 
         return {
           verb: 'delete',
-          type: 'rule',
-          name,
+          kind: 'Rule',
           metadata: {
             name: response.name,
             namespace: response.namespace
