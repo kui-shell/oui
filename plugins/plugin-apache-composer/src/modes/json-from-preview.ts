@@ -28,7 +28,7 @@ export default {
     order: -9,
 
     content: (_, preview: Preview) => ({
-      content: preview.ast,
+      content: JSON.stringify(preview.ast, undefined, 2),
       contentType: 'json'
     })
   }

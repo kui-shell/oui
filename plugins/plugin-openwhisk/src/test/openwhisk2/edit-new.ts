@@ -121,11 +121,10 @@ describe('create new actions in editor', function(this: Common.ISuite) {
           // expect the action content not to be changed
           console.log('lock: Expected action content: "let main = x => x"')
           const actionSrc = await Util.getValueFromMonaco(this.app)
-          console.error('!!!!2', actionSrc, actionSrc.trim() === 'let main = x => x')
           return actionSrc.trim() === 'let main = x => x'
         })
       )
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should get the new action, edit the action content and deployed', () =>
     CLI.command('wsk action get foo2', this.app)
