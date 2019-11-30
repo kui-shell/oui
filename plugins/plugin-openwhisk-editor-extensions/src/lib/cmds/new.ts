@@ -216,7 +216,7 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
         },
         annotations: [],
         persister: execOptions.parameters.persister,
-        gotoReadonlyView: ({ getEntity }) => lockIcon({ getEntity, direct: gotoReadonlyView({ getEntity }) })
+        gotoReadonlyView: ({ getEntity }) => lockIcon({ getEntity, command: gotoReadonlyView({ getEntity }) })
       })
     }
   }
@@ -226,7 +226,7 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
     .then(entity =>
       Object.assign({}, entity, {
         persister: persisters.actions,
-        gotoReadonlyView: ({ getEntity }) => lockIcon({ getEntity, direct: gotoReadonlyView({ getEntity }) })
+        gotoReadonlyView: ({ getEntity }) => lockIcon({ getEntity, command: gotoReadonlyView({ getEntity }) })
       })
     )
     .catch(err => {
@@ -317,7 +317,7 @@ export const newAction = ({
   return betterNotExist(name, options)
     .then(() => Promise.all([makeAction(), openEditor(tab, name, options, execOptions)]))
     .then(prepareEditorWithAction)
-    .then(respondToRepl(undefined, ['is-modified']))
+    .then(respondToRepl(undefined /*, ['is-modified'] */))
 }
 
 export default async (commandTree: Commands.Registrar) => {

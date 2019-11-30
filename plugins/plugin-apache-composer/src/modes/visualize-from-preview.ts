@@ -68,7 +68,7 @@ export default {
         })
       }
 
-      return preview.container
+      return preview.container as HTMLElement
     }
   }
 }

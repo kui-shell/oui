@@ -356,7 +356,7 @@ export const newAction = ({
     .then(() => Promise.all([makeAction(), openEditor(tab, name, options, execOptions)]))
     .then(prepareEditorWithAction)
     .then(addWskflow(tab))
-    .then(respondToRepl(undefined, ['is-modified']))
+    .then(respondToRepl(undefined /*, ['is-modified'] */))
 }
 
 export default async (commandTree: Commands.Registrar) => {
