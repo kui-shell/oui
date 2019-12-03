@@ -359,7 +359,7 @@ const addFn = (tab: Tab, key: string, subject: string): Promise<string> => {
   const previousAuth = authModel.get()
   return authModel
     .set(key)
-    .then(() => namespace.init(true)) // true means that we'll do the error handling
+    .then(() => namespace.init({ noAuthOk: true })) // true means that we'll do the error handling
     .then(() => updateLocalWskProps(key, subject))
     .then(informUserOfChange(tab, subject))
     .catch(err => {

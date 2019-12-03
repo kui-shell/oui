@@ -28,7 +28,7 @@ const key = 'wsk.namespaces'
 
 /** semi-globals */
 let cached
-let currentNS
+let currentNS: string
 
 const read = () =>
   apiHost.get().then(host => {
@@ -191,6 +191,7 @@ export const setNeedsNamespace = async (err?: Error) => {
   }
 
   debug('no selected namespace in local storage')
+
   return list().then(async auths => {
     if (auths.length === 0) {
       // user has no namespaces, and so needs to use
@@ -207,8 +208,13 @@ export const setNeedsNamespace = async (err?: Error) => {
       // user has many namespaces, and didn't select one previously, so list them
       debug('user has more than one namespace, listing them')
       setPleaseSelectNamespace()
-      const repl = await REPL()
-      repl.pexec(`wsk auth list`)
+      // const repl = await REPL()
+      // repl.pexec(`wsk auth list`)
+      if (err) {
+        throw err
+      } else {
+        throw new Error('please select a namespace via "wsk auth add"')
+      }
     }
   })
 }
@@ -234,7 +240,7 @@ const setNamespace = (namespace: string) => {
   }
 
   // UI bits
-  debug(`setNamespace ${namespace}`)
+  /* debug(`setNamespace ${namespace}`)
   const namespaceDom = document.querySelector('#openwhisk-namespace') as HTMLElement
   namespaceDom.className = 'clickable' // remove any prior oops
   namespaceDom.onclick = async () => {
@@ -248,7 +254,7 @@ const setNamespace = (namespace: string) => {
   hostDom.onclick = async () => {
     const { UI } = await import('@kui-shell/core/api/ui')
     UI.LowLevel.partialInput('host set <your_api_host>')
-  }
+  } */
 
   // cache
   currentNS = namespace
@@ -261,23 +267,29 @@ const setNamespace = (namespace: string) => {
  * Initialize the apihost and namespace bits of the UI
  *
  */
-export const init = async (noCatch = false, { noAuthOk = false } = {}) => {
+export const init = async ({ noAuthOk = false } = {}) => {
   debug('init')
 
-  return apiHost
-    .get() // get the current apihost
-    .then(setApiHost) // udpate the UI for the apihost
-    .then(async () => (await REPL()).qexec('wsk auth namespace get')) // get the namespace associated with the current auth key
-    .then(setNamespace) // update the UI for the namespace
-    .catch(err => {
-      debug('namespace init error', noAuthOk)
-      console.error('namespace::init error ' + JSON.stringify(err), err)
-      if (!noCatch) {
-        return setNeedsNamespace(err)
-      } else if (!noAuthOk) {
-        throw err
-      }
-    })
+  try {
+    // udpate the UI for the apihost
+    try {
+      setApiHost(await apiHost.get())
+    } catch (err) {
+      console.error(err)
+    }
+
+    // get the namespace associated with the current auth key
+    const ns = await (await REPL()).qexec<string>('wsk auth namespace get')
+
+    // update the UI for the namespace
+    setNamespace(ns)
+  } catch (err) {
+    debug('namespace init error', noAuthOk)
+    console.error('namespace::init error ' + JSON.stringify(err), err)
+    if (!noAuthOk) {
+      throw err
+    }
+  }
 }
 
 /**
@@ -297,7 +309,7 @@ export const current = async (opts: CurrentOptions = new DefaultCurrentOptions()
   if (!ns && !opts.noNamespaceOk) {
     // lazily initialize ourselves
     await init()
-    return current()
+    return current({ noNamespaceOk: true })
   } else {
     return Promise.resolve(ns)
   }

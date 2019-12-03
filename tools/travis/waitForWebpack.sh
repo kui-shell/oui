@@ -7,9 +7,6 @@ set -e
 set -o pipefail
 
 if [[ $T = webpack ]]; then
-    npm run -s pty:nodejs
-
-    (npm run proxy &)
     (npm run webpack &)
                             
     echo "$(tput setaf 3)waiting for webpack to wake up$(tput sgr0)"
