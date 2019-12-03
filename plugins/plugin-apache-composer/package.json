@@ -21,12 +21,12 @@
   ],
   "main": "dist/index.js",
   "dependencies": {
-    "@kui-shell/core": "^5.5.3",
-    "@kui-shell/plugin-wskflow": "^5.5.3",
-    "@kui-shell/test": "^5.5.3",
+    "@kui-shell/core": "^5.5.5",
+    "@kui-shell/plugin-wskflow": "^5.5.5",
+    "@kui-shell/test": "^5.5.5",
     "app-module-path": "2.2.0",
     "debug": "4.1.1",
-    "openwhisk-composer": "github:starpit/incubator-openwhisk-composer#agent"
+    "openwhisk-composer": "github:apache/openwhisk-composer"
   },
   "publishConfig": {
     "access": "public"

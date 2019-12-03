@@ -11,7 +11,7 @@ install:
   - ./tools/travis/openwhisk/openwhisk.sh &
   - ow=$!
   - npm ci
-  - if [ "$MOCHA_RUN_TARGET"] == "webpack" ]; then (npm run proxy &); (npm run webpack &); fi
+  - ./tools/travis/waitForWebpack.sh
   - wait $ow
 
 jobs:
