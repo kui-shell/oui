@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { REPL } from '@kui-shell/core'
+import { Tab } from '@kui-shell/core'
 
-export const drilldownWith = (command: string | (() => Promise<string>), callThese: (() => void)[] = []) => (
+export const drilldownWith = (tab: Tab, command: string | (() => Promise<string>), callThese: (() => void)[] = []) => (
   event: MouseEvent
 ) => {
   // invoke any precursor functions
   callThese.forEach(_ => _())
 
-  REPL.click(command, event)
+  tab.REPL.click(command, event)
 }

@@ -1,0 +1,9 @@
+{
+  "extends": "./node_modules/@kui-shell/builder/tsconfig-base.json",
+  "references": [
+    { "path": "./plugins/plugin-openwhisk/tsconfig-es6.json" },
+    { "path": "./plugins/plugin-apache-composer/tsconfig-es6.json" },
+    { "path": "./plugins/plugin-grid/tsconfig-es6.json" },
+    { "path": "./plugins/plugin-openwhisk-editor-extensions/tsconfig-es6.json" }
+  ]
+}

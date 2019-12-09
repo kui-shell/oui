@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core'
 
 import newCmd from './lib/cmds/new'
 import composeCmd from './lib/cmds/compose'
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   return Promise.all([newCmd(commandTree), composeCmd(commandTree)])
 }

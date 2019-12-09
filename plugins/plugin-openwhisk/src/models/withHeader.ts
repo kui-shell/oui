@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Row, Table } from '@kui-shell/core/api/table-models'
-import Commands from '@kui-shell/core/api/commands'
+import { ExecOptions, Row, Table } from '@kui-shell/core'
+
+const DefaultExecOptions: ExecOptions = {}
 
 /**
  * Maybe add a header row for tables. If this is a nested call,
@@ -24,7 +25,7 @@ import Commands from '@kui-shell/core/api/commands'
  * actually wants us to add the header (showHeader).
  *
  */
-export default (rows: Row[], execOptions: Commands.ExecOptions = new Commands.DefaultExecOptions()): Table => {
+export default (rows: Row[], execOptions: ExecOptions = DefaultExecOptions): Table => {
   if (rows.length === 0 || (!execOptions.showHeader && (execOptions.nested || rows[0].type === 'activations'))) {
     return { body: rows }
   } else {

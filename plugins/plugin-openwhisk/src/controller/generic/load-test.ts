@@ -22,7 +22,7 @@
 
 import Debug from 'debug'
 
-import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core'
 
 import { kvOptions } from '../key-value'
 import { clientOptions, getClient } from '../../client/get'

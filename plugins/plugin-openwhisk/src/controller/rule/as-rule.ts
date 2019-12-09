@@ -15,10 +15,7 @@
  */
 
 import { RuleDesc, Rule as RawRule } from 'openwhisk'
-
-import { Table } from '@kui-shell/core/api/table-models'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { encodeComponent, Tab, Table, MultiModalResponse } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { apiVersion, Rule } from '../../models/resource'
@@ -42,8 +39,8 @@ export function asRule(raw: RawRule): Rule {
   }
 }
 
-export function asRuleTable(raw: RuleDesc[]): Promise<Table> {
-  return asTable(raw.map(asRule))
+export function asRuleTable(tab: Tab, raw: RuleDesc[]): Promise<Table> {
+  return asTable(tab, raw.map(asRule))
 }
 
 /**

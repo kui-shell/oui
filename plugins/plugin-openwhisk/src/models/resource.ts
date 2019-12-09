@@ -26,7 +26,7 @@ import {
   RuleDesc,
   TriggerDesc
 } from 'openwhisk'
-import { ResourceWithMetadata } from '@kui-shell/core/api/models'
+import { ResourceWithMetadata } from '@kui-shell/core'
 
 /** our synthetic apiVersion */
 export const apiVersion = 'openwhisk/v1'

@@ -15,9 +15,7 @@
  */
 
 import * as prettyPrintDuration from 'pretty-ms'
-
-import { Tab } from '@kui-shell/core/api/tab'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
+import { encodeComponent, Tab } from '@kui-shell/core'
 
 import { TableOptions } from '../lib/options'
 import { drilldownWith } from '../lib/drilldown'
@@ -302,7 +300,7 @@ async function content2(tab: Tab, data: ActivationData<TableOptions>, content: H
 
         label.className = 'cell-label'
         labelAction.className = 'clickable'
-        label.onclick = drilldownWith(`wsk action get ${group.path}`)
+        label.onclick = drilldownWith(tab, `wsk action get ${group.path}`)
 
         if (nameWithoutNamespace.length > 20) {
           label.setAttribute('data-balloon', nameWithoutNamespace) // line break
@@ -362,6 +360,7 @@ async function content2(tab: Tab, data: ActivationData<TableOptions>, content: H
         // drill down to grid view; note how we pass through a name filter
         // query, to filter based on the clicked-upon row
         cell.onclick = drilldownWith(
+          tab,
           `grid ${encodeComponent(group.path)} ${optionsToString(options)} ${splitOptions}`,
           [resetFocus]
         )
@@ -470,7 +469,7 @@ async function content2(tab: Tab, data: ActivationData<TableOptions>, content: H
           if (!redraw) {
             outlier.dom = dot
             dot.className = 'outlier-dot cell-show-only-when-outliers-shown'
-            dot.onclick = drilldownWith(`wsk activation get ${activation.activationId}`)
+            dot.onclick = drilldownWith(tab, `wsk activation get ${activation.activationId}`)
             barWrapper.appendChild(dot)
 
             const tooltip = `${prettyPrintDuration(duration)} (versus median ${prettyPrintDuration(thisMedian)})`
@@ -517,7 +516,10 @@ async function content2(tab: Tab, data: ActivationData<TableOptions>, content: H
         } else {
           // drill down to grid, showing just successes
           cell.classList.add('clickable')
-          cell.onclick = drilldownWith(`grid "${group.path}" ${optionsToString(options)} --success ${splitOptions}`)
+          cell.onclick = drilldownWith(
+            tab,
+            `grid "${group.path}" ${optionsToString(options)} --success ${splitOptions}`
+          )
         }
         cell.appendChild(countPart)
         countPart.innerText = group.nSuccesses.toString()
@@ -547,7 +549,7 @@ async function content2(tab: Tab, data: ActivationData<TableOptions>, content: H
 
         // drill down to grid, showing just failures
         cell.classList.add('clickable')
-        cell.onclick = drilldownWith(`grid "${group.path}" ${optionsToString(options)} --failure ${splitOptions}`)
+        cell.onclick = drilldownWith(tab, `grid "${group.path}" ${optionsToString(options)} --failure ${splitOptions}`)
         if (group.nFailures === 0) {
           cell.classList.add('count-is-zero')
           cell.classList.remove('clickable')

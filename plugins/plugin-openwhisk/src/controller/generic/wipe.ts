@@ -16,10 +16,7 @@
 
 import Debug from 'debug'
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
-import { Table, Row } from '@kui-shell/core/api/table-models'
-import UI from '@kui-shell/core/api/ui'
+import { prompt, isHeadless, Table, Row, Arguments, Registrar } from '@kui-shell/core'
 
 import { OpenWhiskResource } from '../../models/resource'
 
@@ -165,7 +162,7 @@ const doWipeWithConfirmation = async (command: Arguments) => {
   //
   // then ask the user to confirm the dangerous operation
   //
-  return UI.LowLevel.prompt(
+  return prompt(
     'DANGER!',
     block as HTMLElement,
     nextBlock,

@@ -17,7 +17,8 @@
 import Debug from 'debug'
 import { basename } from 'path'
 
-import { extension } from '@kui-shell/plugin-editor'
+import { encodeComponent } from '@kui-shell/core'
+import { extension, Editor, EditorState } from '@kui-shell/plugin-editor'
 
 const debug = Debug('plugins/openwhisk-editor-extensions/model/composition-persister')
 
@@ -25,7 +26,7 @@ const debug = Debug('plugins/openwhisk-editor-extensions/model/composition-persi
  * If this is a Composer parse error, display the error as editor decorations
  *
  */
-export const handleParseError = (err, filepath, editor) => {
+export const handleParseError = (err, filepath: string, editor: Editor) => {
   if (err.statusCode === 'ENOPARSE') {
     debug('composition did not parse', err)
     // try two patterns to spot stack trace information;
@@ -68,7 +69,7 @@ export const handleParseError = (err, filepath, editor) => {
           }
         }
       ]
-      editor.__cloudshell_decorations = editor.deltaDecorations([], decorations)
+      editor['__cloudshell_decorations'] = editor.deltaDecorations([], decorations)
     }
   }
 }
@@ -103,7 +104,7 @@ export const persister = {
         }
       }
     }),
-  save: (app, editor) =>
+  save: (app, editor, state: EditorState) =>
     new Promise((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const fs = require('fs')
@@ -118,11 +119,8 @@ export const persister = {
             if (err) {
               reject(err)
             } else {
-              const { REPL } = await import('@kui-shell/core/api/repl')
-              return REPL.pexec(
-                `wsk app update ${REPL.encodeComponent(app.name)} ${REPL.encodeComponent(filepath)} --kind ${
-                  app.exec.kind
-                }`
+              return state.tab.REPL.pexec(
+                `wsk app update ${encodeComponent(app.name)} ${encodeComponent(filepath)} --kind ${app.exec.kind}`
               )
                 .then(app => {
                   cleanup()

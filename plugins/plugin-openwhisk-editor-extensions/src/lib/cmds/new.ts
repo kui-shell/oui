@@ -16,14 +16,13 @@
 
 import Debug from 'debug'
 
-import { Tab } from '@kui-shell/core/api/ui-lite'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
-import Commands from '@kui-shell/core/api/commands'
+import { encodeComponent, Tab, Arguments, ExecOptions, ParsedOptions, Registrar } from '@kui-shell/core'
 
 import { Action, fqn } from '@kui-shell/plugin-openwhisk'
 
 import {
   EditorEntity as Entity,
+  EditorState,
   fetchFile,
   language,
   lockIcon,
@@ -156,12 +155,11 @@ export const persisters = {
   // persisters for regular actions
   actions: {
     getCode: entity => entity,
-    revert: async (entity: Entity, { editor }) => {
+    revert: async (entity: Entity, { editor }, state: EditorState) => {
       debug('revert', entity)
       const namespacePart = entity.metadata.namespace ? `/${entity.metadata.namespace}/` : ''
 
-      const { REPL } = await import('@kui-shell/core/api/repl')
-      return REPL.qexec<Action>(`wsk action get "${namespacePart}${entity.metadata.name}"`)
+      return state.tab.REPL.qexec<Action>(`wsk action get "${namespacePart}${entity.metadata.name}"`)
         .then(persisters.actions.getCode)
         .then(entity => {
           entity.persister = persisters.actions
@@ -169,7 +167,7 @@ export const persisters = {
           return entity
         })
     },
-    save: async action => {
+    save: async (action, _, state: EditorState) => {
       debug('save', action)
       const namespacePart = action.metadata.namespace ? `/${action.metadata.namespace}/` : ''
 
@@ -177,15 +175,19 @@ export const persisters = {
       // https://github.com/apache/incubator-openwhisk/issues/3237
       delete action.version
 
-      const { REPL } = await import('@kui-shell/core/api/repl')
-      return REPL.qexec<Action>(`wsk action update "${namespacePart}${action.metadata.name}"`, undefined, undefined, {
-        entity: { action }
-      })
+      return state.tab.REPL.qexec<Action>(
+        `wsk action update "${namespacePart}${action.metadata.name}"`,
+        undefined,
+        undefined,
+        {
+          entity: { action }
+        }
+      )
     }
   }
 }
 
-interface Options extends Commands.ParsedOptions {
+interface Options extends ParsedOptions {
   kind?: string
   language?: string
 }
@@ -196,9 +198,10 @@ interface Options extends Commands.ParsedOptions {
  *
  */
 export const fetchAction = (check = checkForConformance, tryLocal = true) => async (
+  tab: Tab,
   name: string,
   parsedOptions?: Options,
-  execOptions?: Commands.ExecOptions
+  execOptions?: ExecOptions
 ): Promise<Entity> => {
   if (name.charAt(0) === '!') {
     const parameterName = name.substring(1)
@@ -220,8 +223,7 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
       })
     }
   }
-  const { REPL } = await import('@kui-shell/core/api/repl')
-  return REPL.qexec<Action>(`wsk action get "${name}"`)
+  return tab.REPL.qexec<Action>(`wsk action get "${name}"`)
     .then(check)
     .then(entity =>
       Object.assign({}, entity, {
@@ -233,7 +235,7 @@ export const fetchAction = (check = checkForConformance, tryLocal = true) => asy
       debug('fetchAction error', err.statusCode, err.code, err.message)
       if (tryLocal && err.code !== 406) {
         // 406 means that this is a valid action, but lacking composer source
-        return fetchFile(name)
+        return fetchFile(tab, name)
       } else {
         throw err
       }
@@ -245,11 +247,11 @@ const fetchActionFailingIfExists = fetchAction(failWith409, false)
  * Confirm that the given named action does not already exist
  *
  */
-export const betterNotExist = (name: string, options): Promise<boolean> => {
+export const betterNotExist = (tab: Tab, name: string, options): Promise<boolean> => {
   if (options.readOnly) {
     return Promise.resolve(true)
   } else {
-    return fetchActionFailingIfExists(name)
+    return fetchActionFailingIfExists(tab, name)
       .then(() => true)
       .catch(failIfNot404)
   }
@@ -276,7 +278,7 @@ export const newAction = ({
   placeholder = undefined,
   placeholderFn = undefined,
   persister = persisters.actions
-} = {}) => async ({ tab, argvNoOptions, parsedOptions: options, execOptions }: Commands.Arguments<Options>) => {
+} = {}) => async ({ tab, argvNoOptions, parsedOptions: options, execOptions }: Arguments<Options>) => {
   const name = argvNoOptions[argvNoOptions.indexOf(cmd) + 1]
   const prettyKind = addVariantSuffix(options.kind || _kind)
   const kind = addVariantSuffix(options.kind || defaults.kind)
@@ -314,13 +316,13 @@ export const newAction = ({
   // then update the editor to show the placeholder action
   // then send a response back to the repl
   //
-  return betterNotExist(name, options)
+  return betterNotExist(tab, name, options)
     .then(() => Promise.all([makeAction(), openEditor(tab, name, options, execOptions)]))
     .then(prepareEditorWithAction)
     .then(respondToRepl(undefined /*, ['is-modified'] */))
 }
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   // command registration: create new action
   commandTree.listen('/new', newAction(), {
     usage: newUsage,

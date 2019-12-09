@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { REPL, Util } from '@kui-shell/core'
+// import { REPL, Util } from '@kui-shell/core'
 
-import { clientOptions, getClient } from '../client/get'
+// import { clientOptions, getClient } from '../client/get'
 
 /** api gateway actions */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 const api = {
   get: (options, argv: string[]) => {
     if (!options) return
@@ -190,3 +191,4 @@ const api = {
     }
   }
 }
+*/

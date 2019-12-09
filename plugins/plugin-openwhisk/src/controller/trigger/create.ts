@@ -17,9 +17,7 @@
 import Debug from 'debug'
 
 import { KeyVal, Limits } from 'openwhisk'
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
+import { isHeadless, Arguments, ParsedOptions, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import ok from '../ok'
 import toDict from '../dict'

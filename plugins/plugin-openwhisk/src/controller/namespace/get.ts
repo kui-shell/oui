@@ -15,7 +15,7 @@
  */
 
 import { Namespace as RawNamespace } from 'openwhisk'
-import { Arguments, Registrar, RawResponse, KResponse } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar, RawResponse, KResponse } from '@kui-shell/core'
 
 import respondWith from './as-namespace'
 import { getClient } from '../../client/get'

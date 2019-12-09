@@ -15,8 +15,7 @@
  */
 
 import { EventEmitter } from 'events'
-
-import { ResourceWithMetadata } from '@kui-shell/core/api/models'
+import { ResourceWithMetadata } from '@kui-shell/core'
 
 import apiVersion from '../lib/apiVersion'
 import Activation from '../lib/activation'

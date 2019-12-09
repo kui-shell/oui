@@ -15,9 +15,7 @@
  */
 
 import { EventEmitter } from 'events'
-
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import defaults from '../../defaults'
 import apiVersion from '../apiVersion'
@@ -71,12 +69,13 @@ const tableModes = (state: State): UI.Mode[] => choicesArray(state).concat([
  *
  */
 const drawTable = (verb: string) => async ({
+  tab,
   argvNoOptions,
   parsedOptions
 }: Arguments<TableOptions>): Promise<MultiModalResponse<ActivationData<TableOptions>>> => {
   const N = parsedOptions.batches || defaults.N
   const name = argvNoOptions[argvNoOptions.indexOf(verb) + 1]
-  const activations = await fetchActivationData(N, Object.assign(parsedOptions, { name }))
+  const activations = await fetchActivationData(tab, N, Object.assign(parsedOptions, { name }))
 
   const { stats, toolbarText } = formatStats(activations, parsedOptions)
 

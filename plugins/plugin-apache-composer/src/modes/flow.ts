@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Tab } from '@kui-shell/core/api/tab'
+import { Tab } from '@kui-shell/core'
 
 import { Session, isSession } from '../models/resource'
 import { doFlow } from '../lib/controller/cmd/flowCommand'

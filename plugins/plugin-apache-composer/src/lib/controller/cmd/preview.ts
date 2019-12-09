@@ -18,10 +18,7 @@ import Debug from 'debug'
 import { basename } from 'path'
 import { readFile as fsReadFile, stat } from 'fs'
 
-import Util from '@kui-shell/core/api/util'
-import { inBrowser } from '@kui-shell/core/api/capabilities'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
-import { MultiModalResponse, Tab } from '@kui-shell/core/api/ui-lite'
+import { findFile, expandHomeDir, inBrowser, MultiModalResponse, Tab, Arguments, Registrar } from '@kui-shell/core'
 
 import * as usage from './preview-usage'
 import { invalidFSM, unknownInput } from '../../utility/messages'
@@ -70,7 +67,7 @@ export default (registrar: Registrar) => {
   const readFile = (input: string): Promise<string> =>
     // eslint-disable-next-line no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      const filepath = Util.findFile(Util.expandHomeDir(input))
+      const filepath = findFile(expandHomeDir(input))
 
       if (!inBrowser()) {
         debug('readFile in headless mode or for electron')
@@ -227,7 +224,7 @@ export default (registrar: Registrar) => {
         return resolve(REPL.qexec(`compose ${basename(inputFile)} --simple --readOnly --template "${inputFile}"`))
       }
 
-      const input = Util.findFile(Util.expandHomeDir(inputFile))
+      const input = findFile(expandHomeDir(inputFile))
 
       /* if (currentSelection() && currentSelection().input === input) {
              debug('already showing', input)

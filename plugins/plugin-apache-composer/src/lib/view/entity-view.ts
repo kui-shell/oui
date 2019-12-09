@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments } from '@kui-shell/core/api/commands'
+import { isHeadless, Arguments } from '@kui-shell/core'
 import { ok } from '@kui-shell/plugin-openwhisk'
 
 /**

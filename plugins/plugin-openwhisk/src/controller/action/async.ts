@@ -15,8 +15,7 @@
  */
 
 import { ActivationDesc, Dict } from 'openwhisk'
-import { Tab } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Tab, Arguments, Registrar } from '@kui-shell/core'
 
 import ok from '../ok'
 import { fqn } from '../fqn'
@@ -33,7 +32,7 @@ async function asyncOk(tab: Tab, name: string, response: ActivationDesc) {
   const isAbsolute = name.charAt(0) === '/'
   const ns = isAbsolute && nameParts[1]
   const restIndex = isAbsolute ? 2 : 0 // '/a/b/c' => ['', 'a', 'b', 'c'], rest starts at 2
-  const nsForDisplay = !ns || ns === (await currentNamespace()) ? '' : `/${ns}/`
+  const nsForDisplay = !ns || ns === (await currentNamespace(tab)) ? '' : `/${ns}/`
   const prettyName = `${nsForDisplay}${nameParts.slice(restIndex).join('/')}`
 
   const suffix = document.createElement('span')

@@ -15,9 +15,7 @@
  */
 
 import { TriggerDesc, Trigger as RawTrigger } from 'openwhisk'
-
-import { Table } from '@kui-shell/core/api/table-models'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { Tab, Table, MultiModalResponse } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { apiVersion, Trigger } from '../../models/resource'
@@ -41,8 +39,8 @@ export function asTrigger(raw: RawTrigger): Trigger {
   }
 }
 
-export function asTriggerTable(raw: TriggerDesc[]): Promise<Table> {
-  return asTable(raw.map(asTrigger))
+export function asTriggerTable(tab: Tab, raw: TriggerDesc[]): Promise<Table> {
+  return asTable(tab, raw.map(asTrigger))
 }
 
 /**

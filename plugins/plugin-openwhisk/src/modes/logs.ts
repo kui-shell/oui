@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import UI from '@kui-shell/core/api/ui'
+import { prettyPrintTime } from '@kui-shell/core'
 import { WithLogs, hasLogs } from '../models/resource'
 
 /**
@@ -55,7 +55,7 @@ function content(_, resource: WithLogs): HTMLElement {
 
       try {
         const timestamp = new Date(match[1])
-        date.appendChild(UI.PrettyPrinters.time(timestamp, 'short', previousTimestamp))
+        date.appendChild(prettyPrintTime(timestamp, 'short', previousTimestamp))
         previousTimestamp = timestamp
       } catch (e) {
         date.innerText = match[1]

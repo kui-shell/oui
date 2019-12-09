@@ -15,9 +15,7 @@
  */
 
 import { Dict } from 'openwhisk'
-import Errors from '@kui-shell/core/api/errors'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
+import { CodedError, Arguments, ParsedOptions, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import { fqn } from '../fqn'
 import toDict from '../dict'
@@ -98,7 +96,7 @@ async function invokeAction<T extends Dict>({
             clientOptions
           )
         )
-        .catch((err: Errors.CodedError<number>) => {
+        .catch((err: CodedError<number>) => {
           if (err.statusCode === 502) {
             return err['error']
           } else {

@@ -15,6 +15,7 @@
  */
 
 import * as prettyPrintDuration from 'pretty-ms'
+import { Tab } from '@kui-shell/core'
 
 import { StatData } from './grouping'
 import { renderCell } from './cell'
@@ -31,7 +32,7 @@ import { enDash, latencyBuckets } from './util'
  * @param options user options from the CLI
  *
  */
-export const formatLegend = (viewName: string, statData: StatData) => {
+export const formatLegend = (tab: Tab, viewName: string, statData: StatData) => {
   const gridContainer = document.createElement('div')
   const wrapper = document.createElement('div')
   const wrapper2 = document.createElement('div')
@@ -96,7 +97,7 @@ export const formatLegend = (viewName: string, statData: StatData) => {
       valueCell.classList.add('kind')
       gridCellCell.appendChild(valueCell)
 
-      renderCell('Legend', cell, null, isFailure, 0, latBucket, {
+      renderCell(tab, 'Legend', cell, null, isFailure, 0, latBucket, {
         zoom: options.zoom
       }) // null means no activation associated with cell
 

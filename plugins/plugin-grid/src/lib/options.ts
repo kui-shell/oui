@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ParsedOptions } from '@kui-shell/core/api/commands'
+import { ParsedOptions } from '@kui-shell/core'
 
 export interface Options extends ParsedOptions {
   name?: string

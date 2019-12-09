@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { isHeadless, Arguments, Registrar } from '@kui-shell/core'
 
 import { withStandardOptions, standardListUsage } from '../usage'
 import { synonyms } from '../../models/synonyms'
@@ -71,7 +70,7 @@ const doList = async ({ tab, argvNoOptions, parsedOptions, execOptions }: Argume
       if (execOptions.raw) {
         return { mode: 'raw', content: list }
       } else if (isHeadless()) {
-        const L = await asActivationTable(list)
+        const L = await asActivationTable(tab, list)
         if (L.body.length > 0) {
           L.header.type = isSession(raw[0]) ? 'sessions' : 'activations' // hack: needed to make core's headless pretty printer work
         }

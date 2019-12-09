@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import Errors from '@kui-shell/core/api/errors'
-import { CommandOptions } from '@kui-shell/core/api/commands'
+import { CommandOptions, UsageModel } from '@kui-shell/core'
 
 import standardOptions from './aliases'
 
@@ -276,7 +275,7 @@ export const api = {
   ]
 }
 
-export function withStandardOptions(model: Errors.UsageModel): CommandOptions {
+export function withStandardOptions(model: UsageModel): CommandOptions {
   const usage = Object.assign({}, standardOptions.usage, model)
   return Object.assign({}, standardOptions, { usage })
 }

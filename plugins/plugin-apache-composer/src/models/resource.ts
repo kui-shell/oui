@@ -15,7 +15,7 @@
  */
 
 import { ASTNode } from '@kui-shell/plugin-wskflow'
-import Models from '@kui-shell/core/api/models'
+import { ResourceWithMetadata } from '@kui-shell/core'
 import {
   Action,
   isAction,
@@ -29,16 +29,16 @@ import PreviewOptions from '../lib/controller/cmd/preview-options'
 
 export const apiVersion = 'apache-composer/v1'
 
-export interface WithSource extends Models.ResourceWithMetadata {
+export interface WithSource extends ResourceWithMetadata {
   source: string
 }
 
-export function hasSource(resource: WithSource | Models.ResourceWithMetadata): resource is WithSource {
+export function hasSource(resource: WithSource | ResourceWithMetadata): resource is WithSource {
   const preview = resource as WithSource
   return typeof preview.source === 'string'
 }
 
-export interface Preview extends Models.ResourceWithMetadata, WithSource {
+export interface Preview extends ResourceWithMetadata, WithSource {
   apiVersion
   kind: 'Preview'
   ast: ASTNode
@@ -50,7 +50,7 @@ export interface Preview extends Models.ResourceWithMetadata, WithSource {
   alreadyWatching: boolean
 }
 
-export function isPreview(resource: Preview | Models.ResourceWithMetadata): resource is Preview {
+export function isPreview(resource: Preview | ResourceWithMetadata): resource is Preview {
   const preview = resource as Preview
   return preview.apiVersion === apiVersion && preview.kind === 'Preview'
 }

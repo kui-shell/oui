@@ -24,9 +24,7 @@
 import Debug from 'debug'
 import { Dict } from 'openwhisk'
 
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
-import Models from '@kui-shell/core/api/models'
+import { History, Arguments, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import { synonyms } from '../../models/synonyms'
 import { Activation } from '../../models/resource'
@@ -128,8 +126,9 @@ function poll<T extends Dict>(command: Arguments, activation: Activation<T>): Pr
  *
  */
 const findActivationId = <T extends Dict>(command: Arguments, activationId?: string): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const { REPL, parsedOptions: options } = command
+  // eslint-disable-next-line no-async-promise-executor
+  new Promise(async (resolve, reject) => {
+    const { tab, REPL, parsedOptions: options } = command
 
     if (activationId) {
       resolve(activationId)
@@ -141,7 +140,7 @@ const findActivationId = <T extends Dict>(command: Arguments, activationId?: str
           .catch(reject)
       } else {
         // otherwise, use our local history to find the last activation id
-        const lastActivationCommand = Models.History.find(
+        const lastActivationCommand = (await History(tab)).find(
           entry => entry.entityType === 'actions' && (entry.verb === 'invoke' || entry.verb === 'async')
         )
         debug('lastActivationCommand', lastActivationCommand)

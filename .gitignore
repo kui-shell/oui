@@ -1,7 +1,8 @@
 build
 dist
+mdist
 node_modules
 packages/app/build
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 *~
 flycheck*

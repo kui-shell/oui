@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { asMetadata } from '../fqn'
@@ -26,6 +26,7 @@ import { clientOptions, getClient } from '../../client/get'
 
 /** List actions or feeds in a package */
 const doList = (cmd: string, project: (pack: Package) => FQN[]) => async ({
+  tab,
   argvNoOptions,
   execOptions
 }: Arguments) => {
@@ -43,6 +44,7 @@ const doList = (cmd: string, project: (pack: Package) => FQN[]) => async ({
   )
 
   return asTable(
+    tab,
     project(pack).map(_ => ({
       apiVersion,
       kind: 'Action',

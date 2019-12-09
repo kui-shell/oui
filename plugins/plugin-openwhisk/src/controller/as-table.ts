@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Table } from '@kui-shell/core/api/table-models'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
+import { encodeComponent, Tab, Table } from '@kui-shell/core'
 
 import { fqn, fqnOfPath } from './fqn'
 import { bg as trafficLightColor } from '../views/traffic-light'
@@ -60,8 +59,8 @@ function maybeStatus(
   )
 }
 
-export default async function asTable<T extends OpenWhiskResource>(resources: T[]): Promise<Table> {
-  const pattern = new RegExp(`^/${await currentNamespace()}/`)
+export default async function asTable<T extends OpenWhiskResource>(tab: Tab, resources: T[]): Promise<Table> {
+  const pattern = new RegExp(`^/${await currentNamespace(tab)}/`)
   return {
     header: {
       name: 'name',

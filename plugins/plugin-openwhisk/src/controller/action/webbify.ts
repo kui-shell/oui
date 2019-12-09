@@ -22,9 +22,7 @@
  */
 
 import { KeyVal } from 'openwhisk'
-import Models from '@kui-shell/core/api/models'
-import { Tab } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { currentSelection, Tab, Arguments, Registrar } from '@kui-shell/core'
 
 import { fqnOfDesc } from '../fqn'
 import { synonyms } from '../../models/synonyms'
@@ -41,7 +39,7 @@ const fixedOf = (val: string) => () => val // the match is always a fixed value
 const matchers = [
   {
     pattern: /^\s*wsk\s+(action|actions)\s+webbify\s+as\s+(.+)\s*$/,
-    action: (_, tab: Tab) => Models.Selection.current(tab),
+    action: (_, tab: Tab) => currentSelection(tab),
     mimeType: matchOf(2)
   },
   {
@@ -56,7 +54,7 @@ const matchers = [
   },
   {
     pattern: /^\s*wsk\s+(action|actions)\s+webbify\s*$/,
-    action: (_, tab: Tab) => Models.Selection.current(tab),
+    action: (_, tab: Tab) => currentSelection(tab),
     mimeType: fixedOf('json')
   }
 ]

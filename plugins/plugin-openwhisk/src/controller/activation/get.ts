@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, ParsedOptions, Registrar } from '@kui-shell/core'
 
 import respondWith from './as-activation'
 import { synonyms } from '../../models/synonyms'

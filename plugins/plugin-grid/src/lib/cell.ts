@@ -15,6 +15,7 @@
  */
 
 import * as prettyPrintDuration from 'pretty-ms'
+import { Tab } from '@kui-shell/core'
 
 import { Activation } from './activation'
 import { drilldownWith } from './drilldown'
@@ -25,6 +26,7 @@ import { newline, latencyBucket } from './util'
  *
  */
 export const renderCell = (
+  tab: Tab,
   returnTo: string,
   cell: HTMLElement,
   activation: Activation,
@@ -83,7 +85,7 @@ export const renderCell = (
   }
 
   if (activation) {
-    cell.onclick = drilldownWith(`wsk activation get ${activation.activationId}`)
+    cell.onclick = drilldownWith(tab, `wsk activation get ${activation.activationId}`)
 
     // tooltip
     const result = activation.response && activation.response.result && activation.response.result

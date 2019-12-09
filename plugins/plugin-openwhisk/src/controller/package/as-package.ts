@@ -15,9 +15,7 @@
  */
 
 import { PackageDesc, Package as RawPackage } from 'openwhisk'
-
-import { Table } from '@kui-shell/core/api/table-models'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { Tab, Table, MultiModalResponse } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { apiVersion, Package, Metadata } from '../../models/resource'
@@ -41,8 +39,8 @@ export function asPackage(raw: RawPackage): Package {
   }
 }
 
-export function asPackageTable(raw: PackageDesc[]): Promise<Table> {
-  return asTable(raw.map(asPackage))
+export function asPackageTable(tab: Tab, raw: PackageDesc[]): Promise<Table> {
+  return asTable(tab, raw.map(asPackage))
 }
 
 /**

@@ -17,9 +17,7 @@
 import * as a from 'indefinite'
 import { ActionDesc, Action as RawAction } from 'openwhisk'
 
-import { Table } from '@kui-shell/core/api/table-models'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { encodeComponent, Tab, Table, MultiModalResponse } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { packageName } from '../fqn'
@@ -49,8 +47,8 @@ export function asAction(raw: RawAction): Action {
   }
 }
 
-export function asActionTable(raw: ActionDesc[]): Promise<Table> {
-  return asTable(raw.map(asAction))
+export function asActionTable(tab: Tab, raw: ActionDesc[]): Promise<Table> {
+  return asTable(tab, raw.map(asAction))
 }
 
 /**

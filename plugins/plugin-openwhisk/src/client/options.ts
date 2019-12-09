@@ -18,8 +18,7 @@ import { type as osType } from 'os'
 import { Agent as HttpAgent } from 'http'
 import { Agent as HttpsAgent } from 'https'
 
-import Settings from '@kui-shell/core/api/settings'
-import { inBrowser } from '@kui-shell/core/api/capabilities'
+import { theme, inBrowser } from '@kui-shell/core'
 
 import agent from './agent'
 
@@ -40,9 +39,9 @@ if (isLinux) {
   options.agent = agent()
 }
 
-if (Settings.theme.userAgent && !process.env.TEST_SPACE && !process.env.TRAVIS) {
+if (theme.userAgent && !process.env.TEST_SPACE && !process.env.TRAVIS) {
   // install a User-Agent header, except when running tests
-  options['User-Agent'] = Settings.theme.userAgent
+  options['User-Agent'] = theme.userAgent
 }
 
 if (inBrowser()) {

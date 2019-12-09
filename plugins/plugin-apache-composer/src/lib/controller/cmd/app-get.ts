@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core'
 import { Action } from '@kui-shell/plugin-openwhisk'
 
 import { appGet } from '../../utility/usage'
 import * as parseUtil from '../../utility/parse'
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   /* command handler for app get */
   commandTree.listen(
     `/wsk/app/get`,

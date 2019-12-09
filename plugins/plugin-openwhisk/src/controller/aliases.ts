@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandOptions } from '@kui-shell/core/api/commands'
+import { CommandOptions } from '@kui-shell/core'
 
 export const alias = {
   /*  memory: ['m'],

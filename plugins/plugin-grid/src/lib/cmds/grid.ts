@@ -15,12 +15,9 @@
  */
 
 import { EventEmitter } from 'events'
-
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import { grid as usage } from '../../usage'
-
 import defaults from '../../defaults'
 import apiVersion from '../apiVersion'
 import { GridOptions } from '../options'
@@ -35,12 +32,17 @@ const viewName = 'Grid'
  *
  */
 async function drawGrid({
+  tab,
   argvNoOptions,
   parsedOptions
 }: Arguments<GridOptions>): Promise<MultiModalResponse<ActivationData<GridOptions>>> {
   const N = parsedOptions.batches || defaults.N
   const name = argvNoOptions[argvNoOptions.indexOf(verb) + 1]
-  const activations = await fetchActivationData(N, Object.assign(parsedOptions, { name }))
+  const activations = await fetchActivationData(tab, N, Object.assign(parsedOptions, { name }))
+
+  if (activations.length === 0) {
+    throw new Error('no activations to display')
+  }
 
   const { stats, toolbarText } = formatStats(activations, parsedOptions)
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 
 import { fqnOfDesc } from '../fqn'
 import asTable from '../as-table'
@@ -30,7 +30,7 @@ export default (registrar: Registrar) => {
 
     registrar.listen(
       `/wsk/${syn}/list`,
-      async ({ argvNoOptions, parsedOptions, execOptions, REPL }: Arguments<ListOptions>) => {
+      async ({ tab, argvNoOptions, parsedOptions, execOptions, REPL }: Arguments<ListOptions>) => {
         const name = argvNoOptions[argvNoOptions.indexOf('list') + 1]
         const args = copy(parsedOptions, nameForList(name))
 
@@ -40,7 +40,7 @@ export default (registrar: Registrar) => {
           return ((raw as any) as { rules: number }).rules
         } else {
           const rulesFull = await Promise.all(raw.map(_ => REPL.qexec<Rule>(`wsk rule get "${fqnOfDesc(_)}"`)))
-          return asTable(rulesFull)
+          return asTable(tab, rulesFull)
         }
       },
       standardListUsage(syn)

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import Errors from '@kui-shell/core/api/errors'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { CodedError, Arguments, Registrar } from '@kui-shell/core'
 
 import ok from '../ok'
 import { fqn } from '../fqn'
@@ -53,7 +52,7 @@ async function fireTrigger({ tab, argv, execOptions }: Arguments): Promise<HTMLE
         clientOptions
       )
     )
-    .catch((err: Errors.CodedError<number>) => {
+    .catch((err: CodedError<number>) => {
       if (err.statusCode === 502) {
         return err['error']
       } else {
