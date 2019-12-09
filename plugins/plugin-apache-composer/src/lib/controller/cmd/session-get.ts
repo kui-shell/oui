@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core'
 import { Activation, synonyms } from '@kui-shell/plugin-openwhisk'
 
 import { sessionGet } from '../../utility/usage'
 import * as view from '../../view/entity-view'
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   commandTree.listen(
     `/wsk/session/result`,
     ({ command, REPL }) => {

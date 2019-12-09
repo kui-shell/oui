@@ -26,8 +26,7 @@
 
 import * as minimist from 'yargs-parser'
 
-import { Table } from '@kui-shell/core/api/table-models'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Table, Arguments, Registrar } from '@kui-shell/core'
 
 import { synonyms } from '../../models/synonyms'
 import { currentSelection } from '../../models/selection'

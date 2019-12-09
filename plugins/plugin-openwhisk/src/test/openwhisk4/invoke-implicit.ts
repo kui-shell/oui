@@ -22,7 +22,7 @@ import { dirname } from 'path'
 
 const ROOT = dirname(require.resolve('@kui-shell/plugin-openwhisk/tests/package.json'))
 
-import paramsJson = require('@kui-shell/plugin-openwhisk/tests/data/openwhisk/params.json')
+import * as paramsJson from '@kui-shell/plugin-openwhisk/tests/data/openwhisk/params.json'
 
 const actionName = 'foo'
 

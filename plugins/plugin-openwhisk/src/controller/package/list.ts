@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 
 import { standardListUsage } from '../usage'
 import { asPackageTable } from './as-package'
@@ -28,7 +28,7 @@ export default (registrar: Registrar) => {
 
     registrar.listen(
       `/wsk/${syn}/list`,
-      async ({ argvNoOptions, parsedOptions, execOptions }: Arguments<ListOptions>) => {
+      async ({ tab, argvNoOptions, parsedOptions, execOptions }: Arguments<ListOptions>) => {
         const name = argvNoOptions[argvNoOptions.indexOf('list') + 1]
         const args = copy(parsedOptions, nameForList(name))
 
@@ -36,7 +36,7 @@ export default (registrar: Registrar) => {
         if (parsedOptions.count) {
           return ((raw as any) as { packages: number }).packages
         } else {
-          return asPackageTable(raw)
+          return asPackageTable(tab, raw)
         }
       },
       standardListUsage(syn)

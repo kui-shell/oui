@@ -16,7 +16,7 @@
 
 const assert = require('assert')
 const { Common, CLI, ReplExpect, Selectors } = require('@kui-shell/test')
-const expandHomeDir = require('@kui-shell/core/util/home').default
+const { expandHomeDir } = require('@kui-shell/core')
 
 // read and cache local ~/.wskprops
 let wskprops

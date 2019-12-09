@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Arguments, Registrar } from '@kui-shell/core'
 
 import { synonyms } from '../../models/synonyms'
 import { Activation } from '../../models/resource'
@@ -23,7 +23,7 @@ import { Activation } from '../../models/resource'
  * wsk activation last: find and display the (temporally) last activation
  *
  */
-const last = ({ argv: fullArgv, REPL }: Commands.Arguments): Promise<Activation> => {
+const last = ({ argv: fullArgv, REPL }: Arguments): Promise<Activation> => {
   const argv = fullArgv.slice(fullArgv.indexOf('last'))
 
   const limit = argv.length === 1 ? 1 : 200 // if no options, then we're showing just the last activation
@@ -36,7 +36,7 @@ const last = ({ argv: fullArgv, REPL }: Commands.Arguments): Promise<Activation>
   })
 }
 
-export default (commandTree: Commands.Registrar) => {
+export default (commandTree: Registrar) => {
   synonyms('activations').forEach(syn => {
     commandTree.listen(`/wsk/${syn}/last`, last, {
       usage: {

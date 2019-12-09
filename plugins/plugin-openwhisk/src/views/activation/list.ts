@@ -18,16 +18,16 @@ import Debug from 'debug'
 import * as prettyPrintDuration from 'pretty-ms'
 
 import { ActivationDesc } from 'openwhisk'
-import { Commands, REPL, Tables, UI } from '@kui-shell/core'
+import { encodeComponent, ParsedOptions, Table, Row, Tab, empty, prettyPrintTime } from '@kui-shell/core'
 
 import { Activation } from '../../models/resource'
 import { ListOptions } from '../../controller/options'
 
 const debug = Debug('plugins/openwhisk/views/activations/list')
 
-export type ActivationListRow = Tables.Row & Activation
+export type ActivationListRow = Row & Activation
 
-export interface ActivationListTable extends Tables.Table {
+export interface ActivationListTable extends Table {
   body: ActivationListRow[]
 }
 
@@ -42,7 +42,7 @@ const mapToOptions = (baseMap: Record<string, any>, overrides = {}) => {
     if (key === '_' || typeof map[key] === 'object') {
       return opts
     } else {
-      return `${opts} --${key} ${REPL.encodeComponent(map[key])}`
+      return `${opts} --${key} ${encodeComponent(map[key])}`
     }
   }, '')
 }
@@ -55,7 +55,7 @@ function isArrayOfStrings(a: (Activation | string)[]): a is string[] {
  * Fetch activation records
  *
  */
-const fetch = async (tab: UI.Tab, activationIds: Activation[] | string[]): Promise<Activation[]> => {
+const fetch = async (tab: Tab, activationIds: Activation[] | string[]): Promise<Activation[]> => {
   debug('fetching', activationIds)
 
   if (!isArrayOfStrings(activationIds)) {
@@ -116,7 +116,7 @@ const findItemInAnnotations = (name: string, activation?: Activation): number =>
 }
 
 interface Args {
-  tab: UI.Tab
+  tab: Tab
   entity?: Activation
   activationIds: Activation[] | string[]
   container: Element
@@ -127,7 +127,7 @@ interface Args {
   showTimeline?: boolean
   skip?: number
   limit?: number
-  parsedOptions?: Commands.ParsedOptions
+  parsedOptions?: ParsedOptions
 }
 
 const _render = (args: Args) => {
@@ -189,7 +189,7 @@ const _render = (args: Args) => {
 
     if (entity) {
       // for the sidecar only, clean things out
-      UI.empty(container)
+      empty(container)
     }
 
     container.appendChild(logTable)
@@ -209,6 +209,9 @@ const _render = (args: Args) => {
   ]).then(([activations, count]) => {
     // duration of the activation. this will be helpful for
     // normalizing the bar dimensions
+    if (count === 0) {
+      return
+    }
     const first = activations.length - 1
     const start = entity
       ? entity.start
@@ -331,7 +334,7 @@ const _render = (args: Args) => {
       // column 4: success cell
       /* const success = nextCell()
         success.className = 'smaller-text lighter-text log-field success-field very-narrow'
-        UI.empty(success)
+        empty(success)
         const successBadge = document.createElement('badge')
         successBadge.classList.add(isSuccess ? 'green-background' : 'red-background')
         successBadge.innerText = isSuccess ? 'OK' : 'Failed'
@@ -352,7 +355,7 @@ const _render = (args: Args) => {
       // column 5|6|7: bar chart cell
       if (showTimeline) {
         const timeline = nextCell()
-        UI.empty(timeline)
+        empty(timeline)
 
         const isRootBar = entity && idx === 0 // for sequence traces, show the sequence bar a bit differently
 
@@ -450,7 +453,7 @@ const _render = (args: Args) => {
         const startInner = newLine ? document.createElement('span') : start.querySelector('span')
         const previous = activations[idx - 1]
         const previousStart = previous && previous.start - findItemInAnnotations('waitTime', previous)
-        const time = UI.PrettyPrinters.time(
+        const time = prettyPrintTime(
           activation.start - findItemInAnnotations('waitTime', activation),
           'short',
           previousStart
@@ -461,7 +464,7 @@ const _render = (args: Args) => {
         if (typeof time === 'string') {
           startInner.innerText = time
         } else {
-          UI.empty(startInner)
+          empty(startInner)
           startInner.appendChild(time)
         }
       }
@@ -636,7 +639,7 @@ export const render = (opts: Args) => {
  *
  */
 export const renderActivationListView = (
-  tab: UI.Tab,
+  tab: Tab,
   activations: Activation[],
   parsedOptions: ListOptions
 ): HTMLElement => {

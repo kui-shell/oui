@@ -19,7 +19,7 @@
  *
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 import { synonyms } from '../../models/synonyms'
 import { CMD as copy } from './cp'
 

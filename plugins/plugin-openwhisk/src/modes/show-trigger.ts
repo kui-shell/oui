@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
+import { encodeComponent } from '@kui-shell/core'
 
 import { fqnOfPath } from '../controller/fqn'
 import { WithTrigger, hasTrigger } from '../models/resource'

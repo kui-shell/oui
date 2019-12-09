@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Registrar } from '@kui-shell/core/api/commands'
+import { Registrar } from '@kui-shell/core'
 
 import respondWith from './as-activation'
 import { withStandardOptions } from '../usage'

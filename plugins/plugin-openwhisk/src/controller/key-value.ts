@@ -25,7 +25,7 @@ import Debug from 'debug'
 import { KeyVal, Limits } from 'openwhisk'
 import * as parseDuration from 'parse-duration'
 import { existsSync, readFileSync } from 'fs'
-import Util from '@kui-shell/core/api/util'
+import { expandHomeDir } from '@kui-shell/core'
 
 import { standardOptions } from './aliases'
 
@@ -75,7 +75,7 @@ function isNumeric(input) {
  */
 function parseOneParamFile(idx: number, argv: string[], parameters: KeyVal[]): number {
   const file = argv[++idx]
-  const params = JSON.parse(readFileSync(Util.expandHomeDir(file)).toString())
+  const params = JSON.parse(readFileSync(expandHomeDir(file)).toString())
 
   for (const key in params) {
     parameters.push({ key, value: params[key] })
@@ -173,7 +173,7 @@ function parseOneKeyValue(idx: number, argv: string[], kv: KeyVal[]): number {
       paramValue = `@${process.env[paramValue.substring(2)]}`
     }
 
-    const location = Util.expandHomeDir(paramValue.substring(1))
+    const location = expandHomeDir(paramValue.substring(1))
     if (!existsSync(location)) {
       throw new Error(`Requested parameter @file does not exist: ${location}`)
     } else {

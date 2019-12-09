@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
+import { PreloadRegistrar, isHeadless } from '@kui-shell/core'
 
 export default async (registrar: PreloadRegistrar) => {
   if (!isHeadless()) {

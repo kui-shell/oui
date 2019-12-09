@@ -25,7 +25,7 @@
 
 import * as parse from 'parse-duration'
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 import { Rule, Trigger } from '../../models/resource'
 
 const MILLIS_PER_SECOND = 1000

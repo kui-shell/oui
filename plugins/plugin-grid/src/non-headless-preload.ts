@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
+import { PreloadRegistrar } from '@kui-shell/core'
 
 // modes
 import grid from './modes/grid'

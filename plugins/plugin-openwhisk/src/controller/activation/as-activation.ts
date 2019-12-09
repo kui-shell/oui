@@ -15,10 +15,7 @@
  */
 
 import { Dict, ActivationDesc, Activation as RawActivation } from 'openwhisk'
-
-import { Table } from '@kui-shell/core/api/table-models'
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { encodeComponent, Tab, Table, MultiModalResponse } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { apiVersion, Activation } from '../../models/resource'
@@ -59,8 +56,8 @@ export function asActivation<T extends Dict>(raw: RawActivation<T>): Activation<
   }
 }
 
-export function asActivationTable<T extends Dict>(raw: ActivationDesc[]): Promise<Table> {
-  return asTable(raw.map(asActivation))
+export function asActivationTable<T extends Dict>(tab: Tab, raw: ActivationDesc[]): Promise<Table> {
+  return asTable(tab, raw.map(asActivation))
 }
 
 export function asActivationResponse<T extends Dict>(activation: Activation<T>): MultiModalResponse<Activation<T>> {

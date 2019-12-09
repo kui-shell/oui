@@ -15,7 +15,7 @@
  */
 
 import Debug from 'debug'
-import { Tab } from '@kui-shell/core/api/tab'
+import { Tab } from '@kui-shell/core'
 import { Action, ComponentArrayBearing } from '@kui-shell/plugin-wskflow'
 
 import { isAnonymousLet } from '../controller/action/let/let-core'

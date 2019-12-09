@@ -15,8 +15,7 @@
  */
 
 import Debug from 'debug'
-
-import { Capabilities, Commands, UI, Util } from '@kui-shell/core'
+import { isHeadless, inBrowser, Arguments, ParsedOptions, Registrar, Tab, findFile } from '@kui-shell/core'
 
 import { loadComposition } from '@kui-shell/plugin-apache-composer'
 import { extension, language, openEditor, respondToRepl } from '@kui-shell/plugin-editor'
@@ -97,10 +96,10 @@ const generateAST = (source, localCodePath) => {
  * Add the wskflow visualization component to the given content
  *
  */
-const addWskflow = (tab: UI.Tab) => opts => {
+const addWskflow = (tab: Tab) => opts => {
   debug('addWskflow', opts)
 
-  if (Capabilities.isHeadless()) return opts
+  if (isHeadless()) return opts
 
   const { getEntity, editor, content, eventBus } = opts
   const wskflowContainer = document.createElement('div')
@@ -236,18 +235,18 @@ const defaultPlaceholderFn = ({ kind = 'nodejs:default', template }) => {
       const readViaImport = () => {
         debug(
           'readViaImport',
-          Util.findFile(template),
-          Util.findFile(template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')
+          findFile(template),
+          findFile(template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')
         )
         resolve(
           require('raw-loader!@kui-shell/plugin-apache-composer/samples' +
-            Util.findFile(template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')).default
+            findFile(template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')).default
         )
       }
 
       const readViaFilesystem = () => {
         debug('readViaFilesystem')
-        require('fs').readFile(Util.findFile(template), (err, data) => {
+        require('fs').readFile(findFile(template), (err, data) => {
           if (err) {
             reject(err)
           } else {
@@ -258,7 +257,7 @@ const defaultPlaceholderFn = ({ kind = 'nodejs:default', template }) => {
 
       try {
         debug('attempting to read template', template)
-        if (Capabilities.inBrowser()) {
+        if (inBrowser()) {
           if (template.indexOf('@') >= 0) {
             readViaImport()
           } else {
@@ -293,7 +292,7 @@ const compositionOptions = baseOptions => {
   )
 }
 
-interface Options extends Commands.ParsedOptions {
+interface Options extends ParsedOptions {
   kind?: string
   template?: string
 }
@@ -308,7 +307,7 @@ export const newAction = ({
   _kind = defaults.kind,
   placeholder = undefined,
   placeholderFn = undefined
-}) => async ({ tab, argvNoOptions, parsedOptions: options, execOptions }: Commands.Arguments<Options>) => {
+}) => async ({ tab, argvNoOptions, parsedOptions: options, execOptions }: Arguments<Options>) => {
   const name = argvNoOptions[argvNoOptions.indexOf(cmd) + 1]
   const prettyKind = addVariantSuffix(options.kind || _kind)
   const kind = addVariantSuffix(options.kind || defaults.kind)
@@ -324,10 +323,10 @@ export const newAction = ({
   // generate AST, if we were given a template
   const compile = () =>
     type === 'compositions' && options.template
-      ? Capabilities.inBrowser()
+      ? inBrowser()
         ? import(
             '@kui-shell/plugin-apache-composer/samples' +
-              Util.findFile(options.template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')
+              findFile(options.template).replace(/^.*plugin-apache-composer\/samples(.*)$/, '$1')
           )
         : generateAST(code, options.template)
       : Promise.resolve()
@@ -352,14 +351,14 @@ export const newAction = ({
   // then update the editor to show the placeholder action
   // then send a response back to the repl
   //
-  return betterNotExist(name, options)
+  return betterNotExist(tab, name, options)
     .then(() => Promise.all([makeAction(), openEditor(tab, name, options, execOptions)]))
     .then(prepareEditorWithAction)
     .then(addWskflow(tab))
     .then(respondToRepl(undefined /*, ['is-modified'] */))
 }
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   // command registration: create new app/composition
   commandTree.listen('/compose', newAction(compositionOptions({ cmd: 'compose' })), {
     usage: composeUsage,

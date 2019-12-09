@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Tab } from '@kui-shell/core/api/tab'
-import Models from '@kui-shell/core/api/models'
+import { Tab, currentSelection as coreCurrentSelection } from '@kui-shell/core'
 
 import { OpenWhiskResource } from './resource'
 
 export function currentSelection<T extends OpenWhiskResource>(tab: Tab, mustBeKind?: string): T {
-  const selection = Models.Selection.current(tab) as T
+  const selection = coreCurrentSelection(tab) as T
 
   if (selection && mustBeKind && mustBeKind !== selection.kind) {
     throw new Error('The current entity is not of the expected kind')

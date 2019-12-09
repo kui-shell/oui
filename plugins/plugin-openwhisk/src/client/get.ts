@@ -15,13 +15,13 @@
  */
 
 import { Client } from 'openwhisk'
-import { ExecOptions } from '@kui-shell/core/api/commands'
+import { ExecOptions } from '@kui-shell/core'
 
 import { initOW, initOWFromConfig } from '../models/auth'
 
 export { default as clientOptions } from './options'
 
-export const getClient = (execOptions: ExecOptions.ExecOptions): Client => {
+export const getClient = (execOptions: ExecOptions): Client => {
   if (execOptions && execOptions.credentials && execOptions.credentials.openwhisk) {
     return initOWFromConfig(execOptions.credentials.openwhisk)
   } else {

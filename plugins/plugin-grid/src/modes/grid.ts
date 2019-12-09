@@ -16,9 +16,8 @@
 
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 
-import { Tab } from '@kui-shell/core/api/ui-lite'
-
 import * as prettyPrintDuration from 'pretty-ms'
+import { Tab } from '@kui-shell/core'
 
 import { ActivationData, isActivationData } from '../models/activation-data'
 import { Activation } from '../lib/activation'
@@ -289,6 +288,7 @@ const drawAsTimeline = (
           : 'up'
 
       renderCell(
+        tab,
         viewName,
         cell,
         activation,
@@ -346,10 +346,10 @@ const _drawGrid = (
     name = group.name
     packageName = pathComponents.length === 4 ? pathComponents[2] : ''
 
-    // const onclick = drilldownWith(`action get "${group.path}"`)
+    // const onclick = drilldownWith(tab, `action get "${group.path}"`)
     // legend = formatLegend(tab, viewName, group, gridGrid)
   } else {
-    // const onclick = options.appName ? drilldownWith(`app get "${options.appName}"`) : undefined
+    // const onclick = options.appName ? drilldownWith(tab, `app get "${options.appName}"`) : undefined
     const pathComponents = (options.appName || '').toString().split('/')
 
     packageName =
@@ -411,7 +411,7 @@ const _drawGrid = (
       labelInner.appendChild(labelAction)
       labelAction.innerText = actionName
       labelAction.className = 'grid-label-part' // was also: clickable
-      // labelAction.onclick = drilldownWith(`grid "${group.path}" ${optionsToString(options)}`)
+      // labelAction.onclick = drilldownWith(tab, `grid "${group.path}" ${optionsToString(options)}`)
     }
 
     // render the grid
@@ -450,7 +450,7 @@ const _drawGrid = (
 
       let idx = 0
       group.activations.forEach(activation => {
-        renderCell(viewName, cells[idx], activation, !isSuccess(activation), undefined, undefined, {
+        renderCell(tab, viewName, cells[idx], activation, !isSuccess(activation), undefined, undefined, {
           zoom: zoomLevelForDisplay
         })
         idx++
@@ -476,6 +476,7 @@ const _drawGrid = (
             cellContainer.appendChild(cell)
             cell.classList.add('grid-cell-newly-created')
             renderCell(
+              tab,
               viewName,
               cell,
               activation,

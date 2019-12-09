@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core'
 import { Action } from '@kui-shell/plugin-openwhisk'
 
 import { appDelete } from '../../utility/usage'
 import * as view from '../../view/entity-view'
 
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   /* command handler for app delete */
   commandTree.listen(
     `/wsk/app/delete`,

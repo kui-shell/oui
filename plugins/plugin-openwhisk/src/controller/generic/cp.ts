@@ -20,7 +20,7 @@
  */
 
 import Debug from 'debug'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 import { synonyms } from '../../models/synonyms'
 
 const debug = Debug('plugins/openwhisk/cmds/copy')

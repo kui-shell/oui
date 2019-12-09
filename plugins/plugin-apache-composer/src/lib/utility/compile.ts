@@ -20,7 +20,7 @@ import * as path from 'path'
 import * as fqn from 'openwhisk-composer/fqn'
 import * as Composer from 'openwhisk-composer'
 
-import { Capabilities, Errors, UI, Util } from '@kui-shell/core'
+import { inBrowser, Tab, UsageError, findFile, expandHomeDir } from '@kui-shell/core'
 import { currentSelection, hasAnnotations } from '@kui-shell/plugin-openwhisk'
 
 import { isValidAst } from './ast'
@@ -32,7 +32,7 @@ const debug = Debug('plugins/apache-composer/utility/compile')
 const loadSourceCode = (inputFile: string, localCodePath: string): Promise<string> =>
   // eslint-disable-next-line no-async-promise-executor
   new Promise(async (resolve, reject) => {
-    if (!Capabilities.inBrowser()) {
+    if (!inBrowser()) {
       debug('readFile in headless mode or for electron')
       fs.readFile(localCodePath, (err, data) => {
         if (err) {
@@ -154,7 +154,7 @@ const sourceErrHandler = (error, originalCode: string, filename: string) => {
   }
 }
 
-export const implicitInputFile = (tab: UI.Tab, inputFile?: string, name?: string) => {
+export const implicitInputFile = (tab: Tab, inputFile?: string, name?: string) => {
   if (!inputFile) {
     // the user didn't provide an input file, maybe we can infer one from the current selection
     const selection = currentSelection(tab)
@@ -179,12 +179,12 @@ export const implicitInputFile = (tab: UI.Tab, inputFile?: string, name?: string
 }
 
 export const loadComposition = (inputFile: string, originalCode?: string, localCodePath?: string) => {
-  if (Capabilities.inBrowser() && originalCode) {
+  if (inBrowser() && originalCode) {
     debug('loadComposition for webpack', originalCode)
     return originalCode
   }
 
-  const localSourcePath = localCodePath || Util.findFile(Util.expandHomeDir(inputFile))
+  const localSourcePath = localCodePath || findFile(expandHomeDir(inputFile))
 
   debug('load source code from', localSourcePath)
 
@@ -265,7 +265,7 @@ export const sourceToComposition = ({ inputFile, name = '' }: { inputFile: strin
       debug('input is composer library client', extension)
     } else {
       return reject(
-        new Errors.UsageError({
+        new UsageError({
           message: messages.unknownInput,
           usage: create('create'),
           code: 497
@@ -273,7 +273,7 @@ export const sourceToComposition = ({ inputFile, name = '' }: { inputFile: strin
       )
     }
 
-    const localCodePath = Util.findFile(Util.expandHomeDir(inputFile))
+    const localCodePath = findFile(expandHomeDir(inputFile))
 
     return loadSourceCode(inputFile, localCodePath) // check inputfile extension and existence and then return the source code
       .then(sourceCode => loadComposition(inputFile, sourceCode)) // check before parse by composer and give users more freedom on source input

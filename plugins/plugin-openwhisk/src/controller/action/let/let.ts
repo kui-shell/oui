@@ -38,9 +38,7 @@ import * as withRetry from 'promise-retry'
 import { Action as OWAction, Exec, Kind } from 'openwhisk'
 import { existsSync, lstat, readFile, readFileSync, unlink, writeFile } from 'fs'
 
-import Util from '@kui-shell/core/api/util'
-import Commands from '@kui-shell/core/api/commands'
-import { inBrowser } from '@kui-shell/core/api/capabilities'
+import { expandHomeDir, findFile, Tab, Arguments, ExecOptions, Registrar, inBrowser } from '@kui-shell/core'
 
 import { synonyms } from '../../../models/synonyms'
 import { deployHTMLViaOpenWhisk } from './html'
@@ -151,7 +149,7 @@ const fetchRemote = (location: string, mimeType: string): Promise<Remote> =>
         })
       })
     } else {
-      lstat(Util.findFile(Util.expandHomeDir(locationWithoutQuotes)), (err, stats) => {
+      lstat(findFile(expandHomeDir(locationWithoutQuotes)), (err, stats) => {
         if (stats) {
           // nothing to fetch, it's local!
           resolve({ location: locationWithoutQuotes, removeWhenDone: false })
@@ -223,7 +221,7 @@ const makeZipActionFromZipFile = (
   name: string,
   location: string,
   options: { kind: Kind; kv: KeyValOptions },
-  execOptions: Commands.ExecOptions
+  execOptions: ExecOptions
 ) =>
   new Promise((resolve, reject) => {
     try {
@@ -265,7 +263,7 @@ const makeZipActionFromZipFile = (
               // location on local filesystem
               owOpts.action.annotations.push({
                 key: 'file',
-                value: Util.expandHomeDir(location)
+                value: expandHomeDir(location)
               })
 
               // add an annotation to indicate that this is a managed action
@@ -339,7 +337,7 @@ const webAssetTransformer = (location, text, extension) => {
     'const getHostRelativeRoot = () => `/api/v1/web${stripSlash(stripSlash(process.env.__OW_ACTION_NAME))}`\n' + // eslint-disable-line no-template-curly-in-string
     'const getReferer = hostRelativeRoot => `${process.env.__OW_API_HOST}${hostRelativeRoot}`\n' + // eslint-disable-line no-template-curly-in-string
     `function main(params) { const hostRelativeRoot = getHostRelativeRoot(); const referer = getReferer(hostRelativeRoot); const getParams = () => { delete params.__ow_headers; delete params.__ow_path; delete params.__ow_method; return params; }; return { ${headers} ${contentType}: \`` +
-    xform(text || readFileSync(Util.expandHomeDir(location))) +
+    xform(text || readFileSync(expandHomeDir(location))) +
     '`} }'
   )
 }
@@ -354,7 +352,7 @@ const makeWebAsset = async (
   location: string,
   text: string,
   options: { kv: KeyValOptions },
-  execOptions: Commands.ExecOptions
+  execOptions: ExecOptions
 ) => {
   const extensionWithoutDot = extension.substring(1)
   const action: OWAction = Object.assign({}, options.kv, {
@@ -366,7 +364,7 @@ const makeWebAsset = async (
     action.annotations = []
   }
   ;(annotators[extension] || []).forEach(annotator => annotator(action))
-  action.annotations.push({ key: 'file', value: Util.expandHomeDir(location) })
+  action.annotations.push({ key: 'file', value: expandHomeDir(location) })
 
   // add an annotation to indicate that this is a managed action
   action.annotations.push({
@@ -387,7 +385,7 @@ const makeWebAsset = async (
 }
 
 /** here is the module */
-export default async (commandTree: Commands.Registrar) => {
+export default async (commandTree: Registrar) => {
   /**
    * Create an OpenWhisk action from a given file
    *
@@ -400,8 +398,8 @@ export default async (commandTree: Commands.Registrar) => {
     location: string,
     letType: string,
     options: { kind: Kind; kv: KeyValOptions },
-    command: Commands.Arguments,
-    execOptions: Commands.ExecOptions
+    command: Arguments,
+    execOptions: ExecOptions
   ) => {
     const extension = location.substring(location.lastIndexOf('.'))
     const kind = options.kind || extensionToKind[extension]
@@ -430,9 +428,10 @@ export default async (commandTree: Commands.Registrar) => {
 
   let currentIter = 0 // optimization
   const createWithRetryOnName = (
+    tab: Tab,
     code: string,
     parentActionName: string,
-    execOptions: Commands.ExecOptions,
+    execOptions: ExecOptions,
     idx: number,
     iter: number,
     desiredName?: string
@@ -450,7 +449,7 @@ export default async (commandTree: Commands.Registrar) => {
               annotations: [
                 {
                   key: ANON_KEY_FQN,
-                  value: `/${currentNamespace()}/${parentActionName}`
+                  value: `/${currentNamespace(tab)}/${parentActionName}`
                 },
                 { key: ANON_KEY, value: parentActionName },
                 { key: ANON_CODE, value: code.replace(/^let main = /, '') }
@@ -468,14 +467,14 @@ export default async (commandTree: Commands.Registrar) => {
         if (err.statusCode === 409) {
           // name conflict
           if (!desiredName) currentIter++ // optimization
-          return createWithRetryOnName(code, parentActionName, execOptions, idx, desiredName ? iter : iter + 1)
+          return createWithRetryOnName(tab, code, parentActionName, execOptions, idx, desiredName ? iter : iter + 1)
         } else {
           throw err
         }
       })
 
-  const doCreate = (args: Commands.Arguments) => {
-    const { argv: fullArgv, command: fullCommand, execOptions, REPL } = args
+  const doCreate = (args: Arguments) => {
+    const { tab, argv: fullArgv, command: fullCommand, execOptions, REPL } = args
     // const update = execOptions.createOnly ? 'create' : 'update'
 
     /**
@@ -507,8 +506,8 @@ export default async (commandTree: Commands.Registrar) => {
       location: string,
       letType = 'let',
       options: { kind: Kind; kv: KeyValOptions },
-      command: Commands.Arguments,
-      execOptions: Commands.ExecOptions = {}
+      command: Arguments,
+      execOptions: ExecOptions = {}
     ) => {
       return fetchRemote(location, mimeType).then(location => {
         return createFromFile(name, mimeType, location.location, letType, options, command, execOptions)
@@ -550,13 +549,14 @@ export default async (commandTree: Commands.Registrar) => {
         debug('sequence component is inline function', match[0])
         const body = `let main = ${match[0]}`
         const candidateName = `${parentActionName}-${idx + 1}`
-        return createWithRetryOnName(body, parentActionName, execOptions, idx, currentIter, candidateName)
+        return createWithRetryOnName(tab, body, parentActionName, execOptions, idx, currentIter, candidateName)
       } else {
-        if (!inBrowser() && existsSync(Util.expandHomeDir(component))) {
+        if (!inBrowser() && existsSync(expandHomeDir(component))) {
           debug('sequence component is local file', component)
           // then we assume that the component identifies a local file
           //    note: the first step reserves a name
           return createWithRetryOnName(
+            tab,
             'let main=x=>x',
             parentActionName,
             execOptions,

@@ -18,7 +18,7 @@ import Debug from 'debug'
 const debug = Debug('plugins/openwhisk-editor-extensions/preload')
 debug('loading')
 
-import Capabilities from '@kui-shell/core/api/capabilities'
+import { isHeadless } from '@kui-shell/core'
 import { registerFetcher } from '@kui-shell/plugin-editor'
 
 debug('done loading prereqs')
@@ -30,7 +30,7 @@ debug('done loading prereqs')
 export default async () => {
   debug('initializing')
 
-  if (!Capabilities.isHeadless()) {
+  if (!isHeadless()) {
     const { fetchAction } = await import('./lib/cmds/new')
     registerFetcher(fetchAction())
   }

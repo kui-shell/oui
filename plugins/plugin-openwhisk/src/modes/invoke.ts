@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
+import { encodeComponent } from '@kui-shell/core'
 
 import { fqn } from '../controller/fqn'
 import { Invokeable, isInvokeable, isActivation } from '../models/resource'

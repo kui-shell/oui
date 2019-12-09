@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Registrar, KResponse } from '@kui-shell/core/api/commands'
+import { Registrar, KResponse } from '@kui-shell/core'
 
 import { synonyms } from '../../models/synonyms'
 import { clientOptions, getClient } from '../../client/get'

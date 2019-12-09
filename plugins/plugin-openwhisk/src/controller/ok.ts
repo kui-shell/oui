@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
+import { isHeadless } from '@kui-shell/core'
 
 export default async function(suffix: string | HTMLElement): Promise<HTMLElement> {
   const ok = document.createElement('span')

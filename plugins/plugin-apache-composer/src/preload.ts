@@ -19,10 +19,9 @@ const debug = Debug('plugins/apache-composer/preload')
 debug('loading')
 
 import { dirname } from 'path'
-import Util from '@kui-shell/core/api/util'
-import { PreloadRegistrar } from '@kui-shell/core/api/registrars'
-import initRequirePath from './initRequirePath'
+import { augmentModuleLoadPath, PreloadRegistrar } from '@kui-shell/core'
 
+import initRequirePath from './initRequirePath'
 import flow from './modes/flow'
 import json from './modes/json'
 import jsonPreview from './modes/json-from-preview'
@@ -39,7 +38,7 @@ export default async (registrar: PreloadRegistrar) => {
   await initRequirePath()
 
   // give visibility to our @demos directory on the module path
-  Util.augmentModuleLoadPath(dirname(require.resolve('@kui-shell/plugin-apache-composer/samples/@demos/hello.js')), {
+  augmentModuleLoadPath(dirname(require.resolve('@kui-shell/plugin-apache-composer/samples/@demos/hello.js')), {
     command: 'preview'
   })
 

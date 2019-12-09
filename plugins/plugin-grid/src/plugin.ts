@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Commands } from '@kui-shell/core'
+import { Registrar } from '@kui-shell/core'
 
 import { toplevel as usage } from './usage'
 import grid from './lib/cmds/grid'
@@ -24,7 +24,7 @@ import table from './lib/cmds/table'
  * This is the module
  *
  */
-export default (commandTree: Commands.Registrar) => {
+export default (commandTree: Registrar) => {
   // register the top-level usage handler
   commandTree.subtree('/visualize', { usage })
 

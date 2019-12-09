@@ -18,8 +18,7 @@ import Debug from 'debug'
 import { dirname, join } from 'path'
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { Capabilities, REPL, UI, Util } from '@kui-shell/core'
-import { ParsedOptions } from '@kui-shell/core/api/commands'
+import { flatten, injectCSS, prettyPrintTime, inBrowser, Tab, ToolbarText, ParsedOptions } from '@kui-shell/core'
 
 import { currentNamespace } from '@kui-shell/plugin-openwhisk'
 
@@ -71,8 +70,8 @@ const makeFilter = (includePattern: string, excludePattern: string) => {
  * ns/foo => ns/foo
  *
  */
-const amendWithNamespace = async (name: string) => {
-  const ns = await currentNamespace()
+const amendWithNamespace = async (tab: Tab, name: string) => {
+  const ns = await currentNamespace(tab)
   if (name.indexOf(ns) >= 0) {
     if (name.charAt(0) === '/') return name.substring(1)
     else return name
@@ -145,7 +144,7 @@ const filterBySuccess = ({ success, failure }: { success?: boolean; failure?: bo
  * Fetch the activation data from the OpenWhisk API
  *
  */
-export const fetchActivationData /* FromBackend */ = (N: number, options): Promise<Activation[]> => {
+export const fetchActivationData /* FromBackend */ = (tab: Tab, N: number, options): Promise<Activation[]> => {
   const { nocrawl = false, path, filter, include, exclude, skip = 0, batchSize = defaults.batchSize, all } = options
   let { name = '' } = options
 
@@ -173,7 +172,7 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
   const uptoArg = upto ? ` --upto ${upto}` : '' // this is part of the openwhisk API; upto a millis since epoch
   const sinceArg = since ? ` --since ${since}` : '' // ibid; after a millis since epoch
   const fetch = extraSkip =>
-    REPL.rexec<{ content: Activation[] }>(
+    tab.REPL.rexec<{ content: Activation[] }>(
       `wsk activation list ${nameFilter} --skip ${skip + extraSkip} --limit ${batchSize}${uptoArg}${sinceArg}`
     )
       .then(activations => activations.content)
@@ -190,7 +189,7 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
   /** fetch activations without an app/composer filter */
   const fetchNonApp = async (): Promise<Activation[]> =>
     Promise.all(new Array(N).fill(0).map((_, idx) => fetch(idx * batchSize)))
-      .then(Util.flatten)
+      .then(flatten)
       .then(filterByLatencyBucket(options))
       .then(filterBySuccess(options))
       .then(
@@ -198,7 +197,7 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
           path || filter || include
             ? makeFilter(path || filter || include, exclude)
             : name
-            ? makeFilter(await amendWithNamespace(name), exclude)
+            ? makeFilter(await amendWithNamespace(tab, name), exclude)
             : acceptAnything
         )
       )
@@ -215,13 +214,13 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
 
   if (name && !nocrawl) {
     // then the user asked to filter; first see if this is an app
-    return REPL.qexec(`wsk app get "${name}"`)
+    return tab.REPL.qexec(`wsk app get "${name}"`)
       .then(extractTasks)
       .then(tasks => (all ? tasks.concat([name]) : tasks)) // if options.all, then add the app to the list of actions
       .then(tasks =>
         Promise.all(
           tasks.map(task =>
-            fetchActivationData(N, {
+            fetchActivationData(tab, N, {
               nocrawl: true,
               name: task,
               filter,
@@ -235,7 +234,7 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
           )
         )
       )
-      .then(Util.flatten)
+      .then(flatten)
       .then(filterByLatencyBucket(options))
       .then(filterBySuccess(options))
       .catch(err => {
@@ -257,7 +256,7 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
 /* const fetchActivationDatas = (wsk, _1, _2, rest, fixedTimeRange) => {
     // --raw means return the raw collection, not a repl result
     // --fixedTimeRange will help us in keeping a fixed window of time across redraws
-    return REPL.qexec(`mirror query ${rest.join(' ')} --raw --fixedTimeRange ${fixedTimeRange||false}`)
+    return tab.REPL.qexec(`mirror query ${rest.join(' ')} --raw --fixedTimeRange ${fixedTimeRange||false}`)
 } */
 
 /**
@@ -265,17 +264,17 @@ export const fetchActivationData /* FromBackend */ = (N: number, options): Promi
  *
  */
 export const injectContent = () => {
-  if (Capabilities.inBrowser()) {
-    UI.injectCSS({
+  if (inBrowser()) {
+    injectCSS({
       css: require('@kui-shell/plugin-grid/web/css/table.css'),
       key: 'grid-visualization.table.css'
     })
   } else {
     const root = dirname(require.resolve('@kui-shell/plugin-grid/package.json'))
-    UI.injectCSS(join(root, 'web/css/table.css'))
+    injectCSS(join(root, 'web/css/table.css'))
   }
 
-  UI.injectCSS('https://cdnjs.cloudflare.com/ajax/libs/balloon-css/0.5.0/balloon.min.css') // tooltips
+  injectCSS('https://cdnjs.cloudflare.com/ajax/libs/balloon-css/0.5.0/balloon.min.css') // tooltips
 }
 
 export const injectHTML = (container, file, css = '') => {
@@ -300,7 +299,7 @@ const strong = (container: HTMLElement, N: number) => {
   }
 }
 
-function formatToolbarText(stats: StatData): UI.ToolbarText {
+function formatToolbarText(stats: StatData): ToolbarText {
   const container = document.createElement('span')
 
   if (stats.count === 0) {
@@ -316,22 +315,22 @@ function formatToolbarText(stats: StatData): UI.ToolbarText {
     strong(container, 1).innerText = stats.count.toString()
 
     if (fresh) container.appendChild(document.createTextNode(' activations | '))
-    strong(container, 2).appendChild(UI.PrettyPrinters.time(stats.min, 'short'))
+    strong(container, 2).appendChild(prettyPrintTime(stats.min, 'short'))
 
     if (fresh) container.appendChild(document.createTextNode(' | '))
-    // strong(container, 3).innerText = UI.PrettyPrinters.time(maxTime, 'short')
+    // strong(container, 3).innerText = prettyPrintTime(maxTime, 'short')
     strong(container, 3).innerText = prettyPrintDuration(stats.max - stats.min, {
       compact: true
     })
   }
 
-  return new UI.ToolbarText('info', container)
+  return new ToolbarText('info', container)
 }
 
 export function formatStats(
   activations: Activation[],
   options: Options
-): { stats: StatData; toolbarText: UI.ToolbarText } {
+): { stats: StatData; toolbarText: ToolbarText } {
   const stats = summarizePerformance(activations, options)
 
   return {

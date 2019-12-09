@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { isHeadless, Arguments, Registrar } from '@kui-shell/core'
 
 import ok from '../ok'
 import respondWith from './as-rule'

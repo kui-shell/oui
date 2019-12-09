@@ -22,15 +22,20 @@
 
 import Debug from 'debug'
 
-import { inBrowser } from '@kui-shell/core/api/capabilities'
-import { Arguments, RawResponse, Registrar } from '@kui-shell/core/api/commands'
-import { Table, Row } from '@kui-shell/core/api/table-models'
-import { Tab } from '@kui-shell/core/api/ui-lite'
-import UI from '@kui-shell/core/api/ui'
-import Util from '@kui-shell/core/api/util'
-import Errors from '@kui-shell/core/api/errors'
-import eventBus from '@kui-shell/core/api/events'
-import Models from '@kui-shell/core/api/models'
+import {
+  clearSelection,
+  partialInput,
+  expandHomeDir,
+  inBrowser,
+  eventBus,
+  Tab,
+  Table,
+  Row,
+  UsageError,
+  Arguments,
+  RawResponse,
+  Registrar
+} from '@kui-shell/core'
 
 import getClient from '../../client/get'
 import * as namespace from '../../models/namespace'
@@ -43,7 +48,7 @@ const debug = Debug('plugins/openwhisk/cmds/auth')
  *
  */
 const wskpropsFile = (): string => {
-  return Util.expandHomeDir(process.env.WSK_CONFIG_FILE || '~/.wskprops')
+  return expandHomeDir(process.env.WSK_CONFIG_FILE || '~/.wskprops')
 }
 
 /**
@@ -156,15 +161,15 @@ const informUserOfChange = (tab: Tab, subject?: string) => () => {
   setTimeout(
     async () =>
       eventBus.emit('/auth/change', {
-        namespace: await namespace.current(),
+        namespace: await namespace.current(tab),
         subject: subject
       }),
     0
   )
 
   return apiHost.get().then(async host => {
-    Models.Selection.clear(tab)
-    return `You are now using the OpenWhisk host ${host}, and namespace ${await namespace.current()}`
+    clearSelection(tab)
+    return `You are now using the OpenWhisk host ${host}, and namespace ${await namespace.current(tab)}`
   })
 }
 
@@ -172,9 +177,9 @@ const informUserOfChange = (tab: Tab, subject?: string) => () => {
  * Notify other plugins of a host change event
  *
  */
-const notifyOfHostChange = host => async () => {
+const notifyOfHostChange = (tab: Tab, host: string) => async () => {
   eventBus.emit('/host/change', {
-    namespace: await namespace.current({ noNamespaceOk: true }),
+    namespace: await namespace.current(tab, { noNamespaceOk: true }),
     host: host
   })
 }
@@ -322,10 +327,10 @@ const use = (verb: string) => ({ argvNoOptions, parsedOptions, tab }: Arguments)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const options = (parsedOptions as any) as UseOptions
       if (options.save === false) {
-        return namespace.use(auth).then(informUserOfChange(tab))
+        return namespace.use(tab, auth).then(informUserOfChange(tab))
       } else {
         return updateLocalWskProps(auth)
-          .then(auth => namespace.useAndSave(auth))
+          .then(auth => namespace.useAndSave(tab, auth))
           .then(informUserOfChange(tab))
       }
     } else {
@@ -359,7 +364,7 @@ const addFn = (tab: Tab, key: string, subject: string): Promise<string> => {
   const previousAuth = authModel.get()
   return authModel
     .set(key)
-    .then(() => namespace.init(true)) // true means that we'll do the error handling
+    .then(() => namespace.init(tab, true)) // true means that we'll do the error handling
     .then(() => updateLocalWskProps(key, subject))
     .then(informUserOfChange(tab, subject))
     .catch(err => {
@@ -376,8 +381,8 @@ const addFn = (tab: Tab, key: string, subject: string): Promise<string> => {
         dom.appendChild(document.createTextNode('Please select a namespace, using '))
         clicky(dom, 'wsk auth list', tab.REPL.pexec)
         dom.appendChild(document.createTextNode(' or '))
-        clicky(dom, 'wsk auth add', UI.LowLevel.partialInput)
-        throw new Errors.UsageError(dom)
+        clicky(dom, 'wsk auth add', partialInput)
+        throw new UsageError(dom)
       }
     })
 }
@@ -454,7 +459,7 @@ const hostSet = async (command: Arguments) => {
     .set(host, { ignoreCerts })
     .then(namespace.setApiHost)
     .then(() => updateLocalWskProps())
-    .then(notifyOfHostChange(host))
+    .then(notifyOfHostChange(command.tab, host))
     .then(() =>
       namespace.list().then(auths => {
         debug('got auths', auths)
@@ -485,14 +490,14 @@ const hostSet = async (command: Arguments) => {
 
           // no keys, yet. enter a special mode requesting further assistance
           debug('no auth found')
-          namespace.setNoNamespace(false)
+          namespace.setNoNamespace(command.tab, false)
           const dom = document.createElement('div')
           const clicky = document.createElement('span')
           const cmd = 'wsk auth add <AUTH_KEY>'
 
           clicky.className = 'clickable clickable-blatant'
           clicky.innerText = cmd
-          clicky.onclick = () => UI.LowLevel.partialInput(cmd)
+          clicky.onclick = () => partialInput(cmd)
 
           dom.appendChild(
             document.createTextNode('Before you can proceed, please provide an OpenWhisk auth key, using ')

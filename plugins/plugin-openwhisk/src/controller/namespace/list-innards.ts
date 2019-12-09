@@ -15,7 +15,7 @@
  */
 
 import { Desc } from 'openwhisk'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 
 import asTable from '../as-table'
 import { asMetadata } from '../fqn'
@@ -30,7 +30,7 @@ const doList = (
   kind: 'Action' | 'Package' | 'Rule' | 'Trigger',
   cmd: string,
   project: (ns: Namespace) => Desc[]
-) => async ({ argvNoOptions, execOptions }: Arguments) => {
+) => async ({ tab, argvNoOptions, execOptions }: Arguments) => {
   const name = argvNoOptions[argvNoOptions.indexOf(cmd) + 1]
 
   const ns = asNamespace(
@@ -39,6 +39,7 @@ const doList = (
   )
 
   return asTable(
+    tab,
     project(ns).map(_ => ({
       apiVersion,
       kind,

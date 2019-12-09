@@ -18,10 +18,16 @@ import Debug from 'debug'
 import { readFileSync } from 'fs'
 import { Action as RawAction, Exec as RawExec, Sequence, Kind, Dict, Limits } from 'openwhisk'
 
-import Util from '@kui-shell/core/api/util'
-import eventBus from '@kui-shell/core/api/events'
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments, ParsedOptions, ExecOptions, Registrar } from '@kui-shell/core/api/commands'
+import {
+  findFile,
+  expandHomeDir,
+  eventBus,
+  isHeadless,
+  Arguments,
+  ParsedOptions,
+  ExecOptions,
+  Registrar
+} from '@kui-shell/core'
 
 import ok from '../ok'
 import fqn from '../fqn'
@@ -81,7 +87,7 @@ async function prepareForCopy(
   src: string,
   dest: string,
   kvOptions: KeyValOptions,
-  execOptions: ExecOptions.ExecOptions
+  execOptions: ExecOptions
 ): Promise<Spec> {
   debug('action copy SRC', src, 'DEST', dest)
 
@@ -186,7 +192,7 @@ async function spec(
 
     if (fileName) {
       // find the file
-      const filepath = Util.findFile(Util.expandHomeDir(fileName))
+      const filepath = findFile(expandHomeDir(fileName))
       const isZip = fileName.endsWith('.zip')
       const isJar = fileName.endsWith('.jar')
       const isBinary = isZip || isJar

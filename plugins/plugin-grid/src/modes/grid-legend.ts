@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { Tab } from '@kui-shell/core'
+
 import { ActivationData, isActivationData } from '../models/activation-data'
 import { GridOptions } from '../lib/options'
 import { formatLegend } from '../lib/legend'
@@ -24,5 +26,5 @@ import { formatLegend } from '../lib/legend'
  */
 export default {
   when: isActivationData,
-  badge: (resource: ActivationData<GridOptions>) => formatLegend('Grid', resource.content.stats)
+  badge: (resource: ActivationData<GridOptions>, tab: Tab) => formatLegend(tab, 'Grid', resource.content.stats)
 }

@@ -15,9 +15,7 @@
  */
 
 import Debug from 'debug'
-
-import Capabilities from '@kui-shell/core/api/capabilities'
-import Models from '@kui-shell/core/api/models'
+import { Store, Tab, isHeadless, inBrowser, partialInput } from '@kui-shell/core'
 
 import { apiHost, auth as authModel } from './auth'
 
@@ -36,7 +34,7 @@ const read = () =>
     let model = cached
     if (!model) {
       debug('read:not cached')
-      const raw = Models.Store().getItem(key)
+      const raw = Store().getItem(key)
       try {
         model = raw ? JSON.parse(raw) : {}
       } catch (e) {
@@ -62,7 +60,7 @@ const read = () =>
 
 const write = model => {
   cached = model._full
-  Models.Store().setItem(key, JSON.stringify(model._full))
+  Store().setItem(key, JSON.stringify(model._full))
 }
 
 /**
@@ -70,9 +68,9 @@ const write = model => {
  *
  */
 const writeSelectedNS = selectedNS => {
-  if (Models.Store().getItem('selectedNS') !== selectedNS) {
-    Models.Store().setItem('selectedNS', selectedNS)
-    debug('stored selected namespace to local storage', Models.Store().getItem('selectedNS'))
+  if (Store().getItem('selectedNS') !== selectedNS) {
+    Store().setItem('selectedNS', selectedNS)
+    debug('stored selected namespace to local storage', Store().getItem('selectedNS'))
   }
 }
 
@@ -93,17 +91,12 @@ export const setApiHost = (apiHost = '') => {
    }))
    self.__lookup = () => apiHost.get().then(host => read().then(model => console.error(`Namespace list for ${host} is ${model.namespaces ? JSON.stringify(model.namespaces) : 'empty'}`))) */
 
-async function REPL() {
-  const { REPL } = await import('@kui-shell/core/api/repl')
-  return REPL
-}
-
 /**
  * User does not have a namespace! warn the user of how to proceed
  *
  */
-export const setNoNamespace = (provideHelp = true) => {
-  if (Capabilities.isHeadless()) {
+export const setNoNamespace = (tab: Tab, provideHelp = true) => {
+  if (isHeadless()) {
     return
   }
 
@@ -111,8 +104,7 @@ export const setNoNamespace = (provideHelp = true) => {
   namespaceDom.className += ' oops'
   namespaceDom.innerText = 'no auth key!'
   namespaceDom.onclick = async () => {
-    const { UI } = await import('@kui-shell/core/api/ui')
-    UI.LowLevel.partialInput('wsk auth add <your_auth_key>')
+    partialInput('wsk auth add <your_auth_key>')
   }
   namespaceDom.removeAttribute('data-value')
   document.body.classList.add('no-auth')
@@ -121,9 +113,9 @@ export const setNoNamespace = (provideHelp = true) => {
   currentNS = undefined
 
   if (provideHelp) {
-    if (Capabilities.inBrowser()) {
+    if (inBrowser()) {
       setTimeout(async () => {
-        ;(await REPL()).qexec('getting started')
+        tab.REPL.qexec('getting started')
       })
     }
   }
@@ -134,7 +126,7 @@ export const setNoNamespace = (provideHelp = true) => {
  *
  */
 export const setPleaseSelectNamespace = () => {
-  if (Capabilities.isHeadless()) {
+  if (isHeadless()) {
     return
   }
 
@@ -169,7 +161,7 @@ export const list = async () => {
  * wsk.namespace.get call failed
  *
  */
-export const setNeedsNamespace = async (err?: Error) => {
+export const setNeedsNamespace = async (tab: Tab, err?: Error) => {
   // oops, we're in a bit of a weird state. if we get here,
   // then the user has specified a valid api host, but
   // hasn't yet selected a namespace.
@@ -178,11 +170,11 @@ export const setNeedsNamespace = async (err?: Error) => {
   }
 
   debug('setNeedsNamespace')
-  const localSelectedNS = Models.Store().getItem('selectedNS')
+  const localSelectedNS = Store().getItem('selectedNS')
   if (localSelectedNS) {
     debug('user selected one namespace previously, so auto-selecting it from local storage', localSelectedNS)
     try {
-      return await (await REPL()).qexec(`wsk auth switch ${localSelectedNS}`)
+      return await tab.REPL.qexec(`wsk auth switch ${localSelectedNS}`)
     } catch (err) {
       console.error('The previously selected namespace probably does not align with the currently selected host', err)
 
@@ -196,19 +188,17 @@ export const setNeedsNamespace = async (err?: Error) => {
       // user has no namespaces, and so needs to use
       // wsk auth add to tell us about one
       debug('user has no namespace')
-      setNoNamespace()
+      setNoNamespace(tab)
     } else if (auths.length === 1) {
       // user has one namespace, so select it
       const singleNamespace = auths[0].namespace
       debug('user has just one namespace, auto-selecting it', singleNamespace)
-      const repl = await REPL()
-      repl.qexec(`wsk auth switch ${singleNamespace}`)
+      tab.REPL.qexec(`wsk auth switch ${singleNamespace}`)
     } else {
       // user has many namespaces, and didn't select one previously, so list them
       debug('user has more than one namespace, listing them')
       setPleaseSelectNamespace()
-      const repl = await REPL()
-      repl.pexec(`wsk auth list`)
+      tab.REPL.pexec(`wsk auth list`)
     }
   })
 }
@@ -228,9 +218,9 @@ const persist = (namespace, auth) => {
   })
 }
 
-const setNamespace = (namespace: string) => {
+const setNamespace = (tab: Tab, namespace: string) => {
   if (!namespace) {
-    return setNeedsNamespace()
+    return setNeedsNamespace(tab)
   }
 
   // UI bits
@@ -238,7 +228,7 @@ const setNamespace = (namespace: string) => {
   const namespaceDom = document.querySelector('#openwhisk-namespace') as HTMLElement
   namespaceDom.className = 'clickable' // remove any prior oops
   namespaceDom.onclick = async () => {
-    ;(await REPL()).pexec('wsk auth list')
+    tab.REPL.pexec('wsk auth list')
   }
   namespaceDom.innerText = namespace
   namespaceDom.setAttribute('data-value', namespace)
@@ -246,8 +236,7 @@ const setNamespace = (namespace: string) => {
   const hostDom = document.querySelector('#openwhisk-api-host') as HTMLElement
   hostDom.className = 'clickable'
   hostDom.onclick = async () => {
-    const { UI } = await import('@kui-shell/core/api/ui')
-    UI.LowLevel.partialInput('host set <your_api_host>')
+    partialInput('host set <your_api_host>')
   }
 
   // cache
@@ -261,14 +250,14 @@ const setNamespace = (namespace: string) => {
  * Initialize the apihost and namespace bits of the UI
  *
  */
-export const init = async (noCatch = false, { noAuthOk = false } = {}) => {
+export const init = async (tab: Tab, noCatch = false, { noAuthOk = false } = {}) => {
   debug('init')
 
   return apiHost
     .get() // get the current apihost
     .then(setApiHost) // udpate the UI for the apihost
-    .then(async () => (await REPL()).qexec('wsk auth namespace get')) // get the namespace associated with the current auth key
-    .then(setNamespace) // update the UI for the namespace
+    .then(async () => tab.REPL.qexec<string>('wsk auth namespace get')) // get the namespace associated with the current auth key
+    .then(ns => setNamespace(tab, ns)) // update the UI for the namespace
     .catch(err => {
       debug('namespace init error', noAuthOk)
       console.error('namespace::init error ' + JSON.stringify(err), err)
@@ -290,14 +279,14 @@ interface CurrentOptions {
 class DefaultCurrentOptions implements CurrentOptions {
   noNamespaceOk = false // eslint-disable-line @typescript-eslint/explicit-member-accessibility
 }
-export const current = async (opts: CurrentOptions = new DefaultCurrentOptions()): Promise<string> => {
+export const current = async (tab: Tab, opts: CurrentOptions = new DefaultCurrentOptions()): Promise<string> => {
   const ns = currentNS
   debug('current', ns)
 
   if (!ns && !opts.noNamespaceOk) {
     // lazily initialize ourselves
-    await init()
-    return current()
+    await init(tab)
+    return current(tab)
   } else {
     return Promise.resolve(ns)
   }
@@ -307,19 +296,19 @@ export const current = async (opts: CurrentOptions = new DefaultCurrentOptions()
  * Switch to use the given openwhisk auth and save
  *
  */
-export const useAndSave = (auth: string) =>
+export const useAndSave = (tab: Tab, auth: string) =>
   authModel
     .set(auth)
-    .then(async () => (await REPL()).qexec('wsk namespace current'))
+    .then(() => tab.REPL.qexec<string>('wsk namespace current'))
     .then(namespace => writeSelectedNS(namespace)) // store the selected namesapce to local storage (use case e.g. reload the browser after auth switch)
-    .then(() => init())
+    .then(() => init(tab))
 
 /**
  * Switch to use the given openwhisk auth but don't save
  *
  */
-export const use = (auth: string) => {
-  return authModel.set(auth).then(() => init())
+export const use = (tab: Tab, auth: string) => {
+  return authModel.set(auth).then(() => init(tab))
 }
 
 /**

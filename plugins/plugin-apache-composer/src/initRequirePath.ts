@@ -16,14 +16,13 @@
 
 import Debug from 'debug'
 import * as path from 'path'
-
-import Capabilities from '@kui-shell/core/api/capabilities'
+import { inBrowser } from '@kui-shell/core'
 
 const debug = Debug('plugins/apache-composer/initRequirePath')
 
 // help compositions find our openwhisk-composer module
 export default async () => {
-  if (!Capabilities.inBrowser()) {
+  if (!inBrowser()) {
     debug('adding node_modules to the require module path')
     const appModulePath = await import('app-module-path')
 

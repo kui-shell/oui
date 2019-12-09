@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { Tab } from '@kui-shell/core/api/tab'
-import { inBrowser } from '@kui-shell/core/api/capabilities'
-
+import { inBrowser, unparse, Tab } from '@kui-shell/core'
 import { Preview, isPreview } from '../models/resource'
 
 /**
@@ -48,13 +46,10 @@ export default {
       if (!preview.alreadyWatching && !inBrowser()) {
         preview.alreadyWatching = true
         const chokidar = await import('chokidar')
-        const Commands = (await import('@kui-shell/core/api/commands')).default
         chokidar.watch(preview.input).on('change', async (path: string) => {
           // debug('change observed to file', path)
           try {
-            preview.ast = (
-              await tab.REPL.qexec<Preview>(`${preview.cmd} ${path} ${Commands.unparse(preview.options)}`)
-            ).ast
+            preview.ast = (await tab.REPL.qexec<Preview>(`${preview.cmd} ${path} ${unparse(preview.options)}`)).ast
             renderOnce()
           } catch (err) {
             empty()

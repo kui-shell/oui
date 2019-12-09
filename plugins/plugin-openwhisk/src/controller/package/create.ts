@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { isHeadless, Arguments, Registrar, MultiModalResponse } from '@kui-shell/core'
 
 import ok from '../ok'
 import respondWith from './as-package'
 import { kvOptions } from '../key-value'
 import { Package } from '../../models/resource'
 import { synonyms } from '../../models/synonyms'
-import { isHeadless } from '@kui-shell/core/api/capabilities'
 import { clientOptions, getClient } from '../../client/get'
 import { paramsAndAnnotations, shared, aPackage, maybeDeployedPackage, withStandardOptions } from '../usage'
 

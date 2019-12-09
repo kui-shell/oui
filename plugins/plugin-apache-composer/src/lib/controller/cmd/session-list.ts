@@ -16,9 +16,7 @@
 
 import Debug from 'debug'
 
-import { isHeadless } from '@kui-shell/core/api/capabilities'
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
-import Errors from '@kui-shell/core/api/errors'
+import { isHeadless, Arguments, Registrar, UsageError } from '@kui-shell/core'
 import { asActivationTable, renderActivationListView, Activation, ListOptions } from '@kui-shell/plugin-openwhisk'
 
 import { sessionList } from '../../utility/usage'
@@ -50,7 +48,7 @@ export default async (commandTree: Registrar) => {
 
         if (nameOption && nameSpecify && nameOption !== nameSpecify) {
           debug('inconsistent name:', nameSpecify, nameSpecify)
-          throw new Errors.UsageError('You provided two different session names')
+          throw new UsageError('You provided two different session names')
         }
 
         const name = nameOption || nameSpecify || ''
@@ -87,7 +85,7 @@ export default async (commandTree: Registrar) => {
           if (parsedOptions.count) {
             return list.length
           } else if (isHeadless()) {
-            const L = await asActivationTable(list)
+            const L = await asActivationTable(tab, list)
             if (L.body.length > 0) {
               L.header.type = 'session' // hack: needed to make core's headless pretty printer work
             }
@@ -101,7 +99,7 @@ export default async (commandTree: Registrar) => {
               if (parsedOptions.count) {
                 return list.length
               } else if (isHeadless()) {
-                const L = await asActivationTable(list)
+                const L = await asActivationTable(tab, list)
                 if (L.body.length > 0) {
                   L.header.type = 'session' // hack: needed to make core's headless pretty printer work
                 }

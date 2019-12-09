@@ -15,9 +15,7 @@
  */
 
 import { Namespace as RawNamespace } from 'openwhisk'
-
-import { encodeComponent } from '@kui-shell/core/api/repl-util'
-import { MultiModalResponse } from '@kui-shell/core/api/ui-lite'
+import { encodeComponent, MultiModalResponse } from '@kui-shell/core'
 
 import { asMetadata } from '../fqn'
 import { apiVersion, Namespace } from '../../models/resource'

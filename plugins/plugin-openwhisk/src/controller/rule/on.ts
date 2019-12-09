@@ -22,7 +22,7 @@
  *
  */
 
-import { Arguments, Registrar } from '@kui-shell/core/api/commands'
+import { Arguments, Registrar } from '@kui-shell/core'
 import { Rule, Trigger } from '../../models/resource'
 
 /**
