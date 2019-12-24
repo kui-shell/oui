@@ -18,6 +18,7 @@
     "openwhisk"
   ],
   "main": "dist/index.js",
+  "module": "mdist/index.js",
   "kui": {
     "headless": false,
     "proxy": false
@@ -27,7 +28,7 @@
   },
   "gitHead": "89de9f78e8a1a2bdd29d2e17d7c608ab006c6d32",
   "dependencies": {
-    "@kui-shell/plugin-editor": "^5.6.6",
+    "@kui-shell/plugin-editor": "^5.7.11",
     "debug": "4.1.1"
   }
 }

@@ -1,5 +1,5 @@
 language: node_js
-node_js: 8
+node_js: 12
 
 services:
   - docker
@@ -11,30 +11,25 @@ install:
   - ./tools/travis/openwhisk/openwhisk.sh &
   - ow=$!
   - npm ci
-  - ./tools/travis/waitForWebpack.sh
   - wait $ow
 
+# below, the various stages will define S and T
+script: npm run test:$T $LAYERS
+
+# re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
 jobs:
   include:
-    - stage: test
-      script: npm run test
-      env: LAYERS="openwhisk1 grid" MOCHA_RUN_TARGET=electron
-    - stage: test
-      script: npm run test
-      # re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
-      env: LAYERS=openwhisk2 MOCHA_RUN_TARGET=electron NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
-    - stage: test
-      script: npm run test
-      env: LAYERS=openwhisk3 MOCHA_RUN_TARGET=electron
-    - stage: test
-      script: npm run test
-      env: LAYERS="openwhisk4 composer1" MOCHA_RUN_TARGET=electron NEEDS_OPENWHISK_NODEJS8=true
-    - stage: test
-      script: npm run test
-      env: LAYERS=composer2 MOCHA_RUN_TARGET=electron
+    - env: LAYERS=composer1
+    - env: LAYERS=composer2
+    - env: LAYERS=openwhisk1
+    - env: LAYERS=grid
+    - env: LAYERS=openwhisk2 NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
+    - env: LAYERS=openwhisk3
+    - env: LAYERS=openwhisk4 NEEDS_OPENWHISK_NODEJS8=true
 
 env:
   global:
+    - T=electron # default target (the other being T=webpack)
     - WINDOW_WIDTH=1400
     - WINDOW_HEIGHT=1050
     - PATH=bin:$PATH
@@ -46,3 +41,4 @@ env:
     - TEST_ORG=testorg
     - TEST_SPACE=testspace
     - NEEDS_OPENWHISK=true
+    - KUI_TEST_PARALLEL=true

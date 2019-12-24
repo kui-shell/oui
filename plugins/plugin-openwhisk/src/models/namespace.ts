@@ -262,7 +262,7 @@ export const init = async (tab: Tab, noCatch = false, { noAuthOk = false } = {})
       debug('namespace init error', noAuthOk)
       console.error('namespace::init error ' + JSON.stringify(err), err)
       if (!noCatch) {
-        return setNeedsNamespace(err)
+        return setNeedsNamespace(tab, err)
       } else if (!noAuthOk) {
         throw err
       }

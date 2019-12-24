@@ -18,7 +18,7 @@ import Debug from 'debug'
 const debug = Debug('plugins/apache-composer/preload')
 debug('loading')
 
-import { dirname } from 'path'
+import { dirname, join } from 'path'
 import { augmentModuleLoadPath, PreloadRegistrar } from '@kui-shell/core'
 
 import initRequirePath from './initRequirePath'
@@ -29,6 +29,9 @@ import visualize from './modes/visualize'
 import visualizePreview from './modes/visualize-from-preview'
 import code from './modes/code'
 
+declare let __non_webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+declare let __webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+
 /**
  * This is the module
  *
@@ -37,10 +40,16 @@ export default async (registrar: PreloadRegistrar) => {
   // help compositions find our openwhisk-composer module
   await initRequirePath()
 
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const requireFunc = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : require
+
   // give visibility to our @demos directory on the module path
-  augmentModuleLoadPath(dirname(require.resolve('@kui-shell/plugin-apache-composer/samples/@demos/hello.js')), {
-    command: 'preview'
-  })
+  augmentModuleLoadPath(
+    join(dirname(requireFunc.resolve('@kui-shell/plugin-apache-composer/package.json')), 'samples/@demos'),
+    {
+      command: 'preview'
+    }
+  )
 
   registrar.registerModes(flow, visualize, visualizePreview, json, jsonPreview, code)
 }
