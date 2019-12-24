@@ -17,7 +17,7 @@
     "en_US": "**Oui** is a tool that enhances the OpenWhisk terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles.\n\n---\n\n[GitHub](https://github.com/kui-shell/oui)\n\n[Bugs](https://github.com/kui-shell/oui/issues/new)"
   },
   "gettingStarted": "tutorial play @tutorials/getting-started",
-  "defaultTheme": "Carbon Gray10",
+  "defaultTheme": "Dark",
   "defaultContext": ["wsk"],
   "contentSecurityPolicy": "default-src * 'nonce-kuiDefaultNonce' 'unsafe-eval'; img-src * data:; style-src * 'unsafe-inline'; connect-src 'self' http://localhost:9953",
   "about": [{ "mode": "contexts", "label": "Contexts", "direct": "about --mode contexts --content contexts" }],

@@ -27,6 +27,9 @@ import { isValidAst } from './ast'
 import { create } from './usage'
 import * as messages from './messages'
 
+declare let __non_webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+declare let __webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+
 const debug = Debug('plugins/apache-composer/utility/compile')
 
 const loadSourceCode = (inputFile: string, localCodePath: string): Promise<string> =>
@@ -51,7 +54,7 @@ const loadSourceCode = (inputFile: string, localCodePath: string): Promise<strin
         debug('readFile for webpack done', data)
         resolve(data)
       } catch (err) {
-        console.error(err)
+        debug(err)
         const error = new Error('The specified file does not exist')
         error['code'] = 404
         reject(error)
@@ -178,7 +181,7 @@ export const implicitInputFile = (tab: Tab, inputFile?: string, name?: string) =
   return { inputFile, name }
 }
 
-export const loadComposition = (inputFile: string, originalCode?: string, localCodePath?: string) => {
+export const loadComposition = async (inputFile: string, originalCode?: string, localCodePath?: string) => {
   if (inBrowser() && originalCode) {
     debug('loadComposition for webpack', originalCode)
     return originalCode
@@ -206,10 +209,13 @@ export const loadComposition = (inputFile: string, originalCode?: string, localC
       }
       console.error = function() {
         // eslint-disable-next-line prefer-rest-params
-        err(...arguments)
+        debug(...arguments)
         for (let idx = 0; idx < arguments.length; idx++) {
           // eslint-disable-next-line prefer-rest-params
-          errorMessage += arguments[idx].toString() + ' '
+          if (arguments[idx].toString) {
+            // eslint-disable-next-line prefer-rest-params
+            errorMessage += arguments[idx].toString() + ' '
+          }
         }
         errorMessage += '\n'
       }
@@ -221,12 +227,15 @@ export const loadComposition = (inputFile: string, originalCode?: string, localC
         throw error
       }
 
-      composition = require(localSourcePath)
-      // Note the use of requireUncached: this allows
-      // users to edit and see updates of their
-      // compositions, without having to reload or
-      // restart the shell
-      delete require.cache[require.resolve(localSourcePath)]
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const requireFunc = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : require
+      composition = await requireFunc(localSourcePath)
+
+      // Notes: this allows users to edit and see updates of their
+      // compositions, without having to reload or restart the shell
+      if (requireFunc.cache && requireFunc.resolve) {
+        delete requireFunc.cache[requireFunc.resolve(localSourcePath)]
+      }
     } finally {
       // restore our temporary overrides
       console.log = log
@@ -237,7 +246,7 @@ export const loadComposition = (inputFile: string, originalCode?: string, localC
         console.log(logMessage)
       }
       if (errorMessage) {
-        console.error(errorMessage)
+        debug(errorMessage)
       }
     }
 

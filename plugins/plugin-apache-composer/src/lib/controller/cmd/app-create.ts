@@ -15,7 +15,7 @@
  */
 
 import Debug from 'debug'
-import { Registrar, UsageError } from '@kui-shell/core'
+import { findFile, expandHomeDir, Registrar, UsageError } from '@kui-shell/core'
 
 import { create } from '../../utility/usage'
 import * as view from '../../view/entity-view'
@@ -50,7 +50,7 @@ export default async (commandTree: Registrar) => {
       }
 
       return compileUtil
-        .sourceToComposition({ inputFile, name })
+        .sourceToComposition({ inputFile: findFile(expandHomeDir(inputFile)), name })
         .then(source =>
           client.deploy({ composition: source, overwrite: false }).then(view.formatCompositionEntity(command))
         )
@@ -86,7 +86,7 @@ export default async (commandTree: Registrar) => {
       }
 
       return compileUtil
-        .sourceToComposition({ inputFile, name })
+        .sourceToComposition({ inputFile: findFile(expandHomeDir(inputFile)), name })
         .then(composition =>
           client.deploy({ composition, overwrite: true }).then(view.formatCompositionEntity(command))
         )

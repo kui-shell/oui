@@ -82,10 +82,10 @@ const differentASTs = (ast1, ast2) => {
  * Turn source into composer IR
  *
  */
-const generateAST = (source, localCodePath) => {
+const generateAST = async (source, localCodePath) => {
   // const base = kind.substring(0, kind.indexOf(':')) || kind // maybe useful when we have python composer
   try {
-    const result = loadComposition(localCodePath, source)
+    const result = await loadComposition(localCodePath, source)
     return Promise.resolve(result)
   } catch (error) {
     return Promise.resolve(error)

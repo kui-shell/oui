@@ -48,7 +48,7 @@ interface CompositionWithCode {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleError = (err: Error, reject?: (reason: any) => void) => {
-  console.error(err)
+  debug(err)
   if (reject) {
     reject(err)
   } else if (typeof err === 'string') {

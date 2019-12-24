@@ -16,8 +16,6 @@
 
 import Debug from 'debug'
 
-import * as Client from 'openwhisk-composer/client'
-
 import { clientOptions } from '@kui-shell/plugin-openwhisk'
 
 const debug = Debug('plugins/apache-composer/client')
@@ -33,9 +31,16 @@ const options = {
  * added.
  *
  */
-export const deploy = ({ composition, overwrite }) => {
+declare let __non_webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+declare let __webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+export const deploy = async ({ composition, overwrite }) => {
   // deploys the JSON-encoded composition
   debug('deploying composition', composition)
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const requireFunc = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : require
+  const Client = requireFunc('openwhisk-composer/client')
+
   return Client(options)
     .compositions.deploy(composition, overwrite, undefined, undefined, undefined, undefined, undefined, clientOptions)
     .then(entity => {

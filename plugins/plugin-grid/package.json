@@ -17,6 +17,7 @@
     "plugin"
   ],
   "main": "dist/index.js",
+  "module": "mdist/index.js",
   "dependencies": {
     "pretty-ms": "5.1.0",
     "uuid": "3.3.3"

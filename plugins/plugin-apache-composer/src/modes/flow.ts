@@ -28,6 +28,7 @@ export default {
   mode: {
     mode: 'visualization',
     label: 'Flow',
+    order: 1,
 
     content: (tab: Tab, session: Session) => doFlow(tab, session.activationId)
   }

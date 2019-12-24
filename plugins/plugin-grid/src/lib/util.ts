@@ -15,10 +15,10 @@
  */
 
 import Debug from 'debug'
-import { dirname, join } from 'path'
+import { join } from 'path'
 import * as prettyPrintDuration from 'pretty-ms'
 
-import { flatten, injectCSS, prettyPrintTime, inBrowser, Tab, ToolbarText, ParsedOptions } from '@kui-shell/core'
+import { flatten, injectCSS, prettyPrintTime, Tab, ToolbarText, ParsedOptions } from '@kui-shell/core'
 
 import { currentNamespace } from '@kui-shell/plugin-openwhisk'
 
@@ -264,17 +264,10 @@ export const fetchActivationData /* FromBackend */ = (tab: Tab, N: number, optio
  *
  */
 export const injectContent = () => {
-  if (inBrowser()) {
-    injectCSS({
-      css: require('@kui-shell/plugin-grid/web/css/table.css'),
-      key: 'grid-visualization.table.css'
-    })
-  } else {
-    const root = dirname(require.resolve('@kui-shell/plugin-grid/package.json'))
-    injectCSS(join(root, 'web/css/table.css'))
-  }
-
-  injectCSS('https://cdnjs.cloudflare.com/ajax/libs/balloon-css/0.5.0/balloon.min.css') // tooltips
+  injectCSS({
+    css: require('@kui-shell/plugin-grid/web/css/table.css'),
+    key: 'grid-visualization.table.css'
+  })
 }
 
 export const injectHTML = (container, file, css = '') => {

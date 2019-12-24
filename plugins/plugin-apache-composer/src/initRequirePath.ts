@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import Debug from 'debug'
-import * as path from 'path'
+import { dirname, join } from 'path'
 import { inBrowser } from '@kui-shell/core'
 
-const debug = Debug('plugins/apache-composer/initRequirePath')
+declare let __non_webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
+declare let __webpack_require__ // eslint-disable-line @typescript-eslint/camelcase
 
 // help compositions find our openwhisk-composer module
 export default async () => {
   if (!inBrowser()) {
-    debug('adding node_modules to the require module path')
     const appModulePath = await import('app-module-path')
+
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    const requireFunc = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : require
 
     // add the directory that encloses `openwhisk-composer`
     // this is needed e.g. for `compose foo`
-    const root = path.dirname(require.resolve('openwhisk-composer/package.json'))
-    appModulePath.addPath(path.join(root, '..'))
+    const root = dirname(requireFunc.resolve('openwhisk-composer/package.json'))
+    appModulePath.addPath(join(root, '..'))
   }
 }
