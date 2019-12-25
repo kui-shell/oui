@@ -23,10 +23,6 @@ import { Common, CLI, ReplExpect, SidecarExpect } from '@kui-shell/test'
 
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
-import { dirname } from 'path'
-
-const ROOT = dirname(require.resolve('@kui-shell/plugin-openwhisk/tests/package.json'))
-
 describe('auth tests', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
@@ -37,7 +33,7 @@ describe('auth tests', function(this: Common.ISuite) {
 
   // create an action, using the implicit entity type
   it('should create an action foo', () =>
-    CLI.command(`wsk action create foo ${ROOT}/data/openwhisk/foo.js`, this.app)
+    CLI.command(`let foo = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('foo')))
@@ -64,7 +60,7 @@ describe('auth tests', function(this: Common.ISuite) {
 
   // create the second action
   it('should create an action foo2', () =>
-    CLI.command(`wsk action create foo2 ${ROOT}/data/openwhisk/foo.js`, this.app)
+    CLI.command(`let foo2 = x=>x`, this.app)
       .then(ReplExpect.justOK)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing('foo2')))

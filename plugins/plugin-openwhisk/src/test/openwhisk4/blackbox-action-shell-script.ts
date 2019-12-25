@@ -29,7 +29,7 @@ const flip = 'flip'
 
 const removeWhitespace = txt => txt.replace(/\s/g, '')
 
-describe('blackbox actions from a shell script', function(this: Common.ISuite) {
+Common.localDescribe('blackbox actions from a shell script', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
 

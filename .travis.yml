@@ -4,41 +4,49 @@ node_js: 12
 services:
   - docker
 
-install:
+before_install:
+  - export MOCHA_RUN_TARGET=$T
+  - export LAYERS=$S
+  - export KUI="${TRAVIS_BUILD_DIR}"/bin/oui-ascii
   - Xvfb :1 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :1 -ac >& /dev/null &
   - Xvfb :2 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :2 -ac >& /dev/null &
-  - Xvfb :3 -screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 :3 -ac >& /dev/null &
-  - ./tools/travis/openwhisk/openwhisk.sh &
+    
+install:
+  - ./tools/travis/openwhisk/openwhisk.sh & # start up openwhisk in parallel with oui bootstrapping
   - ow=$!
-  - npm ci
-  - wait $ow
+  - npm ci # initial install
+  - npm run _${T} # then start the webpack watcher for target T
+  - wait $ow # finally, wait for openhisk to finish coming up
 
-# below, the various stages will define S and T
-script: npm run test:$T $LAYERS
+script: PORT_OFFSET=1 npx kui-testv2 $S
 
-# re: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts
+# openwhisk2: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts and NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
+# openwhisk4: has NEEDS_OPENWHISK_NODEJS8=true
+
 jobs:
   include:
-    - env: LAYERS=composer1
-    - env: LAYERS=composer2
-    - env: LAYERS=openwhisk1
-    - env: LAYERS=grid
-    - env: LAYERS=openwhisk2 NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
-    - env: LAYERS=openwhisk3
-    - env: LAYERS=openwhisk4 NEEDS_OPENWHISK_NODEJS8=true
+    - env: T="electron" S="openwhisk1"
+    - env: T="webpack" S="grid"
+    - env: T="electron" S="grid"
+    - env: T="webpack" S="openwhisk1"
+    - env: T="webpack" S="openwhisk3"
+    - env: T="electron" S="openwhisk3"
+    - env: T="electron" S="composer1"
+    - env: T="electron" S="composer2"
+    - env: T="electron" S="openwhisk2" NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
+    - env: T="electron" S="openwhisk4" NEEDS_OPENWHISK_NODEJS8=true
 
 env:
   global:
-    - T=electron # default target (the other being T=webpack)
+    - WEBPACK_CLIENT_URL='http://localhost:9080'
     - WINDOW_WIDTH=1400
     - WINDOW_HEIGHT=1050
     - PATH=bin:$PATH
     - KEY=${TRAVIS_JOB_NUMBER}
-    - PORT_OFFSET=1
     - LOCAL_OPENWHISK=true # allows e.g. openwhisk/src/test/openwhisk1/headless to avoid trying to host set <not-local>
     - NO_OPENWHISK_API_MGMT=true # no openwhisk api management support
     - IGNORE_CERTS=true # apache-composer needs this, because it doesn't obey INSECURE_SSL in wskprops
     - TEST_ORG=testorg
     - TEST_SPACE=testspace
     - NEEDS_OPENWHISK=true
-    - KUI_TEST_PARALLEL=true
+#    - KUI_TEST_PARALLEL=true

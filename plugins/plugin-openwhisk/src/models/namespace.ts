@@ -26,7 +26,7 @@ const key = 'wsk.namespaces'
 
 /** semi-globals */
 let cached
-let currentNS
+let currentNS: string
 
 const read = () =>
   apiHost.get().then(host => {
