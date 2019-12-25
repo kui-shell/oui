@@ -55,7 +55,6 @@
   "devDependencies": {
     "@kui-shell/builder": "5.7.12",
     "@kui-shell/core": "5.7.12",
-    "@kui-shell/proxy": "5.7.12",
     "@kui-shell/test": "5.7.12",
     "@kui-shell/webpack": "5.7.12",
     "@types/mocha": "5.2.7",
@@ -86,7 +85,6 @@
     "@kui-shell/plugin-bash-like": "5.7.12",
     "@kui-shell/plugin-core-support": "5.7.12",
     "@kui-shell/plugin-editor": "5.7.12",
-    "@kui-shell/plugin-proxy-support": "5.7.12",
     "@kui-shell/plugin-apache-composer": "file:plugins/plugin-apache-composer",
     "@kui-shell/plugin-grid": "file:plugins/plugin-grid",
     "@kui-shell/plugin-openwhisk": "file:plugins/plugin-openwhisk",
