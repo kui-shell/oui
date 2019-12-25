@@ -34,7 +34,7 @@ const actionName2 = 'foo2'
 const actionName3 = 'foo3'
 const seqName = 'sss'
 
-describe('@file params and annotations', function(this: Common.ISuite) {
+Common.localDescribe('@file params and annotations', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
 

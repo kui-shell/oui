@@ -24,7 +24,7 @@ import { dirname } from 'path'
 
 const ROOT = dirname(require.resolve('@kui-shell/plugin-openwhisk/tests/package.json'))
 
-describe('blackbox actions docker', function(this: Common.ISuite) {
+Common.localDescribe('blackbox actions docker', function(this: Common.ISuite) {
   before(openwhisk.before(this))
   after(Common.after(this))
 
