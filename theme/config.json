@@ -1,6 +1,6 @@
 {
   "proxyServer": {
-    "enabled": true,
+    "enabled": false,
     "url": "http://localhost:8081/exec",
     "needleOptions": {
       "rejectUnauthorized": false
