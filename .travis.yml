@@ -36,6 +36,12 @@ jobs:
     - env: T="electron" S="openwhisk2" NEEDS_SECOND_OPENWHISK_AUTH=true NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
     - env: T="electron" S="openwhisk4" NEEDS_OPENWHISK_NODEJS8=true
 
+    # the above are test stages; next is the release stage, performed for tag builds
+    # see ./package.json for the release-it build definition
+    - stage: release
+      script: npm install -g release-it@12.4.3 && release-it
+      if: tag =~ /^v([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3})$/
+
 env:
   global:
     - WEBPACK_CLIENT_URL='http://localhost:9080'

@@ -104,5 +104,28 @@
       "eslint --fix",
       "git add"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commit": false,
+      "tag": false,
+      "push": false,
+      "requireUpstream": false
+    },
+    "npm": {
+      "publish": false
+    },
+    "github": {
+      "release": true,
+      "releaseNotes": "git log --pretty=format:\"* %s (%h)\" v${latestVersion}...HEAD",
+      "assets": [
+        "./dist/electron/Oui-darwin-x64.tar.bz2",
+        "./dist/electron/Oui-linux-x64.zip",
+        "./dist/electron/Oui-win32-x64.zip"
+      ]
+    },
+    "hooks": {
+      "before:init": "if [ \"$TRAVIS_OS_NAME\" = \"linux\" ]; then sudo apt-get update && sudo apt-get install wine; fi; npm run build:electron:all"
+    }
   }
 }
