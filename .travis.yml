@@ -23,6 +23,11 @@ script: PORT_OFFSET=1 npx kui-testv2 $S
 # openwhisk2: second auth see plugins/plugin-openwhisk/src/test/openwhisk2/auth.ts and NEEDS_OPENWHISK_API_GATEWAY=true NEEDS_OPENWHISK_JAVA8=true
 # openwhisk4: has NEEDS_OPENWHISK_NODEJS8=true
 
+stages:
+  - test
+  - name: release
+    if: tag =~ /^v([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3})$/
+
 jobs:
   include:
     - env: T="electron" S="openwhisk1"
@@ -40,7 +45,6 @@ jobs:
     # see ./package.json for the release-it build definition
     - stage: release
       script: npm install -g release-it@12.4.3 && release-it
-      if: tag =~ /^v([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3})$/
 
 env:
   global:
