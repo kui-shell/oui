@@ -44,6 +44,8 @@ jobs:
     # the above are test stages; next is the release stage, performed for tag builds
     # see ./package.json for the release-it build definition
     - stage: release
+      before_install: true
+      install: npm ci
       script: npm install -g release-it@12.4.3 && release-it
 
 env:
