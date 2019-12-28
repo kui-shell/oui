@@ -53,10 +53,9 @@
   ],
   "license": "Apache-2.0",
   "devDependencies": {
-    "@kui-shell/builder": "5.7.14",
-    "@kui-shell/core": "5.7.14",
-    "@kui-shell/test": "5.7.14",
-    "@kui-shell/webpack": "5.7.14",
+    "@kui-shell/builder": "5.7.17",
+    "@kui-shell/test": "5.7.17",
+    "@kui-shell/webpack": "5.7.17",
     "@types/mocha": "5.2.7",
     "@types/node": "13.1.1",
     "@types/swagger-schema-official": "^2.0.20",
@@ -82,9 +81,10 @@
     "typescript": "3.7.4"
   },
   "dependencies": {
-    "@kui-shell/plugin-bash-like": "5.7.14",
-    "@kui-shell/plugin-core-support": "5.7.14",
-    "@kui-shell/plugin-editor": "5.7.14",
+    "@kui-shell/core": "5.7.17",
+    "@kui-shell/plugin-bash-like": "5.7.17",
+    "@kui-shell/plugin-core-support": "5.7.17",
+    "@kui-shell/plugin-editor": "5.7.17",
     "@kui-shell/plugin-apache-composer": "file:plugins/plugin-apache-composer",
     "@kui-shell/plugin-grid": "file:plugins/plugin-grid",
     "@kui-shell/plugin-openwhisk": "file:plugins/plugin-openwhisk",
