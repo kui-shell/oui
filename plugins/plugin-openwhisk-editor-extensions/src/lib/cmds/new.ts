@@ -134,7 +134,12 @@ const failWith409 = () => {
   throw error
 }
 const failIfNot404 = err => {
-  if (err.statusCode !== 404 && err.message.indexOf('socket hang up') < 0 && err.statusCode !== 'ENOTFOUND') {
+  if (
+    !/NetworkError/.test(err.message) &&
+    err.statusCode !== 404 &&
+    err.message.indexOf('socket hang up') < 0 &&
+    err.statusCode !== 'ENOTFOUND'
+  ) {
     console.error(err)
     throw err
   } else {
