@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../controller/fqn'
 import { WithBinding, hasBinding } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Annotations mode applies to all Action resources.
@@ -27,7 +29,7 @@ export default {
   when: hasBinding,
   mode: {
     mode: 'binding',
-    label: 'Show Binding',
+    label: strings('Show Binding'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithBinding) => `wsk package get ${encodeComponent(fqn({ metadata: resource.binding }))}`

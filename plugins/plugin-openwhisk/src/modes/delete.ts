@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { i18n , encodeComponent } from '@kui-shell/core'
+
+
+const strings = i18n('plugin-openwhisk')
 
 import { fqn } from '../controller/fqn'
 import { Deleteable, isDeleteable } from '../models/resource'
@@ -27,7 +30,7 @@ export default {
   when: isDeleteable,
   mode: {
     mode: 'delete',
-    label: 'Delete',
+    label: strings('Delete'),
     kind: 'drilldown' as const,
 
     command: (_, resource: Deleteable) =>

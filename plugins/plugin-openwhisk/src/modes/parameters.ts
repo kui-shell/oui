@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { WithParameters, hasParameters } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Parameters mode applies to all WithParameters.
@@ -24,6 +27,7 @@ export default {
   when: hasParameters,
   mode: {
     mode: 'parameters',
+    label: strings('Parameters'),
 
     content: async (_, resource: WithParameters) => {
       const { safeDump } = await import('js-yaml')

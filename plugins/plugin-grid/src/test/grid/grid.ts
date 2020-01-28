@@ -43,7 +43,7 @@ describe('grid visualization', function(this: Common.ISuite) {
         .then(SidecarExpect.showing(name))
         .then(Util.getValueFromMonaco)
         .then(Util.expectYAML(expectedStruct))
-        .catch(Common.oops(this)))
+        .catch(Common.oops(this, true)))
   }
   const notbomb = (name?, packageName?) => invoke(+1, name, packageName)
   // const bomb = (name, packageName) => invoke(-1, name, packageName)
@@ -100,7 +100,7 @@ describe('grid visualization', function(this: Common.ISuite) {
                 console.error('retry!')
                 setTimeout(() => once(iter + 1, resolve, reject), 1000)
               } else {
-                return Common.oops(this)(err)
+                return Common.oops(this, true)(err)
               }
             })
         }
@@ -116,7 +116,7 @@ describe('grid visualization', function(this: Common.ISuite) {
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   // invoke with positive number, expect count of 1 in the table
   notbomb()
@@ -128,12 +128,12 @@ describe('grid visualization', function(this: Common.ISuite) {
   it('should fail with a bad this query', () =>
     CLI.command('grid --this', this.app)
       .then(ReplExpect.error(498))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it('should fail with a bad last query', () =>
     CLI.command('grid --last', this.app)
       .then(ReplExpect.error(498))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   const icon = `${Selectors.SIDECAR} .sidecar-header-icon-wrapper .sidecar-header-icon`
 
@@ -149,7 +149,7 @@ describe('grid visualization', function(this: Common.ISuite) {
         .then(ReplExpect.ok)
         .then(SidecarExpect.open)
         .then(() => this.app.client.waitForText(icon))
-        .catch(Common.oops(this)))
+        .catch(Common.oops(this, true)))
   })
   whens.forEach(when => {
     intervals.forEach(interval => {
@@ -158,7 +158,7 @@ describe('grid visualization', function(this: Common.ISuite) {
           .then(ReplExpect.ok)
           .then(SidecarExpect.open)
           .then(() => this.app.client.waitForText(icon))
-          .catch(Common.oops(this)))
+          .catch(Common.oops(this, true)))
     })
   })
 
@@ -198,7 +198,7 @@ describe('grid visualization', function(this: Common.ISuite) {
             }
           })
         ) */
-        .catch(Common.oops(this)))
+        .catch(Common.oops(this, true)))
   }
   const switcheroo = () => {
     switchTo('summary')
@@ -239,7 +239,7 @@ describe('grid visualization', function(this: Common.ISuite) {
         .then(SidecarExpect.showing(actionName))
         .then(() => this.app.client.waitForText(icon))
     })
-     .catch(Common.oops(this))) */
+     .catch(Common.oops(this, true))) */
 
   // invoke again with positive, and then look for a count of 2
   notbomb()
@@ -276,7 +276,7 @@ describe('grid visualization', function(this: Common.ISuite) {
       .then(() => this.app)
       .then(SidecarExpect.open)
       .then(verifyGrid(4, 2)))
-    .catch(Common.oops(this)))
+    .catch(Common.oops(this, true)))
 */
   /* const tableTest = (iter, resolve, reject) => CLI.command(`table ${actionName}`, this.app)
         .then(ReplExpect.ok)
@@ -291,7 +291,7 @@ describe('grid visualization', function(this: Common.ISuite) {
                   console.error('retry in tableTest')
                   setTimeout(() => tableTest(iter + 1, resolve, reject), 1000)
               } else {
-                  return Common.oops(this)(err)
+                  return Common.oops(this, true)(err)
               }
           });
     it(`should open table view, click on table row, and observe switch to grid view actionName=${actionName}`, () => new Promise((resolve, reject) => tableTest(0, resolve, reject))) */
@@ -300,7 +300,7 @@ describe('grid visualization', function(this: Common.ISuite) {
     .then(ReplExpect.ok)
     .then(SidecarExpect.open)
     .then(SidecarExpect.showing(actionName2))
-    .catch(Common.oops(this)))
+    .catch(Common.oops(this, true)))
 
   notbomb(actionName2)
   openGridExpectCountOf(1, 0, `grid --batches ${N}`, actionName2)
@@ -320,7 +320,7 @@ describe('grid visualization', function(this: Common.ISuite) {
     .then(ReplExpect.ok)
     .then(SidecarExpect.open)
     .then(SidecarExpect.showing(actionName2, packageName))
-    .catch(Common.oops(this)))
+    .catch(Common.oops(this, true)))
 
   // invoke not-packed actionName2 again, and packaged
   // actionName2. open grid filtering just to packaged actionName2,
@@ -334,11 +334,11 @@ describe('grid visualization', function(this: Common.ISuite) {
 
   it('should open grid as timeline with grid --timeline', () => CLI.command('grid --timeline', this.app)
     .then(ReplExpect.ok)
-    .catch(Common.oops(this)))
+    .catch(Common.oops(this, true)))
 
   it('should open grid as timeline with grid -t', () => CLI.command('grid -t', this.app)
     .then(ReplExpect.ok)
-    .catch(Common.oops(this)))
+    .catch(Common.oops(this, true)))
 
   it('should open grid as timeline with grid -t, then switch to summary', () => CLI.command('grid -t', this.app)
     .then(ReplExpect.ok)
@@ -347,5 +347,5 @@ describe('grid visualization', function(this: Common.ISuite) {
       return this.app.client.getText('.sidecar-header-icon')
         .then(txt => txt.toLowerCase() === 'summary')
     }))
-    .catch(Common.oops(this))) */
+    .catch(Common.oops(this, true))) */
 })

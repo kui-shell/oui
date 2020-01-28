@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../../controller/fqn'
 import { WithTriggers, hasTriggers } from '../../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Namespace triggers drilldown
@@ -27,7 +29,7 @@ export default {
   when: hasTriggers,
   mode: {
     mode: 'triggers',
-    label: 'Show Triggers',
+    label: strings('Show Triggers'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithTriggers) => `wsk namespace list-triggers ${encodeComponent(fqn(resource))}`

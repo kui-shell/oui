@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { Action, hasTextualCode } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Code mode applies to all Action resources.
@@ -24,6 +27,7 @@ export default {
   when: hasTextualCode,
   mode: {
     mode: 'code',
+    label: strings('Code'),
 
     content: (_, resource: Action) => ({
       content: resource.exec.code,

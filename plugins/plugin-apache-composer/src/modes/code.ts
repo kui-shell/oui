@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { WithSource, hasSource } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Flow view
@@ -24,6 +27,7 @@ export default {
   when: hasSource,
   mode: {
     mode: 'code',
+    label: strings('Code'),
     order: -8,
 
     content: (_, preview: WithSource) => ({

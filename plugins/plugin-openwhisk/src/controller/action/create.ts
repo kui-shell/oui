@@ -151,12 +151,21 @@ async function spec(
     action.action.annotations = (action.action.annotations || []).concat(kvOptions.annotations)
     action.action.parameters = (action.action.annotations || []).concat(kvOptions.parameters)
     if (kvOptions.limits.timeout) {
+      if (!action.action.limits) {
+        action.action.limits = {}
+      }
       action.action.limits.timeout = kvOptions.limits.timeout
     }
     if (kvOptions.limits.memory) {
+      if (!action.action.limits) {
+        action.action.limits = {}
+      }
       action.action.limits.memory = kvOptions.limits.memory
     }
     if (kvOptions.limits.logs) {
+      if (!action.action.limits) {
+        action.action.limits = {}
+      }
       action.action.limits.logs = kvOptions.limits.logs
     }
   }

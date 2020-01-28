@@ -1,0 +1,11 @@
+{
+  "app": "icons/png/oui.png",
+  "large": "icons/svg/oui.svg",
+  "wide": "icons/svg/oui-wide.svg",
+  "favicon": "icons/ico/oui.ico",
+  "filesystem": {
+    "darwin": "icons/icns/oui.icns",
+    "win32": "icons/ico/oui.ico",
+    "linux": "icons/png/oui.png"
+  }
+}

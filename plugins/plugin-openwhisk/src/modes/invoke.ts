@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../controller/fqn'
 import { Invokeable, isInvokeable, isActivation } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Invoke an invokeable resource
@@ -27,7 +29,7 @@ export default {
   when: isInvokeable,
   mode: {
     mode: 'invoke',
-    label: 'Invoke',
+    label: strings('Invoke'),
     kind: 'drilldown' as const,
 
     command: (_, resource: Invokeable) => {

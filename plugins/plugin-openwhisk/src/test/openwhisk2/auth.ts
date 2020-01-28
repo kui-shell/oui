@@ -92,7 +92,8 @@ describe('auth tests', function(this: Common.ISuite) {
   // wsk auth list should so both installed namespaces
   openwhisk.aliases.list.forEach(cmd => {
     const checkMarkCell = (ns: string) => `.entity.namespaces[data-name="${ns}"] .entity-name.clickable`
-    const nameCell = (ns: string) => `.entity.namespaces[data-name="${ns}"] > tr > .clickable`
+    const nameCell = (ns: string) =>
+      `.entity.namespaces[data-name="${ns}"] > tr > td:not(.entity-name-group) > .clickable`
 
     const ok = (ns: string) => {
       it(`should list namespace ${ns} and find checkmark cell with "wsk auth ${cmd}"`, async () => {

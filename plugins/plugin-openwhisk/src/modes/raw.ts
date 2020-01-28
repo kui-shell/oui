@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { RawDataBearing, hasRawData } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Raw mode applies to all OpenWhiskResources, and simply extracts
@@ -25,6 +28,7 @@ export default {
   when: hasRawData,
   mode: {
     mode: 'raw',
+    label: strings('Raw'),
 
     content: async (_, resource: RawDataBearing) => {
       const { safeDump } = await import('js-yaml')

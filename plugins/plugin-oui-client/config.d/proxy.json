@@ -1,4 +1,5 @@
 {
+  "millisBeforeProxyConnectionWarning": 250,
   "proxyServer": {
     "enabled": false,
     "url": "http://localhost:8081/exec",

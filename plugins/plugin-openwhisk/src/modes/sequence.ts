@@ -15,12 +15,13 @@
  */
 
 import Debug from 'debug'
-import { Tab } from '@kui-shell/core'
+import { i18n, Tab } from '@kui-shell/core'
 import { Action, ComponentArrayBearing } from '@kui-shell/plugin-wskflow'
 
 import { isAnonymousLet } from '../controller/action/let/let-core'
 import { Action as OWAction, Sequence, isSequence } from '../models/resource'
 
+const strings = i18n('plugin-openwhisk')
 const debug = Debug('openwhisk/modes/sequence')
 
 /**
@@ -94,6 +95,7 @@ export default {
   when: isSequence,
   mode: {
     mode: 'sequence',
+    label: strings('Sequence'),
     content
   }
 }

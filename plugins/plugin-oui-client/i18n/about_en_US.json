@@ -1,0 +1,6 @@
+{
+  "about": "About",
+  "about:content": "[![Oui: The CLI with a GUI twist](icons/svg/oui-wide.svg)](https://github.com/kui-shell/oui)\n\n**Oui** is a tool that enhances the OpenWhisk terminal experience with visualizations. It provides users a modern alternative to ASCII terminals and web-based consoles.\n\n---\n\n[GitHub](https://github.com/kui-shell/oui \"Oui's GitHub page\")\n\n[Bugs](https://github.com/kui-shell/oui/issues/new \"Oui's bug reporting page\")",
+  "theme": "Themes",
+  "contexts": "Contexts"
+}

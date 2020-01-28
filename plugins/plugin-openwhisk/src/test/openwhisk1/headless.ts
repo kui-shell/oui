@@ -22,6 +22,10 @@ import { cli } from '@kui-shell/core/tests/lib/headless'
 
 import { dirname, join } from 'path'
 
+import { version } from '@kui-shell/client/config.d/version.json'
+
+const expectedVersion = version
+
 const ROOT = dirname(require.resolve('@kui-shell/plugin-openwhisk/tests/package.json'))
 
 function odescribe(name: string, suite: (this: Common.ISuite) => void) {
@@ -29,11 +33,6 @@ function odescribe(name: string, suite: (this: Common.ISuite) => void) {
     describe(name, suite)
   }
 }
-
-export const {
-  version: expectedVersion
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-} = require('@kui-shell/settings/package.json')
 
 odescribe('openwhisk headless mode', function(this: Common.ISuite) {
   before(openwhisk.before(this, { noApp: true }))

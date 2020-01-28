@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Tab } from '@kui-shell/core'
+import { i18n, Tab } from '@kui-shell/core'
 import { ASTNode } from '@kui-shell/plugin-wskflow'
 
 import { Composition, isComposition } from '../models/resource'
+
+const strings = i18n('plugin-apache-composer')
 
 /**
  * Flow view
@@ -27,6 +29,7 @@ export default {
   when: isComposition,
   mode: {
     mode: 'visualization',
+    label: strings('Flow'),
     order: -10,
 
     content: async (tab: Tab, composition: Composition) => {

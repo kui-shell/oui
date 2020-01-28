@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { WithLimits, hasLimits } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Code mode applies to all Action resources.
@@ -24,6 +27,7 @@ export default {
   when: hasLimits,
   mode: {
     mode: 'limits',
+    label: strings('Limits'),
 
     content: async (_, resource: WithLimits) => {
       const { safeDump } = await import('js-yaml')

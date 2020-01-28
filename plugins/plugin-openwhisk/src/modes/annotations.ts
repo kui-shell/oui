@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { WithAnnotations, hasAnnotations } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Annotations mode applies to all Action resources.
@@ -24,6 +27,7 @@ export default {
   when: hasAnnotations,
   mode: {
     mode: 'annotations',
+    label: strings('Annotations'),
 
     content: async (_, resource: WithAnnotations) => {
       const { safeDump } = await import('js-yaml')

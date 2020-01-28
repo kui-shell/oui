@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqnOfPath } from '../controller/fqn'
 import { WithAction, hasAction } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Show the related action, e.g. for Rules.
@@ -27,7 +29,7 @@ export default {
   when: hasAction,
   mode: {
     mode: 'action',
-    label: 'Show Action',
+    label: strings('Show Action'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithAction) => `wsk action get ${encodeComponent(fqnOfPath(resource.action))}`

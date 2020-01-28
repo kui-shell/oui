@@ -1,0 +1,23 @@
+{
+  "name": "@kui-shell/plugin-oui-client",
+  "version": "5.1.0",
+  "description": "Kui plugin that offers client defintion",
+  "license": "Apache-2.0",
+  "author": "Mengting Yan",
+  "dependencies": {
+    "@kui-shell/plugin-client-default": "^6.0.5"
+  },
+  "homepage": "https://github.com/IBM/kui#readme",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/IBM/kui/issues/new"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IBM/kui.git"
+  },
+  "keywords": [
+    "kui",
+    "plugin"
+  ]
+}

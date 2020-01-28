@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { i18n , encodeComponent } from '@kui-shell/core'
+
 
 import { fqn } from '../controller/fqn'
 import { Action, hasCode } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * An Edit button
@@ -27,7 +30,7 @@ export default {
   when: hasCode,
   mode: {
     mode: 'edit',
-    label: 'Edit',
+    label: strings('Edit'),
     kind: 'drilldown' as const,
 
     command: (_, resource: Action) => `edit ${encodeComponent(fqn(resource))}`

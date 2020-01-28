@@ -19,6 +19,8 @@ import { Common, CLI, ReplExpect, SidecarExpect } from '@kui-shell/test'
 import * as openwhisk from '@kui-shell/plugin-openwhisk/tests/lib/openwhisk/openwhisk'
 
 const actionName = 'foo'
+const fourOhFour = 404
+const fourOhFour2 = process.env.MOCHA_RUN_TARGET === 'webpack' ? 404 : 127
 
 describe('Check error handling for invoking a non-existent action', function(this: Common.ISuite) {
   before(openwhisk.before(this))
@@ -26,12 +28,12 @@ describe('Check error handling for invoking a non-existent action', function(thi
 
   it('invoke a non-existent action', () =>
     CLI.command(`wsk action invoke xxxxxx`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour))
       .catch(Common.oops(this)))
 
   it('async a non-existent action', () =>
     CLI.command(`wsk action async xxxxxx`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour))
       .catch(Common.oops(this)))
 
   it('create an action', () =>
@@ -43,21 +45,21 @@ describe('Check error handling for invoking a non-existent action', function(thi
 
   it('invoke with a non-existent package, but existing action name', () =>
     CLI.command(`wsk action invoke xxxxxx/${actionName}`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour))
       .catch(Common.oops(this)))
 
   it('invoke with a non-existent package, but existing action name, via fdsfasdjfioajdsfioads action invoke', () =>
     CLI.command(`fdsfasdjfioajdsfioads action invoke xxxxxx/${actionName}`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour2))
       .catch(Common.oops(this)))
 
   it('invoke with a non-existent package, but existing action name, via wsk action invoke', () =>
     CLI.command(`wsk action invoke xxxxxx/${actionName}`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour))
       .catch(Common.oops(this)))
 
   it('async with a non-existent package, but existing action name', () =>
     CLI.command(`wsk action async xxxxxx/${actionName}`, this.app)
-      .then(ReplExpect.error(404))
+      .then(ReplExpect.error(fourOhFour))
       .catch(Common.oops(this)))
 })

@@ -15,7 +15,7 @@
  */
 
 import * as prettyPrintDuration from 'pretty-ms'
-import { encodeComponent, Tab } from '@kui-shell/core'
+import { encodeComponent, i18n, Tab } from '@kui-shell/core'
 
 import { TableOptions } from '../lib/options'
 import { drilldownWith } from '../lib/drilldown'
@@ -24,6 +24,8 @@ import { OutlierReason, groupByAction } from '../lib/grouping'
 import { ActivationData, isActivationData } from '../models/activation-data'
 
 import { leftArrowHead, rightArrowHead, enDash, emDash, optionsToString, injectContent } from '../lib/util'
+
+const strings = i18n('plugin-grid')
 
 const defaultBottom = 25
 const defaultTop = 75 // default range to show in summary
@@ -633,6 +635,7 @@ export default {
   when: isActivationData,
   mode: {
     mode: 'summary',
+    label: strings('Summary'),
     content
   }
 }
