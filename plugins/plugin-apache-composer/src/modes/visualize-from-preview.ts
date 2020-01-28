@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { inBrowser, unparse, Tab } from '@kui-shell/core'
+import { inBrowser, i18n, unparse, Tab } from '@kui-shell/core'
 import { Preview, isPreview } from '../models/resource'
+
+const strings = i18n('plugin-apache-composer')
 
 /**
  * Flow view from a Preview
@@ -25,6 +27,7 @@ export default {
   when: isPreview,
   mode: {
     mode: 'visualization',
+    label: strings('Flow'),
     order: -10,
 
     content: async (tab: Tab, preview: Preview) => {

@@ -15,7 +15,10 @@
  */
 
 import { Dict } from 'openwhisk'
+import { i18n } from '@kui-shell/core'
 import { WithResponse, hasResponse } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Response mode for activations
@@ -25,6 +28,7 @@ export default {
   when: hasResponse,
   mode: {
     mode: 'result',
+    label: strings('Result'),
 
     content: async <T extends Dict>(_, resource: WithResponse<T>) => {
       const { safeDump } = await import('js-yaml')

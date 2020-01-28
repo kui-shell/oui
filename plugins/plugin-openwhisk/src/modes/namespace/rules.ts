@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../../controller/fqn'
 import { WithRules, hasRules } from '../../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Namespace rules drilldown
@@ -27,7 +29,7 @@ export default {
   when: hasRules,
   mode: {
     mode: 'rules',
-    label: 'Show Rules',
+    label: strings('Show Rules'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithRules) => `wsk namespace list-rules ${encodeComponent(fqn(resource))}`

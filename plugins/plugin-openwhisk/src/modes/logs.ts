@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { prettyPrintTime } from '@kui-shell/core'
+import { i18n, prettyPrintTime } from '@kui-shell/core'
 import { WithLogs, hasLogs } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * e.g. 2017-06-15T14:41:15.60027911Z  stdout:
@@ -98,6 +100,7 @@ export default {
   when: hasLogs,
   mode: {
     mode: 'logs',
+    label: strings('Logs'),
     content
   }
 }

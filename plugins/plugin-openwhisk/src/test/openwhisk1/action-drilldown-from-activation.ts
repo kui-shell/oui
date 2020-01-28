@@ -28,7 +28,7 @@ describe('activation list, activation get, click on header', function(this: Comm
       .then(ReplExpect.ok)
       .then(SidecarExpect.open)
       .then(SidecarExpect.showing(actionName))
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   const expectedSrc = 'let main = x=>x'
 
@@ -40,7 +40,7 @@ describe('activation list, activation get, click on header', function(this: Comm
         await this.app.client.click(selector)
         return SidecarExpect.open(this.app).then(SidecarExpect.showing(actionName, activationId))
       })
-      .catch(Common.oops(this)))
+      .catch(Common.oops(this, true)))
 
   it(`click on action name in sidecar header and show action source`, async () => {
     await this.app.client.click(Selectors.SIDECAR_TITLE)
@@ -52,6 +52,6 @@ describe('activation list, activation get, click on header', function(this: Comm
           return actionSrc.trim() === expectedSrc
         })
       )
-      .catch(Common.oops(this))
+      .catch(Common.oops(this, true))
   })
 })

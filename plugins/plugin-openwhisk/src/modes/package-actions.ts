@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../controller/fqn'
 import { WithActions, hasActions } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Annotations mode applies to all Action resources.
@@ -27,7 +29,7 @@ export default {
   when: hasActions,
   mode: {
     mode: 'actions',
-    label: 'Show Actions',
+    label: strings('Show Actions'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithActions) => `wsk package list-actions ${encodeComponent(fqn(resource))}`

@@ -21,12 +21,12 @@
   ],
   "main": "dist/index.js",
   "dependencies": {
-    "@kui-shell/core": "^5.7.22",
-    "@kui-shell/plugin-wskflow": "^5.7.22",
-    "@kui-shell/test": "^5.7.22",
+    "@kui-shell/core": "^6.0.5",
+    "@kui-shell/plugin-wskflow": "^6.0.5",
+    "@kui-shell/test": "^6.0.5",
     "app-module-path": "2.2.0",
     "debug": "4.1.1",
-    "openwhisk-composer": "github:apache/openwhisk-composer"
+    "openwhisk-composer": "0.12.0"
   },
   "kui": {
     "webpack": {

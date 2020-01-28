@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../../controller/fqn'
 import { WithPackages, hasPackages } from '../../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Namespace packages drilldown
@@ -27,7 +29,7 @@ export default {
   when: hasPackages,
   mode: {
     mode: 'packages',
-    label: 'Show Packages',
+    label: strings('Show Packages'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithPackages) => `wsk namespace list-packages ${encodeComponent(fqn(resource))}`

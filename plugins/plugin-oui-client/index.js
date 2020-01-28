@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 IBM Corporation
+ * Copyright 2020 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,4 @@
  * limitations under the License.
  */
 
-import { encodeComponent, i18n } from '@kui-shell/core'
-
-import { fqnOfPath } from '../controller/fqn'
-import { WithTrigger, hasTrigger } from '../models/resource'
-
-const strings = i18n('plugin-openwhisk')
-
-/**
- * Show the related trigger, e.g. for Rules.
- *
- */
-export default {
-  when: hasTrigger,
-  mode: {
-    mode: 'trigger',
-    label: strings('Show Trigger'),
-    kind: 'drilldown' as const,
-
-    command: (_, resource: WithTrigger) => `wsk trigger get ${encodeComponent(fqnOfPath(resource.trigger))}`
-  }
-}
+require('@kui-shell/plugin-client-default')

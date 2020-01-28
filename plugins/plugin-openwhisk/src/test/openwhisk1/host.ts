@@ -29,7 +29,7 @@ describe('openwhisk host tests', function(this: Common.ISuite) {
 
   it('should command not found on hosts set', () =>
     CLI.command('wsk hosts set', this.app)
-      .then(ReplExpect.error(404, 'Command not found'))
+      .then(ReplExpect.error(process.env.MOCHA_RUN_TARGET === 'webpack' ? 404 : 127))
       .catch(Common.oops(this)))
 
   it('bogus host from default context', () =>

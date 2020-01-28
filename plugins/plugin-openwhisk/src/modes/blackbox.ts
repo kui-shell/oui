@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { BlackboxAction, isBlackbox } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * Alternative to Code mode for blackbox actions
@@ -24,6 +27,7 @@ export default {
   when: isBlackbox,
   mode: {
     mode: 'code',
+    label: strings('Code'),
 
     content: (_, resource: BlackboxAction) => ({
       content: `dockerhub image: ${resource.exec.image}`

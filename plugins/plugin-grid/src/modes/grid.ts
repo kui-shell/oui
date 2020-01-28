@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 
 import * as prettyPrintDuration from 'pretty-ms'
-import { Tab } from '@kui-shell/core'
+import { i18n, Tab } from '@kui-shell/core'
 
 import { ActivationData, isActivationData } from '../models/activation-data'
 import { Activation } from '../lib/activation'
@@ -27,6 +27,8 @@ import { GroupData, TimelineData, groupByAction } from '../lib/grouping'
 import { renderCell } from '../lib/cell'
 
 import { nbsp, isSuccess, titleWhenNothingSelected, latencyBucket, injectContent } from '../lib/util'
+
+const strings = i18n('plugin-grid')
 
 const css = {
   content: 'activation-viz-plugin',
@@ -614,6 +616,7 @@ export default {
   when: isActivationData,
   mode: {
     mode: 'grid',
+    label: strings('Grid'),
     content
   }
 }

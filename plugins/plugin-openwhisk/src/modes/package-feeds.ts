@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { encodeComponent } from '@kui-shell/core'
+import { encodeComponent, i18n } from '@kui-shell/core'
 
 import { fqn } from '../controller/fqn'
 import { WithFeeds, hasFeeds } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 /**
  * The Annotations mode applies to all Action resources.
@@ -27,7 +29,7 @@ export default {
   when: hasFeeds,
   mode: {
     mode: 'feeds',
-    label: 'Show Feeds',
+    label: strings('Show Feeds'),
     kind: 'drilldown' as const,
 
     command: (_, resource: WithFeeds) => `wsk package list-feeds ${encodeComponent(fqn(resource))}`

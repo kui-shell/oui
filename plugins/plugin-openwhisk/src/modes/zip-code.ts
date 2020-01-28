@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { i18n } from '@kui-shell/core'
 import { ActionWithCode, hasZipCode } from '../models/resource'
+
+const strings = i18n('plugin-openwhisk')
 
 function extractMain(b64: string): string {
   const code = Buffer.from(b64, 'base64')
@@ -42,6 +45,7 @@ export default {
   when: hasZipCode,
   mode: {
     mode: 'zip main',
+    label: strings('Zip Main'),
 
     content: (_, resource: ActionWithCode) => ({
       content: extractMain(resource.exec.code),

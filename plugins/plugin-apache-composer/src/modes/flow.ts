@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Tab } from '@kui-shell/core'
+import { i18n, Tab } from '@kui-shell/core'
 
 import { Session, isSession } from '../models/resource'
 import { doFlow } from '../lib/controller/cmd/flowCommand'
+
+const strings = i18n('plugin-apache-composer')
 
 /**
  * Flow view
@@ -27,7 +29,7 @@ export default {
   when: isSession,
   mode: {
     mode: 'visualization',
-    label: 'Flow',
+    label: strings('Flow'),
     order: 1,
 
     content: (tab: Tab, session: Session) => doFlow(tab, session.activationId)

@@ -17,7 +17,9 @@
 import Debug from 'debug'
 import { Options as OpenwhiskOptions } from 'openwhisk'
 
-import { expandHomeDir, config, Store, inBrowser, inElectron, getAuthValue, setHasAuth } from '@kui-shell/core'
+import { expandHomeDir, Store, inBrowser, inElectron, getAuthValue, setHasAuth } from '@kui-shell/core'
+
+import * as config from '@kui-shell/client/config.d/openwhisk.json'
 
 const debug = Debug('plugins/openwhisk/models/auth')
 
@@ -55,7 +57,7 @@ const localStorageKey = {
 }
 
 function getDefaultApiHost() {
-  if (inElectron() && config && config['electron-host']) {
+  if (inElectron() && config && config['electron-host'].length > 0) {
     return config['electron-host']
   }
   return window.location ? window.location.host : ''
