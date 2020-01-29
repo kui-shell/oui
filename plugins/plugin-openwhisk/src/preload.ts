@@ -20,5 +20,10 @@ export default async (registrar: PreloadRegistrar) => {
   if (!isHeadless()) {
     const preloader = (await import('./non-headless-preload')).default
     await preloader(registrar)
+
+    // register meter widgets
+    Promise.all([import('./views/status-stripe/grid-widget')]).then(widgets =>
+      widgets.map(_ => registrar.registerMeter(_.default()))
+    )
   }
 }
