@@ -38,7 +38,7 @@
     "pretty-ms": "5.1.0",
     "promise-retry": "1.1.1",
     "tmp": "0.1.0",
-    "yargs-parser": "16.1.0"
+    "yargs-parser": "18.1.2"
   },
   "publishConfig": {
     "access": "public"
